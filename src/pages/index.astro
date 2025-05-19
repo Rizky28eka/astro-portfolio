@@ -157,12 +157,12 @@ const achievements = [
             Rizky Eka Haryadi
           </h1>
           <p class='animated text-lg md:text-xl lg:text-2xl opacity-90 mb-2'>
-            Mobile Developer & Data Analyst
+              Frontend Mobile Developer
           </p>
           <p class='animated text-sm md:text-base lg:text-lg opacity-75 max-w-2xl mx-auto mb-8'>
             Crafting innovative mobile solutions and extracting insights from data to drive business growth
           </p>
-          <div id="ctaButtons" class='animated flex flex-wrap gap-4 justify-center'>
+          <div id="ctaButtons" class='animated flex flex-col sm:flex-row gap-4 justify-center'>
             <a href='/work' class='py-3 px-6 rounded-lg text-sm md:text-base bg-black dark:bg-white text-white dark:text-black hover:bg-black/80 dark:hover:bg-white/90 transition-colors font-medium'>
               View My Work
             </a>
@@ -184,7 +184,7 @@ const achievements = [
       <!-- ABOUT SECTION -->
       <section class="animate">
         <h2 class="text-2xl md:text-3xl font-bold mb-8 text-black dark:text-white">About Me</h2>
-        <div class="grid md:grid-cols-2 gap-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div class="space-y-4">
             <p class="text-base md:text-lg leading-relaxed">
               I'm <strong>Rizky Eka Haryadi</strong>, a passionate <strong>Mobile Developer</strong> and <strong>Data Analyst</strong> with expertise in creating innovative digital solutions. I specialize in building cross-platform applications and extracting meaningful insights from complex datasets.
@@ -233,93 +233,91 @@ const achievements = [
       </section>
 
       <!-- SKILLS SECTION -->
-      
-<section class="animate">
-  <h2 class="text-2xl md:text-3xl font-bold mb-8 text-black dark:text-white">Technical Skills</h2>
-  <div class="grid md:grid-cols-2 gap-8">
-    <div class="space-y-6">
-      <div>
-        <h3 class="text-lg font-semibold mb-3 text-blue-600 dark:text-blue-400">Mobile Development</h3>
-        <div class="flex flex-wrap gap-2">
-          {skills.mobile.map(skill => (
-            <span class="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded-full text-sm font-medium">
-              {skill}
-            </span>
-          ))}
-        </div>
-      </div>
+      <section class="animate">
+        <h2 class="text-2xl md:text-3xl font-bold mb-8 text-black dark:text-white">Technical Skills</h2>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div class="space-y-6">
+            <div>
+              <h3 class="text-lg font-semibold mb-3 text-blue-600 dark:text-blue-400">Mobile Development</h3>
+              <div class="flex flex-wrap gap-2">
+                {skills.mobile.map(skill => (
+                  <span class="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded-full text-sm font-medium">
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            </div>
 
-      <div>
-        <h3 class="text-lg font-semibold mb-3 text-green-600 dark:text-green-400">Backend & Full-Stack</h3>
-        <div class="flex flex-wrap gap-2">
-          {skills.backend.map(skill => (
-            <span class="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 rounded-full text-sm font-medium">
-              {skill}
-            </span>
-          ))}
-        </div>
-      </div>
+            <div>
+              <h3 class="text-lg font-semibold mb-3 text-green-600 dark:text-green-400">Backend & Full-Stack</h3>
+              <div class="flex flex-wrap gap-2">
+                {skills.backend.map(skill => (
+                  <span class="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 rounded-full text-sm font-medium">
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            </div>
 
-      <div>
-        <h3 class="text-lg font-semibold mb-3 text-pink-600 dark:text-pink-400">Frontend & Web</h3>
-        <div class="flex flex-wrap gap-2">
-          {skills.frontend.map(skill => (
-            <span class="px-3 py-1 bg-pink-100 dark:bg-pink-900/30 text-pink-800 dark:text-pink-300 rounded-full text-sm font-medium">
-              {skill}
-            </span>
-          ))}
-        </div>
-      </div>
-    </div>
+            <div>
+              <h3 class="text-lg font-semibold mb-3 text-pink-600 dark:text-pink-400">Frontend & Web</h3>
+              <div class="flex flex-wrap gap-2">
+                {skills.frontend.map(skill => (
+                  <span class="px-3 py-1 bg-pink-100 dark:bg-pink-900/30 text-pink-800 dark:text-pink-300 rounded-full text-sm font-medium">
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
 
-    <div class="space-y-6">
-      <div>
-        <h3 class="text-lg font-semibold mb-3 text-purple-600 dark:text-purple-400">Data Analysis</h3>
-        <div class="flex flex-wrap gap-2">
-          {skills.dataAnalysis.map(skill => (
-            <span class="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 rounded-full text-sm font-medium">
-              {skill}
-            </span>
-          ))}
-        </div>
-      </div>
+          <div class="space-y-6">
+            <div>
+              <h3 class="text-lg font-semibold mb-3 text-purple-600 dark:text-purple-400">Data Analysis</h3>
+              <div class="flex flex-wrap gap-2">
+                {skills.dataAnalysis.map(skill => (
+                  <span class="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 rounded-full text-sm font-medium">
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            </div>
 
-      <div>
-        <h3 class="text-lg font-semibold mb-3 text-orange-600 dark:text-orange-400">Tools & Platforms</h3>
-        <div class="flex flex-wrap gap-2">
-          {skills.tools.map(skill => (
-            <span class="px-3 py-1 bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300 rounded-full text-sm font-medium">
-              {skill}
-            </span>
-          ))}
-        </div>
-      </div>
+            <div>
+              <h3 class="text-lg font-semibold mb-3 text-orange-600 dark:text-orange-400">Tools & Platforms</h3>
+              <div class="flex flex-wrap gap-2">
+                {skills.tools.map(skill => (
+                  <span class="px-3 py-1 bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300 rounded-full text-sm font-medium">
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            </div>
 
-      <div>
-        <h3 class="text-lg font-semibold mb-3 text-teal-600 dark:text-teal-400">Databases</h3>
-        <div class="flex flex-wrap gap-2">
-          {skills.databases.map(skill => (
-            <span class="px-3 py-1 bg-teal-100 dark:bg-teal-900/30 text-teal-800 dark:text-teal-300 rounded-full text-sm font-medium">
-              {skill}
-            </span>
-          ))}
-        </div>
-      </div>
+            <div>
+              <h3 class="text-lg font-semibold mb-3 text-teal-600 dark:text-teal-400">Databases</h3>
+              <div class="flex flex-wrap gap-2">
+                {skills.databases.map(skill => (
+                  <span class="px-3 py-1 bg-teal-100 dark:bg-teal-900/30 text-teal-800 dark:text-teal-300 rounded-full text-sm font-medium">
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            </div>
 
-      <div>
-        <h3 class="text-lg font-semibold mb-3 text-fuchsia-600 dark:text-fuchsia-400">UI/UX & Design</h3>
-        <div class="flex flex-wrap gap-2">
-          {skills.design.map(skill => (
-            <span class="px-3 py-1 bg-fuchsia-100 dark:bg-fuchsia-900/30 text-fuchsia-800 dark:text-fuchsia-300 rounded-full text-sm font-medium">
-              {skill}
-            </span>
-          ))}
+            <div>
+              <h3 class="text-lg font-semibold mb-3 text-fuchsia-600 dark:text-fuchsia-400">UI/UX & Design</h3>
+              <div class="flex flex-wrap gap-2">
+                {skills.design.map(skill => (
+                  <span class="px-3 py-1 bg-fuchsia-100 dark:bg-fuchsia-900/30 text-fuchsia-800 dark:text-fuchsia-300 rounded-full text-sm font-medium">
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
-  </div>
-</section>
-
+      </section>
 
       <!-- EXPERIENCE SECTION -->
       <section class="animate">
@@ -327,9 +325,9 @@ const achievements = [
         
         <!-- WORK EXPERIENCE -->
         <div class="mb-12">
-          <div class="flex justify-between items-center mb-6">
+          <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-2">
             <h3 class="text-xl md:text-2xl font-semibold text-black dark:text-white">Work Experience</h3>
-            <a href="/work" class="group flex gap-1 items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors">
+            <a href="/work" class="group flex gap-1 items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors self-start">
               <span class="font-medium">See All</span>
               <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
@@ -338,7 +336,7 @@ const achievements = [
           </div>
           <div class="space-y-8">
             {work.map((exp) => (
-              <div class="border-l-2 border-gray-200 dark:border-gray-700 pl-6 relative">
+              <div class="border-l-2 border-gray-200 dark:border-gray-700 pl-4 md:pl-6 relative">
                 <div class="absolute w-3 h-3 bg-blue-500 rounded-full -left-2 top-1"></div>
                 <div class="mb-2">
                   <h3 class="text-lg font-semibold text-black dark:text-white">{exp.data.role}</h3>
@@ -364,9 +362,9 @@ const achievements = [
         
         <!-- EDUCATION -->
         <div>
-          <div class="flex justify-between items-center mb-6">
+          <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-2">
             <h3 class="text-xl md:text-2xl font-semibold text-black dark:text-white">Education</h3>
-            <a href="/education" class="group flex gap-1 items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors">
+            <a href="/education" class="group flex gap-1 items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors self-start">
               <span class="font-medium">See All</span>
               <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
@@ -375,7 +373,7 @@ const achievements = [
           </div>
           <div class="space-y-8">
             {education.map((edu) => (
-              <div class="border-l-2 border-gray-200 dark:border-gray-700 pl-6 relative">
+              <div class="border-l-2 border-gray-200 dark:border-gray-700 pl-4 md:pl-6 relative">
                 <div class="absolute w-3 h-3 bg-purple-500 rounded-full -left-2 top-1"></div>
                 <div class="mb-2">
                   <h3 class="text-lg font-semibold text-black dark:text-white">{edu.data.degree || edu.data.field || "Education"}</h3>
@@ -404,12 +402,12 @@ const achievements = [
       <!-- ACHIEVEMENTS SECTION -->
       <section class="animate">
         <h2 class="text-2xl md:text-3xl font-bold mb-8 text-black dark:text-white">Certifications & Achievements</h2>
-        <div class="grid md:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {achievements.map((achievement, index) => (
-            <div class="p-6 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 transition-colors">
+            <div class="p-4 md:p-6 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 transition-colors">
               <div class="flex items-start gap-3">
                 <div class="w-3 h-3 bg-yellow-500 rounded-full mt-2 flex-shrink-0"></div>
-                <div class="flex-1">
+                <div class="flex-1 min-w-0">
                   <h3 class="text-base font-semibold mb-2 text-black dark:text-white leading-tight">
                     {achievement.title}
                   </h3>
@@ -430,9 +428,9 @@ const achievements = [
 
       <!-- PROJECT PREVIEW SECTION -->
       <section class="animate">
-        <div class="flex justify-between items-center mb-8">
+        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-8 gap-2">
           <h2 class="text-2xl md:text-3xl font-bold text-black dark:text-white">Featured Projects</h2>
-          <a href="/projects" class="group flex gap-1 items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors">
+          <a href="/projects" class="group flex gap-1 items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors self-start">
             <span class="font-medium">View All Projects</span>
             <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
@@ -451,9 +449,9 @@ const achievements = [
       <!-- BLOG PREVIEW SECTION -->
       {posts.length > 0 && (
         <section class="animate">
-          <div class="flex justify-between items-center mb-8">
+          <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-8 gap-2">
             <h2 class="text-2xl md:text-3xl font-bold text-black dark:text-white">Latest Articles</h2>
-            <a href="/blog" class="group flex gap-1 items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors">
+            <a href="/blog" class="group flex gap-1 items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors self-start">
               <span class="font-medium">Read More</span>
               <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
@@ -470,48 +468,22 @@ const achievements = [
         </section>
       )}
 
-      <!-- CONTACT SECTION -->
-      <section class="animate">
-        <div class="text-center mb-8">
-          <h2 class="text-2xl md:text-3xl font-bold mb-4 text-black dark:text-white">Let's Work Together</h2>
-          <p class="text-lg max-w-2xl mx-auto opacity-90">
-            I'm always interested in discussing new opportunities, innovative projects, or just having a chat about technology.
-          </p>
-        </div>
-        
-        <div class="max-w-2xl mx-auto">
-          <div class="grid md:grid-cols-2 gap-6 mb-8">
-            <div class="text-center p-6 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
-              <h3 class="font-semibold mb-2 text-black dark:text-white">Email</h3>
-              <a href="mailto:your.email@example.com" class="text-blue-600 dark:text-blue-400 hover:underline">
-                your.email@example.com
-              </a>
-            </div>
-            <div class="text-center p-6 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
-              <h3 class="font-semibold mb-2 text-black dark:text-white">Phone</h3>
-              <a href="tel:+1234567890" class="text-blue-600 dark:text-blue-400 hover:underline">
-                +62 xxx-xxxx-xxxx
-              </a>
-            </div>
-          </div>
-
-          <div class="text-center">
-            <p class="font-semibold mb-4 text-black dark:text-white">Connect with me</p>
-            <div class="flex justify-center gap-6">
-              {SOCIALS.map(social => (
-                <a 
-                  href={social.HREF} 
-                  target="_blank" 
-                  class="group flex flex-col items-center gap-2 p-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors"
-                >
-                  <span class="font-medium text-sm">{social.NAME}</span>
-                  <span class="text-blue-600 dark:text-blue-400 group-hover:text-blue-800 dark:group-hover:text-blue-300 text-sm">
-                    {social.TEXT}
-                  </span>
-                </a>
-              ))}
-            </div>
-          </div>
+      <!-- CONNECT SECTION -->
+      <section class="animate text-center">
+        <p class="font-semibold mb-4 text-black dark:text-white">Connect with me</p>
+        <div class="flex flex-wrap justify-center gap-4">
+          {SOCIALS.map(social => (
+            <a 
+              href={social.HREF} 
+              target="_blank" 
+              class="group flex flex-col items-center gap-2 p-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors min-w-0"
+            >
+              <span class="font-medium text-sm text-center break-words">{social.NAME}</span>
+              <span class="text-blue-600 dark:text-blue-400 group-hover:text-blue-800 dark:group-hover:text-blue-300 text-sm text-center break-all">
+                {social.TEXT}
+              </span>
+            </a>
+          ))}
         </div>
       </section>
     </div>
