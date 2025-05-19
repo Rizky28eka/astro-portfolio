@@ -7,7 +7,16 @@ import { EDUCATION } from "@consts"
 
 // Get education collection and sort by end date (descending)
 const collection = await getCollection("education")
-collection.sort((a, b) => new Date(b.data.dateEnd).getTime() - new Date(a.data.dateEnd).getTime())
+collection.sort((a, b) => {
+  const dateA = a.data.dateEnd ? new Date(a.data.dateEnd) : null;
+  const dateB = b.data.dateEnd ? new Date(b.data.dateEnd) : null;
+  
+  if (!dateA && !dateB) return 0;
+  if (!dateA) return 1;
+  if (!dateB) return -1;
+  
+  return dateB.getTime() - dateA.getTime();
+});
 
 // Render content components
 const education = await Promise.all(
@@ -17,16 +26,19 @@ const education = await Promise.all(
   })
 )
 
-// Format date function
-function formatDate(input) {
-  if (!input) return "Present"
-  if (typeof input === "string") return input
-  const month = input.toLocaleDateString("en-US", {
-    month: "short",
-  })
-  const year = new Date(input).getFullYear()
-  return `${month} ${year}`
+function formatDate(input?: string | Date): string {
+  if (!input) return "Present";
+
+  const date = typeof input === "string" ? new Date(input) : input;
+
+  if (isNaN(date.getTime())) return "Invalid Date";
+
+  const month = date.toLocaleString("en-US", { month: "short" });
+  const year = date.getFullYear();
+
+  return `${month} ${year}`;
 }
+
 ---
 
 <PageLayout title={EDUCATION.TITLE} description={EDUCATION.DESCRIPTION}>

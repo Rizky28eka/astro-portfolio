@@ -11,6 +11,7 @@
     "preview:network": "astro dev --host",
     "astro": "astro",
     "lint": "eslint .",
+    "sync": "astro sync",
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
