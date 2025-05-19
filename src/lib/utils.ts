@@ -6,12 +6,18 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function formatDate(date: Date) {
+  if (!(date instanceof Date) || isNaN(date.getTime())) {
+    // jika date bukan objek Date valid, beri nilai fallback atau return string kosong
+    return ""
+  }
+
   return Intl.DateTimeFormat("en-US", {
     month: "short",
     day: "2-digit",
-    year: "numeric"
+    year: "numeric",
   }).format(date)
 }
+
 
 export function readingTime(html: string) {
   const textOnly = html.replace(/<[^>]+>/g, "")

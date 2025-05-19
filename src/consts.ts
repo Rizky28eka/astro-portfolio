@@ -13,18 +13,18 @@ export const WORK: Page = {
   DESCRIPTION: "Places I have worked.",
 }
 
-// Blog Page
-export const BLOG: Page = {
-  TITLE: "Blog",
-  DESCRIPTION: "Writing on topics I am passionate about.",
-}
+
 
 // Projects Page 
 export const PROJECTS: Page = {
   TITLE: "Projects",
   DESCRIPTION: "Recent projects I have worked on.",
 }
-
+// EDucation Page
+export const EDUCATION = {
+  TITLE: "Education",
+  DESCRIPTION: "My academic background and qualifications"
+}
 // Search Page
 export const SEARCH: Page = {
   TITLE: "Search",
@@ -40,10 +40,6 @@ export const LINKS: Links = [
   { 
     TEXT: "Work", 
     HREF: "/work", 
-  },
-  { 
-    TEXT: "Blog", 
-    HREF: "/blog", 
   },
   { 
     TEXT: "Projects", 

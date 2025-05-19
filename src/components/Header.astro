@@ -29,6 +29,12 @@ import Container from "@components/Container.astro"
             </a>
           ))
         }
+        <a href="/education" class={cn("h-8 rounded-full px-3 text-current", "flex items-center justify-center", "transition-colors duration-300 ease-in-out", pathname === "/education" || "/" + subpath?.[0] === "/education" ? "bg-black dark:bg-white text-white dark:text-black" : "hover:bg-black/5 dark:hover:bg-white/20 hover:text-black dark:hover:text-white")}>
+          Education
+        </a>
+        <a href="/blog" class={cn("h-8 rounded-full px-3 text-current", "flex items-center justify-center", "transition-colors duration-300 ease-in-out", pathname === "/blog" || "/" + subpath?.[0] === "/blog" ? "bg-black dark:bg-white text-white dark:text-black" : "hover:bg-black/5 dark:hover:bg-white/20 hover:text-black dark:hover:text-white")}>
+          Blog
+        </a>
       </nav>
     </div>
 
