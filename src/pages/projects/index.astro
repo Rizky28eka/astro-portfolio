@@ -6,23 +6,36 @@ import BottomLayout from "@layouts/BottomLayout.astro"
 import Projects from "@components/Projects"
 import { PROJECTS } from "@consts"
 
+// Get all non-draft projects and sort by date (newest first)
 const projects = (await getCollection("projects"))
   .filter(project => !project.data.draft)
-  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+  .sort((a, b) => {
+    // Handle both Date objects and date strings
+    const dateA = b.data.date instanceof Date ? b.data.date : new Date(b.data.date || 0);
+    const dateB = a.data.date instanceof Date ? a.data.date : new Date(a.data.date || 0);
+    return dateA.getTime() - dateB.getTime();
+  });
 
-const tags = [...new Set(projects.flatMap(project => project.data.tags))]
-  .sort((a, b) => a.localeCompare(b))
+// Extract unique tags and sort alphabetically
+const tags = [...new Set(projects.flatMap(project => project.data.tags || []))]
+  .sort((a, b) => a.localeCompare(b));
 ---
-
 <PageLayout title={PROJECTS.TITLE} description={PROJECTS.DESCRIPTION}>
   <TopLayout>
     <div class="animate page-heading">
       {PROJECTS.TITLE}
     </div>
+    <p class="animate text-muted mt-2">
+      {PROJECTS.DESCRIPTION}
+    </p>
   </TopLayout>
   <BottomLayout>
     <div class="animate">
-      <Projects client:load tags={tags} data={projects} />
+      <Projects 
+        client:load 
+        tags={tags} 
+        data={projects} 
+      />
     </div>
   </BottomLayout>
 </PageLayout>

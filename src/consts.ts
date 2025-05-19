@@ -13,7 +13,10 @@ export const WORK: Page = {
   DESCRIPTION: "Places I have worked.",
 }
 
-
+export const BLOG: Page = {
+  TITLE: "Blog",
+  DESCRIPTION: "My thoughts on design, development, and the world.",
+}
 
 // Projects Page 
 export const PROJECTS: Page = {

@@ -6,25 +6,36 @@ import BottomLayout from "@layouts/BottomLayout.astro"
 import Blog from "@components/Blog"
 import { BLOG } from "@consts"
 
+// Get all non-draft blog posts and sort by date (newest first)
 const posts = (await getCollection("blog"))
   .filter(post => !post.data.draft)
-  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+  .sort((a, b) => {
+    // Handle both Date objects and date strings
+    const dateA = a.data.date instanceof Date ? a.data.date : a.data.date ? new Date(a.data.date) : new Date(0);
+    const dateB = b.data.date instanceof Date ? b.data.date : b.data.date ? new Date(b.data.date) : new Date(0);
+    return dateB.getTime() - dateA.getTime(); // Sort newest first
+  });
 
-const tags = [...new Set(posts.flatMap(post => post.data.tags))]
-  .sort((a, b) => a.localeCompare(b))
+// Extract unique tags and sort alphabetically
+const tags = [...new Set(posts.flatMap(post => post.data.tags || []))]
+  .sort((a, b) => a.localeCompare(b));
 ---
-
 <PageLayout title={BLOG.TITLE} description={BLOG.DESCRIPTION}>
   <TopLayout>
     <div class="animate page-heading">
       {BLOG.TITLE}
     </div>
+    <p class="animate text-muted mt-2">
+      {BLOG.DESCRIPTION}
+    </p>
   </TopLayout>
   <BottomLayout>
     <div class="animate">
-      <Blog client:load tags={tags} data={posts} />
+      <Blog 
+        client:load 
+        tags={tags} 
+        data={posts} 
+      />
     </div>
   </BottomLayout>
 </PageLayout>
-
-
