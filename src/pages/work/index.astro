@@ -1,59 +1,131 @@
 ---
-import { getCollection } from "astro:content"
-import PageLayout from "@layouts/PageLayout.astro"
-import TopLayout from "@layouts/TopLayout.astro"
-import BottomLayout from "@layouts/BottomLayout.astro"
-import { WORK } from "@consts"
+import { getCollection } from "astro:content";
+import PageLayout from "@layouts/PageLayout.astro";
+import TopLayout from "@layouts/TopLayout.astro";
+import BottomLayout from "@layouts/BottomLayout.astro";
+import { WORK } from "@consts";
 
-const collection = await getCollection("work")
-
-collection.sort((a, b) => new Date(b.data.dateStart).getTime() - new Date(a.data.dateStart).getTime())
-
+// Get work collection
+const rawCollection = await getCollection("work");
+// Filter out drafts
+const collection = rawCollection.filter(item => !item.data.draft);
+// Sort by dateStart descending
+collection.sort((a, b) => {
+  const dateA = new Date(a.data.dateStart || 0).getTime();
+  const dateB = new Date(b.data.dateStart || 0).getTime();
+  return dateB - dateA;
+});
+// Render content components
 const work = await Promise.all(
   collection.map(async (item) => {
-    const { Content } = await item.render()
-    return { ...item, Content }
+    const { Content } = await item.render();
+    return { ...item, Content };
   })
-)
+);
 
-function formatWorkDate(input: Date | string) {
-  if (typeof input === "string") return input
-
-  const month = input.toLocaleDateString("en-US", {
-    month: "short",
-  })
-
-  const year = new Date(input).getFullYear()
-  return `${month} ${year}`
+// Format date function
+function formatWorkDate(input: Date | string | undefined) {
+  if (!input) return "";
+  
+  // Return "Present" directly if it's the string "Present"
+  if (input === "Present") return "Present";
+  
+  // Parse date if it's a string (excluding "Present")
+  const date = typeof input === "string" ? new Date(input) : input;
+  if (isNaN(date.getTime())) return "Invalid date";
+  
+  const month = date.toLocaleDateString("en-US", { month: "short" });
+  const year = date.getFullYear();
+  return `${month} ${year}`;
 }
 ---
 
 <PageLayout title={WORK.TITLE} description={WORK.DESCRIPTION}>
   <TopLayout>
-    <div class="animate page-heading">
-      {WORK.TITLE}
+    <div class="animate page-heading flex items-center gap-3 mb-8">
+      <span class="text-3xl">{WORK.TITLE}</span>
+      <div class="h-px flex-grow bg-gradient-to-r from-black/50 to-transparent dark:from-white/50"></div>
     </div>
   </TopLayout>
+  
   <BottomLayout>
-    <ul>
-      { 
-        work.map((entry) => (
-          <li class="animate border-b border-black/10 dark:border-white/25 mt-4 py-8 first-of-type:mt-0 first-of-type:pt-0 last-of-type:border-none">
-            <div class="text-sm uppercase mb-4">
-              {formatWorkDate(entry.data.dateStart)} - {formatWorkDate(entry.data.dateEnd)}
+    <div class="timeline relative">
+      {work.map((entry, index) => (
+        <div class="timeline-entry animate group relative">
+          <!-- Timeline line -->
+          {index < work.length - 1 && (
+            <div class="absolute left-[14px] top-14 bottom-0 w-0.5 bg-gradient-to-b from-black/20 to-black/10 dark:from-white/20 dark:to-white/10"></div>
+          )}
+          
+          <div class="flex gap-6 py-8 group-first:pt-0">
+            <!-- Timeline dot -->
+            <div class="relative z-10 mt-1.5">
+              <div class="timeline-dot w-7 h-7 rounded-full border-2 border-black/40 dark:border-white/40 bg-white dark:bg-gray-900 flex items-center justify-center shadow-md transition-all duration-300 group-hover:scale-110 group-hover:border-black dark:group-hover:border-white">
+                <span class="text-xs font-bold">{work.length - index}</span>
+              </div>
             </div>
-            <div class="text-black dark:text-white font-semibold">
-              {entry.data.company}
+            
+            <!-- Card content -->
+            <div class="flex-grow">
+              <!-- Date and Location row -->
+              <div class="flex justify-between items-center flex-wrap gap-2 mb-2">
+                <div class="text-sm font-medium px-3 py-1 bg-black/5 dark:bg-white/10 rounded-full">
+                  {formatWorkDate(entry.data.dateStart)} – {entry.data.dateEnd ? formatWorkDate(entry.data.dateEnd) : "Present"}
+                </div>
+                
+                {entry.data.location && (
+                  <div class="text-sm italic text-gray-600 dark:text-gray-400 flex items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                      <circle cx="12" cy="10" r="3"></circle>
+                    </svg>
+                    {entry.data.location}
+                  </div>
+                )}
+              </div>
+              
+              <!-- Company and Role -->
+              <div class="mb-4">
+                <div class="text-xl font-bold text-black dark:text-white transition-all duration-300 group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                  {entry.data.company}
+                </div>
+                <div class="text-lg font-medium mt-1 text-gray-700 dark:text-gray-300">
+                  {entry.data.role}
+                </div>
+              </div>
+              
+              <!-- Content -->
+              <div class="card-content p-5 rounded-lg bg-black/5 dark:bg-white/5 transition-all duration-300 group-hover:bg-black/10 dark:group-hover:bg-white/10">
+                <article class="prose dark:prose-invert max-w-none">
+                  <entry.Content />
+                </article>
+              </div>
             </div>
-            <div class="text-sm font-semibold">
-              {entry.data.role}
-            </div>
-            <article class="prose dark:prose-invert">
-              <entry.Content />
-            </article>
-          </li>
-        ))
-      }
-    </ul>
+          </div>
+        </div>
+      ))}
+    </div>
   </BottomLayout>
 </PageLayout>
+
+<style>
+  /* Additional styles */
+  .timeline-entry {
+    transition: transform 0.3s ease;
+  }
+  .timeline-entry:hover {
+    transform: translateX(4px);
+  }
+  .card-content {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  }
+  @media (prefers-color-scheme: dark) {
+    .card-content {
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+  }
+  .page-heading {
+    margin-bottom: 2rem;
+    font-weight: 700;
+  }
+</style>

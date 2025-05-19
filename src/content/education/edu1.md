@@ -1,7 +1,7 @@
 ---
 school: "Universitas Amikom Yogyakarta"
 degree: "Bachelor's Degree in Informatics"
-dateStart: "2019-09-01"
+dateStart: "22-8"
 dateEnd: "present"
 description: "Studied Informatics with a focus on software development."
 draft: false

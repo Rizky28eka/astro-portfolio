@@ -1,8 +1,8 @@
 ---
 school: "SMK IDN Boarding School"
 degree: "Vocational High School Diploma in Informatic Engineering"
-dateStart: "2019-08-01"
-dateEnd: "2022-07-01"
+dateStart: "2019-08"
+dateEnd: "2022-07"
 description: "Focused on practical and technical skills in software and hardware engineering."
 draft: false
 ---

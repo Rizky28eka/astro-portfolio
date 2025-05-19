@@ -1,64 +1,81 @@
 import { defineCollection, z } from "astro:content";
 
+// Reusable schema elements
+const dateUnion = z.union([z.string(), z.date()]);
+const optionalString = z.string().optional();
+const optionalStringArray = z.array(z.string()).optional();
+
+// Work collection schema
 const work = defineCollection({
   type: "content",
   schema: z.object({
     company: z.string(),
     role: z.string(),
-    location: z.string().optional(), // ✅ Added location
-    dateStart: z.union([z.string(), z.date()]).optional(),
-    dateEnd: z.union([z.string(), z.date()]).optional(),
-    summary: z.string().optional(),
-    technologies: z.array(z.string()).optional(),
+    location: optionalString,
+    dateStart: dateUnion.optional(),
+    dateEnd: dateUnion.optional(),
+    summary: optionalString,
+    technologies: optionalStringArray,
     draft: z.boolean().optional(),
   }),
 });
 
+// Blog collection schema
 const blog = defineCollection({
   type: "content",
   schema: z.object({
     title: z.string(),
-    summary: z.string().optional(),
-    date: z.union([z.string(), z.date()]).optional(), // Support both string and Date objects
-    tags: z.array(z.string()).optional(),
+    summary: optionalString,
+    date: dateUnion.optional(),
+    tags: optionalStringArray,
     draft: z.boolean().optional(),
   }),
 });
 
+// Projects collection schema
 const projects = defineCollection({
   type: "content",
   schema: z.object({
     title: z.string(),
-    summary: z.string().optional(),
-    date: z.union([z.string(), z.date()]).optional(), // Support both string and Date objects
-    tags: z.array(z.string()).optional(),
+    summary: optionalString,
+    date: dateUnion.optional(),
+    tags: optionalStringArray,
+    demoUrl: optionalString,
+    repoUrl: optionalString,
     draft: z.boolean().optional(),
-    demoUrl: z.string().optional(),
-    repoUrl: z.string().optional(),
   }),
 });
 
+// Legal collection schema
 const legal = defineCollection({
   type: "content",
   schema: z.object({
-    title: z.string().optional(),
-    date: z.string().optional(),
+    title: optionalString,
+    date: optionalString,
   }),
 });
 
+// Education collection schema
 const education = defineCollection({
   type: "content",
   schema: z.object({
-    school: z.string().optional(),
-    degree: z.string().optional(),
-    field: z.string().optional(),
-    location: z.string().optional(), // ✅ Added location
-    dateStart: z.union([z.string(), z.date()]).optional(),
-    dateEnd: z.union([z.string(), z.date()]).optional(),
-    description: z.string().optional(),
-    achievements: z.array(z.string()).optional(),
+    school: optionalString,
+    degree: optionalString,
+    field: optionalString,
+    location: optionalString,
+    dateStart: dateUnion.optional(),
+    dateEnd: dateUnion.optional(),
+    description: optionalString,
+    achievements: optionalStringArray,
     draft: z.boolean().optional(),
   }),
 });
 
-export const collections = { work, blog, projects, legal, education };
+// Export all collections
+export const collections = {
+  work,
+  blog,
+  projects,
+  legal,
+  education,
+};
