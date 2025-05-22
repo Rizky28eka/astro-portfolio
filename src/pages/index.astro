@@ -1,9 +1,13 @@
 ---
+// Layout and Core Components
 import PageLayout from "@layouts/PageLayout.astro";
 import ArrowCard from "@components/ArrowCard";
+
+// Configuration and Data
 import { SITE } from "@consts";
 import { getLatestPosts, getLatestProjects } from "@/lib/data";
-// Components
+
+// Page Sections
 import BackgroundEffects from "@components/BackgroundEffects.astro";
 import HeroSection from "@components/HeroSection.astro";
 import AboutSection from "@components/AboutSection.astro";
@@ -11,66 +15,173 @@ import SkillsSection from "@components/SkillsSection.astro";
 import ExperienceSection from "@components/ExperienceSection.astro";
 import AchievementsSection from "@components/AchievementsSection.astro";
 import ConnectSection from "@components/ConnectSection.astro";
-const posts = await getLatestPosts(3);
-const projects = await getLatestProjects(3);
+
+// Data Fetching
+const [posts, projects] = await Promise.all([
+  getLatestPosts(3),
+  getLatestProjects(3)
+]);
+
+// Configuration
+const SECTIONS_CONFIG = {
+  projects: {
+    title: "Featured Projects",
+    linkText: "View All Projects",
+    href: "/projects"
+  },
+  blog: {
+    title: "Latest Articles", 
+    linkText: "Read More",
+    href: "/blog"
+  }
+};
 ---
+
 <PageLayout title="Home" description={SITE.DESCRIPTION}>
   <BackgroundEffects />
   
-  <!-- HERO SECTION -->
+  <!-- Hero Section -->
   <HeroSection />
-  <div class="relative bg-white dark:bg-black">
-    <div class="mx-auto max-w-4xl p-5 space-y-24 pb-16">
-      <!-- ABOUT SECTION -->
+  
+  <!-- Main Content -->
+  <main class="relative bg-white dark:bg-black">
+    <div class="mx-auto max-w-4xl px-5 py-16 space-y-24">
+      
+      <!-- About Section -->
       <AboutSection />
-      <!-- SKILLS SECTION -->
+      
+      <!-- Skills Section -->
       <SkillsSection />
-      <!-- EXPERIENCE SECTION -->
+      
+      <!-- Experience Section -->
       <ExperienceSection />
-      <!-- ACHIEVEMENTS SECTION -->
+      
+      <!-- Achievements Section -->
       <AchievementsSection />
-      <!-- PROJECT PREVIEW SECTION -->
-      <section class="animate">
-        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-8 gap-2">
-          <h2 class="text-2xl md:text-3xl font-bold text-black dark:text-white">Featured Projects</h2>
-          <a href="/projects" class="group flex gap-1 items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors self-start">
-            <span class="font-medium">View All Projects</span>
-            <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+      
+      <!-- Featured Projects Section -->
+      <section class="animate" aria-labelledby="projects-heading">
+        <header class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-8 gap-4">
+          <h2 
+            id="projects-heading"
+            class="text-2xl md:text-3xl font-bold text-black dark:text-white"
+          >
+            {SECTIONS_CONFIG.projects.title}
+          </h2>
+          <a 
+            href={SECTIONS_CONFIG.projects.href}
+            class="group inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium transition-colors duration-200 self-start"
+            aria-label="View all projects"
+          >
+            <span>{SECTIONS_CONFIG.projects.linkText}</span>
+            <svg 
+              class="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" 
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path 
+                stroke-linecap="round" 
+                stroke-linejoin="round" 
+                stroke-width="2" 
+                d="M17 8l4 4m0 0l-4 4m4-4H3"
+              />
             </svg>
           </a>
-        </div>
+        </header>
+        
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {projects.map((project) => (
-            <div class="flex h-full">
+          {projects.map((project, index) => (
+            <article class="flex h-full" key={project.id || index}>
               <ArrowCard entry={project} />
-            </div>
+            </article>
           ))}
         </div>
       </section>
-      <!-- BLOG PREVIEW SECTION -->
+      
+      <!-- Latest Articles Section -->
       {posts.length > 0 && (
-        <section class="animate">
-          <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-8 gap-2">
-            <h2 class="text-2xl md:text-3xl font-bold text-black dark:text-white">Latest Articles</h2>
-            <a href="/blog" class="group flex gap-1 items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors self-start">
-              <span class="font-medium">Read More</span>
-              <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+        <section class="animate" aria-labelledby="blog-heading">
+          <header class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-8 gap-4">
+            <h2 
+              id="blog-heading"
+              class="text-2xl md:text-3xl font-bold text-black dark:text-white"
+            >
+              {SECTIONS_CONFIG.blog.title}
+            </h2>
+            <a 
+              href={SECTIONS_CONFIG.blog.href}
+              class="group inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium transition-colors duration-200 self-start"
+              aria-label="Read more articles"
+            >
+              <span>{SECTIONS_CONFIG.blog.linkText}</span>
+              <svg 
+                class="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path 
+                  stroke-linecap="round" 
+                  stroke-linejoin="round" 
+                  stroke-width="2" 
+                  d="M17 8l4 4m0 0l-4 4m4-4H3"
+                />
               </svg>
             </a>
-          </div>
-          <div class="space-y-4">
-            {posts.map((post) => (
-              <div>
+          </header>
+          
+          <div class="space-y-6">
+            {posts.map((post, index) => (
+              <article key={post.id || index}>
                 <ArrowCard entry={post} />
-              </div>
+              </article>
             ))}
           </div>
         </section>
       )}
-      <!-- CONNECT SECTION -->
+      
+      <!-- Connect Section -->
       <ConnectSection />
+      
     </div>
-  </div>
+  </main>
 </PageLayout>
+
+<style>
+  /* Enhanced animations and transitions */
+  .animate {
+    animation: fadeInUp 0.6s ease-out forwards;
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  
+  .animate:nth-child(1) { animation-delay: 0.1s; }
+  .animate:nth-child(2) { animation-delay: 0.2s; }
+  .animate:nth-child(3) { animation-delay: 0.3s; }
+  .animate:nth-child(4) { animation-delay: 0.4s; }
+  .animate:nth-child(5) { animation-delay: 0.5s; }
+  .animate:nth-child(6) { animation-delay: 0.6s; }
+  .animate:nth-child(7) { animation-delay: 0.7s; }
+  
+  @keyframes fadeInUp {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* Improved hover effects */
+  section:hover .group svg {
+    transform: translateX(2px);
+  }
+  
+  /* Better focus states for accessibility */
+  a:focus-visible {
+    outline: 2px solid theme('colors.blue.500');
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+</style>
