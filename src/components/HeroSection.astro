@@ -1,0 +1,51 @@
+---
+---
+
+<section class="relative h-screen w-full">
+  <div id="planetcont" class='animate absolute inset-0 top-1/4 overflow-hidden'>
+    <div id="crescent" class='absolute top-0 left-1/2 -translate-x-1/2 w-[250vw] min-h-[100vh] aspect-square rounded-full p-[1px] bg-gradient-to-b from-black/25 dark:from-white/75 from-0% to-transparent to-5%'>
+      <div id="planet" class='w-full h-full bg-white dark:bg-black rounded-full p-[1px] overflow-hidden flex justify-center'>
+        <div id="blur" class='w-full h-20 rounded-full bg-neutral-900/25 dark:bg-white/25 blur-3xl'/>
+      </div>
+    </div>
+  </div>
+  <div class="animate absolute h-full w-full flex items-center justify-center">
+    <div class='relative w-full h-full flex items-center justify-center'>
+      <div class='p-5 text-center max-w-4xl'>
+        <p class='animated text-lg md:text-xl lg:text-2xl font-semibold opacity-75 mb-2'>
+          Hello, I'm
+        </p>
+        <h1 class='animated text-3xl md:text-4xl lg:text-6xl font-bold text-black dark:text-white mb-4'>
+          Rizky Eka Haryadi
+        </h1>
+        <p class='animated text-lg md:text-xl lg:text-2xl opacity-90 mb-2'>
+            Frontend Mobile Developer
+        </p>
+        <p class='animated text-sm md:text-base lg:text-lg opacity-75 max-w-2xl mx-auto mb-8'>
+          Crafting innovative mobile solutions and extracting insights from data to drive business growth
+        </p>
+        <div id="ctaButtons" class='animated flex flex-col sm:flex-row gap-4 justify-center'>
+          <a href='/work' class='py-3 px-6 rounded-lg text-sm md:text-base bg-black dark:bg-white text-white dark:text-black hover:bg-black/80 dark:hover:bg-white/90 transition-colors font-medium'>
+            View My Work
+          </a>
+          <a href='/contact' class='py-3 px-6 rounded-lg text-sm md:text-base border border-black/25 dark:border-white/25 hover:bg-black/5 hover:dark:bg-white/15 transition-colors font-medium'>
+            Get In Touch
+          </a>
+          <!-- Fixed Resume Download Button -->
+          <a 
+            href="/resume.pdf" 
+            download="Rizky_Eka_Haryadi_Resume.pdf"
+            target="_blank" 
+            rel="noopener noreferrer" 
+            class="py-3 px-6 rounded-lg text-sm md:text-base border border-black/25 dark:border-white/25 hover:bg-black/5 hover:dark:bg-white/15 transition-colors font-medium inline-flex items-center gap-2"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2z"></path>
+            </svg>
+            Download CV
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

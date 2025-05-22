@@ -1,0 +1,85 @@
+---
+import { getLatestWork, getLatestEducation, formatWorkDate } from '@/lib/data';
+
+const work = await getLatestWork(2);
+const education = await getLatestEducation(2);
+---
+
+<section class="animate">
+  <h2 class="text-2xl md:text-3xl font-bold mb-8 text-black dark:text-white">Experience</h2>
+  
+  <!-- WORK EXPERIENCE -->
+  <div class="mb-12">
+    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-2">
+      <h3 class="text-xl md:text-2xl font-semibold text-black dark:text-white">Work Experience</h3>
+      <a href="/work" class="group flex gap-1 items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors self-start">
+        <span class="font-medium">See All</span>
+        <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+        </svg>
+      </a>
+    </div>
+    <div class="space-y-8">
+      {work.map((exp) => (
+        <div class="border-l-2 border-gray-200 dark:border-gray-700 pl-4 md:pl-6 relative">
+          <div class="absolute w-3 h-3 bg-blue-500 rounded-full -left-2 top-1"></div>
+          <div class="mb-2">
+            <h3 class="text-lg font-semibold text-black dark:text-white">{exp.data.role}</h3>
+            <p class="text-blue-600 dark:text-blue-400 font-medium">{exp.data.company}</p>
+            <p class="text-sm text-gray-600 dark:text-gray-400">
+              {formatWorkDate(exp.data.dateStart)} - {exp.data.dateEnd ? formatWorkDate(exp.data.dateEnd) : "Present"}
+            </p>
+          </div>
+          <p class="text-base mb-3 leading-relaxed">{exp.data.summary || ''}</p>
+          {exp.data.technologies && exp.data.technologies.length > 0 && (
+            <div class="flex flex-wrap gap-2">
+              {exp.data.technologies.map(tech => (
+                <span class="px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded text-xs">
+                  {tech}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  </div>
+  
+  <!-- EDUCATION -->
+  <div>
+    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-2">
+      <h3 class="text-xl md:text-2xl font-semibold text-black dark:text-white">Education</h3>
+      <a href="/education" class="group flex gap-1 items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors self-start">
+        <span class="font-medium">See All</span>
+        <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+        </svg>
+      </a>
+    </div>
+    <div class="space-y-8">
+      {education.map((edu) => (
+        <div class="border-l-2 border-gray-200 dark:border-gray-700 pl-4 md:pl-6 relative">
+          <div class="absolute w-3 h-3 bg-purple-500 rounded-full -left-2 top-1"></div>
+          <div class="mb-2">
+            <h3 class="text-lg font-semibold text-black dark:text-white">{edu.data.degree || edu.data.field || "Education"}</h3>
+            <p class="text-purple-600 dark:text-purple-400 font-medium">{edu.data.school}</p>
+            <p class="text-sm text-gray-600 dark:text-gray-400">
+              {edu.data.dateStart ? formatWorkDate(edu.data.dateStart) : ""} - {edu.data.dateEnd ? formatWorkDate(edu.data.dateEnd) : "Present"}
+            </p>
+          </div>
+          {edu.data.description && <p class="text-base mb-3 leading-relaxed">{edu.data.description}</p>}
+          {edu.data.achievements && edu.data.achievements.length > 0 && (
+            <div class="pl-4 border-l border-gray-200 dark:border-gray-700">
+              <p class="text-sm font-medium mb-2">Achievements/Activities:</p>
+              <ul class="list-disc list-inside space-y-1 text-sm">
+                {edu.data.achievements.map(achievement => (
+                  <li>{achievement}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

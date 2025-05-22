@@ -1,0 +1,119 @@
+---  
+import { SOCIALS } from "@consts";
+---
+<section class="animate text-center py-12 px-4">
+  <!-- Header -->
+  <div class="mb-12">
+    <h2 class="text-3xl font-bold mb-3 text-black dark:text-white">
+      Let's Connect
+    </h2>
+    <p class="text-gray-600 dark:text-gray-400 max-w-md mx-auto">
+      Feel free to reach out through any of these platforms
+    </p>
+    <div class="w-16 h-1 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto mt-4 rounded-full"></div>
+  </div>
+  
+  <!-- Social Links Grid - Centered -->
+  <div class="flex justify-center">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-3xl">
+      {SOCIALS.map((social, index) => (
+        <a 
+          href={social.HREF} 
+          target="_blank"
+          rel="noopener noreferrer"
+          class="group relative overflow-hidden p-6 rounded-2xl bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 transition-all duration-300 hover:shadow-lg hover:shadow-blue-100 dark:hover:shadow-blue-900/20 hover:-translate-y-1 backdrop-blur-sm flex flex-col items-center justify-center text-center min-w-64"
+          style={`animation-delay: ${index * 100}ms`}
+        >
+          <!-- Background Gradient Effect -->
+          <div class="absolute inset-0 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/10 dark:to-purple-900/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          
+          <!-- Content -->
+          <div class="relative z-10 flex flex-col items-center">
+            <!-- Icon/Avatar Placeholder -->
+            <div class="w-12 h-12 mb-4 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+              <span class="text-white font-bold text-lg">
+                {social.NAME.charAt(0).toUpperCase()}
+              </span>
+            </div>
+            
+            <!-- Social Name -->
+            <h3 class="font-semibold text-lg mb-2 text-black dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors text-center">
+              {social.NAME}
+            </h3>
+            
+            <!-- Social Handle/Text -->
+            <p class="text-gray-600 dark:text-gray-400 text-sm group-hover:text-blue-500 dark:group-hover:text-blue-300 transition-colors text-center break-words">
+              {social.TEXT}
+            </p>
+          </div>
+          
+          <!-- Hover Effect Border -->
+          <div class="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-500 to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10"></div>
+          <div class="absolute inset-0.5 rounded-2xl bg-white dark:bg-gray-800 -z-10"></div>
+        </a>
+      ))}
+    </div>
+  </div>
+  
+  <!-- Call to Action -->
+  <div class="mt-12 text-center">
+    <p class="text-gray-500 dark:text-gray-400 text-sm">
+      Don't hesitate to say hello! 👋
+    </p>
+  </div>
+</section>
+
+<style>
+  .animate {
+    animation: fadeInUp 0.8s ease-out forwards;
+  }
+  
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* Staggered animation for social cards */
+  .grid > a {
+    opacity: 0;
+    animation: slideInUp 0.6s ease-out forwards;
+  }
+  
+  @keyframes slideInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* Enhanced hover effects */
+  .group:hover {
+    transform: translateY(-4px);
+  }
+  
+  /* Responsive adjustments - Center on all screen sizes */
+  @media (max-width: 1024px) {
+    .grid {
+      grid-template-columns: repeat(2, 1fr);
+      max-width: 32rem;
+    }
+  }
+  
+  @media (max-width: 640px) {
+    .grid {
+      grid-template-columns: 1fr;
+      max-width: 20rem;
+      gap: 1rem;
+    }
+  }
+</style>

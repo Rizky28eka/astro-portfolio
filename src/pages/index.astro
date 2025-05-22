@@ -1,441 +1,34 @@
 ---
-import { getCollection } from "astro:content"
-import PageLayout from "@layouts/PageLayout.astro"
-import ArrowCard from "@components/ArrowCard"
-import { SITE, SOCIALS } from "@consts"
-import TwinklingStars from "@components/TwinklingStars.astro"
-import MeteorShower from "@components/MeteorShower.astro"
-
-function parseDate(value: unknown): Date | null {
-  if (!value) return null;
-  if (typeof value === 'string') return new Date(value);
-  if (value instanceof Date) return value;
-  return null;
-}
-
-function sortByDateDesc(a: any, b: any): number {
-  const dateA = parseDate(a.data.dateEnd || a.data.date);
-  const dateB = parseDate(b.data.dateEnd || b.data.date);
-
-  if (!dateA && !dateB) return 0;
-  if (!dateA) return 1;
-  if (!dateB) return -1;
-
-  return dateB.getTime() - dateA.getTime();
-}
-
-const posts = (await getCollection("blog"))
-  .filter(post => !post.data.draft)
-  .sort(sortByDateDesc)
-  .slice(0, 3);
-
-const projects = (await getCollection("projects"))
-  .filter(project => !project.data.draft)
-  .sort(sortByDateDesc)
-  .slice(0, 3);
-
-
-// Get work experience data
-const work = (await getCollection("work"))
-  .filter(exp => !exp.data.draft)
-  .sort((a, b) => {
-    const dateStartA = typeof a.data.dateStart === 'string' ? new Date(a.data.dateStart) : a.data.dateStart || new Date(0);
-    const dateStartB = typeof b.data.dateStart === 'string' ? new Date(b.data.dateStart) : b.data.dateStart || new Date(0);
-    return dateStartB.getTime() - dateStartA.getTime();
-  })
-  .slice(0, 2); // Just show the 2 most recent experiences
-
-// Get education data 
-const education = (await getCollection("education"))
-  .filter(edu => !edu.data.draft)
-  .sort((a, b) => {
-    const dateEndA = typeof a.data.dateEnd === 'string' ? new Date(a.data.dateEnd) : a.data.dateEnd || new Date(0);
-    const dateEndB = typeof b.data.dateEnd === 'string' ? new Date(b.data.dateEnd) : b.data.dateEnd || new Date(0);
-    return dateEndB.getTime() - dateEndA.getTime();
-  })
-  .slice(0, 2); // Just show the 2 most recent education entries
-
-// Helper function to format work dates
-function formatWorkDate(input: string | Date | undefined): string {
-  if (!input) return "Present";
-  if (typeof input === "string") return input;
-  const month = new Date(input).toLocaleDateString("en-US", { month: "short" });
-  const year = new Date(input).getFullYear();
-  return `${month} ${year}`;
-}
-
-// Skills data
-const skills = {
-  mobile: [
-    "Dart", "Flutter", "Kotlin", "Java", "Swift", "SwiftUI", "React Native"
-  ],
-  frontend: [
-    "ReactJS", "NextJS", "Frontend", "Full-Stack", "Cross-Platform"
-  ],
-  backend: [
-    "Laravel", "ExpressJS", "NodeJS", "Backend", "RESTful APIs", "GraphQL"
-  ],
-  databases: [
-    "MySQL", "PostgreSQL", "SQLite", "MongoDB"
-  ],
-  cloudAndStorage: [
-    "Firebase", "Cloudinary", "Amazon S3"
-  ],
-  dataAnalysis: [
-    "Python", "R", "SQL", "Pandas", "NumPy", "Matplotlib", "Tableau", "Power BI"
-  ],
-  tools: [
-    "Git", "GitHub", "GitLab", "Bitbucket", "Postman", "XAMPP", "MAMP",
-    "VSCode", "Android Studio", "Xcode"
-  ],
-  design: [
-    "Figma", "Canva", "Adobe XD"
-  ]
-}
-// Achievements/Certifications
-const achievements = [
-  {
-    title: "Belajar Prinsip Pemrograman SOLID",
-    provider: "Dicoding Academy",
-    year: "2020"
-  },
-  {
-    title: "Belajar Membuat Aplikasi Android untuk Pemula",
-    provider: "Dicoding Academy", 
-    year: "2020"
-  },
-  {
-    title: "Android Developer Expert",
-    provider: "Dicoding Academy",
-    year: "2020"
-  },
-  {
-    title: "HTML, PHP, Java, SQL, JavaScript, C++, Python 3",
-    provider: "SoloLearn Certifications",
-    year: "2021"
-  },
-  {
-    title: "Mikrotik Certified Network Associate (MTCNA)",
-    provider: "Mikrotik",
-    year: ""
-  }
-]
+import PageLayout from "@layouts/PageLayout.astro";
+import ArrowCard from "@components/ArrowCard";
+import { SITE } from "@consts";
+import { getLatestPosts, getLatestProjects } from "@/lib/data";
+// Components
+import BackgroundEffects from "@components/BackgroundEffects.astro";
+import HeroSection from "@components/HeroSection.astro";
+import AboutSection from "@components/AboutSection.astro";
+import SkillsSection from "@components/SkillsSection.astro";
+import ExperienceSection from "@components/ExperienceSection.astro";
+import AchievementsSection from "@components/AchievementsSection.astro";
+import ConnectSection from "@components/ConnectSection.astro";
+const posts = await getLatestPosts(3);
+const projects = await getLatestProjects(3);
 ---
-
 <PageLayout title="Home" description={SITE.DESCRIPTION}>
-
-  <!-- Light Mode: Particles -->
-  <div class='absolute inset-0 block dark:hidden'>
-    <div id='particles1' class='fixed inset-0'></div>
-    <div id='particles2' class='fixed inset-0'></div>
-    <div id='particles3' class='fixed inset-0'></div>
-  </div>
-
-  <!-- Dark Theme: Stars -->
-  <div class='absolute inset-0 bg-black hidden dark:block'>
-    <div id='stars1' class='fixed inset-0'></div>
-    <div id='stars2' class='fixed inset-0'></div>
-    <div id='stars3' class='fixed inset-0'></div>
-  </div>
-
-  <!-- Dark Theme: Twinkling Stars / Meteors -->
-  <div id="galaxy" class="fixed inset-0">
-    <div class="hidden dark:block">
-      <TwinklingStars/>
-      <MeteorShower/>
-    </div>
-  </div>
-
-  <script is:inline src="/js/bg.js"></script>
+  <BackgroundEffects />
   
   <!-- HERO SECTION -->
-  <section class="relative h-screen w-full">
-    <div id="planetcont" class='animate absolute inset-0 top-1/4 overflow-hidden'>
-      <div id="crescent" class='absolute top-0 left-1/2 -translate-x-1/2 w-[250vw] min-h-[100vh] aspect-square rounded-full p-[1px] bg-gradient-to-b from-black/25 dark:from-white/75 from-0% to-transparent to-5%'>
-        <div id="planet" class='w-full h-full bg-white dark:bg-black rounded-full p-[1px] overflow-hidden flex justify-center'>
-          <div id="blur" class='w-full h-20 rounded-full bg-neutral-900/25 dark:bg-white/25 blur-3xl'/>
-        </div>
-      </div>
-    </div>
-    <div class="animate absolute h-full w-full flex items-center justify-center">
-      <div class='relative w-full h-full flex items-center justify-center'>
-        <div class='p-5 text-center max-w-4xl'>
-          <p class='animated text-lg md:text-xl lg:text-2xl font-semibold opacity-75 mb-2'>
-            Hello, I'm
-          </p>
-          <h1 class='animated text-3xl md:text-4xl lg:text-6xl font-bold text-black dark:text-white mb-4'>
-            Rizky Eka Haryadi
-          </h1>
-          <p class='animated text-lg md:text-xl lg:text-2xl opacity-90 mb-2'>
-              Frontend Mobile Developer
-          </p>
-          <p class='animated text-sm md:text-base lg:text-lg opacity-75 max-w-2xl mx-auto mb-8'>
-            Crafting innovative mobile solutions and extracting insights from data to drive business growth
-          </p>
-          <div id="ctaButtons" class='animated flex flex-col sm:flex-row gap-4 justify-center'>
-            <a href='/work' class='py-3 px-6 rounded-lg text-sm md:text-base bg-black dark:bg-white text-white dark:text-black hover:bg-black/80 dark:hover:bg-white/90 transition-colors font-medium'>
-              View My Work
-            </a>
-            <a href='/contact' class='py-3 px-6 rounded-lg text-sm md:text-base border border-black/25 dark:border-white/25 hover:bg-black/5 hover:dark:bg-white/15 transition-colors font-medium'>
-              Get In Touch
-            </a>
-            <a href='/resume.pdf' target="_blank" class='py-3 px-6 rounded-lg text-sm md:text-base border border-black/25 dark:border-white/25 hover:bg-black/5 hover:dark:bg-white/15 transition-colors font-medium'>
-              Download CV
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
+  <HeroSection />
   <div class="relative bg-white dark:bg-black">
     <div class="mx-auto max-w-4xl p-5 space-y-24 pb-16">
-
       <!-- ABOUT SECTION -->
-      <section class="animate">
-        <h2 class="text-2xl md:text-3xl font-bold mb-8 text-black dark:text-white">About Me</h2>
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div class="space-y-4">
-            <p class="text-base md:text-lg leading-relaxed">
-              I'm <strong>Rizky Eka Haryadi</strong>, a passionate <strong>Mobile Developer</strong> and <strong>Data Analyst</strong> with expertise in creating innovative digital solutions. I specialize in building cross-platform applications and extracting meaningful insights from complex datasets.
-            </p>
-            
-            <p class="text-base md:text-lg leading-relaxed">
-              My technical arsenal includes <strong>Flutter</strong>, <strong>React Native</strong>, <strong>Java/Kotlin</strong>, and <strong>Swift</strong> for mobile development, alongside <strong>Python</strong>, <strong>R</strong>, and <strong>SQL</strong> for data analysis. I'm also proficient in full-stack development using <strong>Node.js</strong>, <strong>Express.js</strong>, and <strong>Next.js</strong>.
-            </p>
-
-            <p class="text-base md:text-lg leading-relaxed">
-              I thrive on turning complex problems into elegant solutions, whether it's developing user-friendly mobile applications or uncovering actionable insights from data. My goal is to bridge the gap between technology and business needs.
-            </p>
-          </div>
-          
-          <div class="space-y-6">
-            <div>
-              <h3 class="text-lg font-semibold mb-3 text-black dark:text-white">What I Do</h3>
-              <ul class="space-y-2 text-sm md:text-base">
-                <li class="flex items-center gap-2">
-                  <span class="w-2 h-2 bg-blue-500 rounded-full"></span>
-                  Cross-platform mobile app development
-                </li>
-                <li class="flex items-center gap-2">
-                  <span class="w-2 h-2 bg-green-500 rounded-full"></span>
-                  Data analysis & visualization
-                </li>
-                <li class="flex items-center gap-2">
-                  <span class="w-2 h-2 bg-purple-500 rounded-full"></span>
-                  Backend API development
-                </li>
-                <li class="flex items-center gap-2">
-                  <span class="w-2 h-2 bg-orange-500 rounded-full"></span>
-                  UI/UX prototyping
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 class="text-lg font-semibold mb-3 text-black dark:text-white">Currently</h3>
-              <p class="text-sm md:text-base leading-relaxed opacity-90">
-                Expanding my expertise in machine learning and cloud technologies while working on exciting mobile development projects.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
+      <AboutSection />
       <!-- SKILLS SECTION -->
-      <section class="animate">
-        <h2 class="text-2xl md:text-3xl font-bold mb-8 text-black dark:text-white">Technical Skills</h2>
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div class="space-y-6">
-            <div>
-              <h3 class="text-lg font-semibold mb-3 text-blue-600 dark:text-blue-400">Mobile Development</h3>
-              <div class="flex flex-wrap gap-2">
-                {skills.mobile.map(skill => (
-                  <span class="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded-full text-sm font-medium">
-                    {skill}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <h3 class="text-lg font-semibold mb-3 text-green-600 dark:text-green-400">Backend & Full-Stack</h3>
-              <div class="flex flex-wrap gap-2">
-                {skills.backend.map(skill => (
-                  <span class="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 rounded-full text-sm font-medium">
-                    {skill}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <h3 class="text-lg font-semibold mb-3 text-pink-600 dark:text-pink-400">Frontend & Web</h3>
-              <div class="flex flex-wrap gap-2">
-                {skills.frontend.map(skill => (
-                  <span class="px-3 py-1 bg-pink-100 dark:bg-pink-900/30 text-pink-800 dark:text-pink-300 rounded-full text-sm font-medium">
-                    {skill}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div class="space-y-6">
-            <div>
-              <h3 class="text-lg font-semibold mb-3 text-purple-600 dark:text-purple-400">Data Analysis</h3>
-              <div class="flex flex-wrap gap-2">
-                {skills.dataAnalysis.map(skill => (
-                  <span class="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 rounded-full text-sm font-medium">
-                    {skill}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <h3 class="text-lg font-semibold mb-3 text-orange-600 dark:text-orange-400">Tools & Platforms</h3>
-              <div class="flex flex-wrap gap-2">
-                {skills.tools.map(skill => (
-                  <span class="px-3 py-1 bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300 rounded-full text-sm font-medium">
-                    {skill}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <h3 class="text-lg font-semibold mb-3 text-teal-600 dark:text-teal-400">Databases</h3>
-              <div class="flex flex-wrap gap-2">
-                {skills.databases.map(skill => (
-                  <span class="px-3 py-1 bg-teal-100 dark:bg-teal-900/30 text-teal-800 dark:text-teal-300 rounded-full text-sm font-medium">
-                    {skill}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <h3 class="text-lg font-semibold mb-3 text-fuchsia-600 dark:text-fuchsia-400">UI/UX & Design</h3>
-              <div class="flex flex-wrap gap-2">
-                {skills.design.map(skill => (
-                  <span class="px-3 py-1 bg-fuchsia-100 dark:bg-fuchsia-900/30 text-fuchsia-800 dark:text-fuchsia-300 rounded-full text-sm font-medium">
-                    {skill}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
+      <SkillsSection />
       <!-- EXPERIENCE SECTION -->
-      <section class="animate">
-        <h2 class="text-2xl md:text-3xl font-bold mb-8 text-black dark:text-white">Experience</h2>
-        
-        <!-- WORK EXPERIENCE -->
-        <div class="mb-12">
-          <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-2">
-            <h3 class="text-xl md:text-2xl font-semibold text-black dark:text-white">Work Experience</h3>
-            <a href="/work" class="group flex gap-1 items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors self-start">
-              <span class="font-medium">See All</span>
-              <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
-              </svg>
-            </a>
-          </div>
-          <div class="space-y-8">
-            {work.map((exp) => (
-              <div class="border-l-2 border-gray-200 dark:border-gray-700 pl-4 md:pl-6 relative">
-                <div class="absolute w-3 h-3 bg-blue-500 rounded-full -left-2 top-1"></div>
-                <div class="mb-2">
-                  <h3 class="text-lg font-semibold text-black dark:text-white">{exp.data.role}</h3>
-                  <p class="text-blue-600 dark:text-blue-400 font-medium">{exp.data.company}</p>
-                  <p class="text-sm text-gray-600 dark:text-gray-400">
-                    {formatWorkDate(exp.data.dateStart)} - {exp.data.dateEnd ? formatWorkDate(exp.data.dateEnd) : "Present"}
-                  </p>
-                </div>
-                <p class="text-base mb-3 leading-relaxed">{exp.data.summary || ''}</p>
-                {exp.data.technologies && exp.data.technologies.length > 0 && (
-                  <div class="flex flex-wrap gap-2">
-                    {exp.data.technologies.map(tech => (
-                      <span class="px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded text-xs">
-                        {tech}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-        
-        <!-- EDUCATION -->
-        <div>
-          <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-2">
-            <h3 class="text-xl md:text-2xl font-semibold text-black dark:text-white">Education</h3>
-            <a href="/education" class="group flex gap-1 items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors self-start">
-              <span class="font-medium">See All</span>
-              <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
-              </svg>
-            </a>
-          </div>
-          <div class="space-y-8">
-            {education.map((edu) => (
-              <div class="border-l-2 border-gray-200 dark:border-gray-700 pl-4 md:pl-6 relative">
-                <div class="absolute w-3 h-3 bg-purple-500 rounded-full -left-2 top-1"></div>
-                <div class="mb-2">
-                  <h3 class="text-lg font-semibold text-black dark:text-white">{edu.data.degree || edu.data.field || "Education"}</h3>
-                  <p class="text-purple-600 dark:text-purple-400 font-medium">{edu.data.school}</p>
-                  <p class="text-sm text-gray-600 dark:text-gray-400">
-                    {edu.data.dateStart ? formatWorkDate(edu.data.dateStart) : ""} - {edu.data.dateEnd ? formatWorkDate(edu.data.dateEnd) : "Present"}
-                  </p>
-                </div>
-                {edu.data.description && <p class="text-base mb-3 leading-relaxed">{edu.data.description}</p>}
-                {edu.data.achievements && edu.data.achievements.length > 0 && (
-                  <div class="pl-4 border-l border-gray-200 dark:border-gray-700">
-                    <p class="text-sm font-medium mb-2">Achievements/Activities:</p>
-                    <ul class="list-disc list-inside space-y-1 text-sm">
-                      {edu.data.achievements.map(achievement => (
-                        <li>{achievement}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-     <!-- ACHIEVEMENTS SECTION -->
-      <section class="animate">
-        <h2 class="text-2xl md:text-3xl font-bold mb-8 text-black dark:text-white">Certifications & Achievements</h2>
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {achievements.map((achievement) => (
-            <div class="p-4 md:p-6 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 transition-colors">
-              <div class="flex items-start gap-3">
-                <div class="w-3 h-3 bg-yellow-500 rounded-full mt-2 flex-shrink-0"></div>
-                <div class="flex-1 min-w-0">
-                  <h3 class="text-base font-semibold mb-2 text-black dark:text-white leading-tight">
-                    {achievement.title}
-                  </h3>
-                  <p class="text-blue-600 dark:text-blue-400 font-medium text-sm mb-1">
-                    {achievement.provider}
-                  </p>
-                  {achievement.year && (
-                    <p class="text-gray-600 dark:text-gray-400 text-sm">
-                      {achievement.year}
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
+      <ExperienceSection />
+      <!-- ACHIEVEMENTS SECTION -->
+      <AchievementsSection />
       <!-- PROJECT PREVIEW SECTION -->
       <section class="animate">
         <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-8 gap-2">
@@ -449,13 +42,12 @@ const achievements = [
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {projects.map((project) => (
-            <div class="h-full">
+            <div class="flex h-full">
               <ArrowCard entry={project} />
             </div>
           ))}
         </div>
       </section>
-
       <!-- BLOG PREVIEW SECTION -->
       {posts.length > 0 && (
         <section class="animate">
@@ -477,25 +69,8 @@ const achievements = [
           </div>
         </section>
       )}
-
       <!-- CONNECT SECTION -->
-      <section class="animate text-center">
-        <p class="font-semibold mb-4 text-black dark:text-white">Connect with me</p>
-        <div class="flex flex-wrap justify-center gap-4">
-          {SOCIALS.map(social => (
-            <a 
-              href={social.HREF} 
-              target="_blank" 
-              class="group flex flex-col items-center gap-2 p-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors min-w-0"
-            >
-              <span class="font-medium text-sm text-center break-words">{social.NAME}</span>
-              <span class="text-blue-600 dark:text-blue-400 group-hover:text-blue-800 dark:group-hover:text-blue-300 text-sm text-center break-all">
-                {social.TEXT}
-              </span>
-            </a>
-          ))}
-        </div>
-      </section>
+      <ConnectSection />
     </div>
   </div>
 </PageLayout>
