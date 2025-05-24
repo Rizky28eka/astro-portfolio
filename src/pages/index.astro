@@ -14,7 +14,7 @@ import AboutSection from "@components/sections/AboutSection.astro";
 import SkillsSection from "@components/sections/SkillsSection.astro";
 import ExperienceSection from "@components/sections/ExperienceSection.astro";
 import AchievementsSection from "@components/sections/AchievementsSection.astro";
-import ConnectSection from "@components/sections/ConnectSection.astro";
+import ContactsSection from "@components/sections/ContactsSection.astro"; // Updated import
 
 // Data Fetching
 const [posts, projects] = await Promise.all([
@@ -58,7 +58,6 @@ const SECTIONS_CONFIG = {
       <!-- Achievements Section -->
       <AchievementsSection />
 
-      <!-- Featured Projects Section -->
       <!-- Featured Projects Section -->
       <section class="animate" aria-labelledby="projects-heading">
         <header
@@ -141,8 +140,8 @@ const SECTIONS_CONFIG = {
         )
       }
 
-      <!-- Connect Section -->
-      <ConnectSection />
+      <!-- Contacts Section -->
+      <ContactsSection />
     </div>
   </main>
 </PageLayout>
@@ -176,6 +175,9 @@ const SECTIONS_CONFIG = {
   .animate:nth-child(7) {
     animation-delay: 0.7s;
   }
+  .animate:nth-child(8) {
+    animation-delay: 0.8s;
+  }
 
   @keyframes fadeInUp {
     to {
@@ -194,5 +196,11 @@ const SECTIONS_CONFIG = {
     outline: 2px solid theme("colors.blue.500");
     outline-offset: 2px;
     border-radius: 4px;
+  }
+
+  /* Enhanced form styling */
+  input:focus,
+  textarea:focus {
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
   }
 </style>

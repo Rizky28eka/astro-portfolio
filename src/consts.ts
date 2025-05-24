@@ -1,89 +1,101 @@
 import type { Site, Page, Links, Socials } from "@types"
 
-// Global
+// ===== Global Site Config =====
 export const SITE: Site = {
   TITLE: "R28eka",
-  DESCRIPTION: "Welcome to Astro Sphere, a portfolio and blog for designers and developers.",
-  AUTHOR: "Rizky28eka",
+  DESCRIPTION: "Personal portfolio and tech blog by Rizky Eka. Sharing knowledge about web development, design, and personal growth.",
+  AUTHOR: "Rizky Eka Putra",
 }
 
-// Work Page
+// ===== Pages =====
 export const WORK: Page = {
   TITLE: "Work",
-  DESCRIPTION: "Places I have worked.",
+  DESCRIPTION: "Companies and projects I’ve contributed to.",
 }
 
 export const BLOG: Page = {
   TITLE: "Blog",
-  DESCRIPTION: "My thoughts on design, development, and the world.",
+  DESCRIPTION: "Thoughts, tutorials, and insights on tech, design, and development.",
 }
 
-// Projects Page 
 export const PROJECTS: Page = {
   TITLE: "Projects",
-  DESCRIPTION: "Recent projects I have worked on.",
+  DESCRIPTION: "Selected side projects and freelance work.",
 }
-// Education Page
+
 export const EDUCATION: Page = {
   TITLE: "Education",
-  DESCRIPTION: "My academic background and qualifications"
+  DESCRIPTION: "Academic background and relevant certifications.",
 }
-// Search Page
+
 export const SEARCH: Page = {
   TITLE: "Search",
-  DESCRIPTION: "Search all posts and projects by keyword.",
+  DESCRIPTION: "Quickly search through posts, projects, and more.",
 }
 
-// Links
-export const LINKS: Links = [
-  { 
-    TEXT: "Home", 
-    HREF: "/", 
-  },
-  { 
-    TEXT: "Blog", 
-    HREF: "/blog", 
-  },
-  { 
-    TEXT: "Education", 
-    HREF: "/education", 
-  },
+export const ABOUT: Page = {
+  TITLE: "About",
+  DESCRIPTION: "Get to know me — my journey, skills, and passion in tech.",
+}
 
-  {
-    TEXT: "Work", 
-    HREF: "/work", 
-  },
-  { 
-    TEXT: "Projects", 
-    HREF: "/projects", 
-  },
+export const CONTACT: Page = {
+  TITLE: "Contact",
+  DESCRIPTION: "Let’s connect. Send me a message or collaborate on a project.",
+}
+
+// ===== Navigation Links =====
+export const LINKS: Links = [
+  { TEXT: "Home", HREF: "/" },
+  { TEXT: "About", HREF: "/about" },
+  { TEXT: "Blog", HREF: "/blog" },
+  { TEXT: "Projects", HREF: "/projects" },
+  { TEXT: "Education", HREF: "/education" },
+  { TEXT: "Work", HREF: "/work" },
+  { TEXT: "Contact", HREF: "/contact" },
 ]
 
-// Socials
+// ===== Social Media =====
 export const SOCIALS: Socials = [
-  { 
+  {
     NAME: "Email",
-    ICON: "email", 
+    ICON: "lucide:mail",
     TEXT: "r28eka@gmail.com",
     HREF: "mailto:r28eka@gmail.com",
   },
-  { 
-    NAME: "Github",
-    ICON: "github",
+  {
+    NAME: "GitHub",
+    ICON: "lucide:github",
     TEXT: "rizky28eka",
-    HREF: "https://github.com/rizky28eka"
+    HREF: "https://github.com/rizky28eka",
   },
-  { 
+  {
     NAME: "LinkedIn",
-    ICON: "linkedin",
+    ICON: "lucide:linkedin",
     TEXT: "rizky28eka",
     HREF: "https://www.linkedin.com/in/rizky28eka/",
   },
-  { 
+  {
     NAME: "Instagram",
-    ICON: "instagram",
-    TEXT: "rizky28eka", 
+    ICON: "lucide:instagram",
+    TEXT: "@rizky28eka",
     HREF: "https://www.instagram.com/rizky28eka/",
   },
- 
+  {
+    NAME: "Twitter",
+    ICON: "lucide:twitter",
+    TEXT: "@rizky28eka",
+    HREF: "https://twitter.com/rizky28eka",
+  },
+  {
+    NAME: "YouTube",
+    ICON: "lucide:youtube",
+    TEXT: "Rizky Eka",
+    HREF: "https://www.youtube.com/@rizky28eka",
+  },
+  {
+    NAME: "Dev.to",
+    ICON: "simple-icons:devdotto",
+    TEXT: "rizky28eka",
+    HREF: "https://dev.to/rizky28eka",
+  },
 ]

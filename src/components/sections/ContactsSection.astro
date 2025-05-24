@@ -1,0 +1,349 @@
+---
+import { SOCIALS } from "src/consts";
+import {
+  Github,
+  Linkedin,
+  Instagram,
+  Mail,
+  MapPin,
+  Building2,
+  Clock,
+  MessageCircle,
+  Maximize2,
+  ExternalLink,
+} from "lucide-astro";
+
+// Filter hanya social media yang ingin ditampilkan di contact section
+const contactSocials = SOCIALS.filter((social) =>
+  ["GitHub", "LinkedIn", "Instagram"].includes(social.NAME)
+);
+---
+
+<section class="animate" aria-labelledby="contacts-heading">
+  <header class="text-center mb-12">
+    <h2
+      id="contacts-heading"
+      class="text-2xl md:text-3xl font-bold text-black dark:text-white mb-4">
+      Get In Touch
+    </h2>
+    <p class="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+      I'm always open to discussing new opportunities, collaborations, or just
+      having a chat about technology and innovation.
+    </p>
+  </header>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+    <!-- Email Contact -->
+    <div
+      class="group bg-gray-50 dark:bg-gray-900/50 rounded-lg p-6 hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-all duration-300 border border-gray-200 dark:border-gray-800">
+      <div class="flex items-center gap-4">
+        <div
+          class="flex-shrink-0 w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+          <Mail class="w-6 h-6 text-blue-600 dark:text-blue-400" />
+        </div>
+        <div>
+          <h3 class="font-semibold text-black dark:text-white">Email</h3>
+          <a
+            href="mailto:r28eka@gmail.com"
+            class="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200">
+            r28eka@gmail.com
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- LinkedIn Contact -->
+    <div
+      class="group bg-gray-50 dark:bg-gray-900/50 rounded-lg p-6 hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-all duration-300 border border-gray-200 dark:border-gray-800">
+      <div class="flex items-center gap-4">
+        <div
+          class="flex-shrink-0 w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+          <Linkedin class="w-6 h-6 text-blue-600 dark:text-blue-400" />
+        </div>
+        <div>
+          <h3 class="font-semibold text-black dark:text-white">LinkedIn</h3>
+          <a
+            href="https://www.linkedin.com/in/rizky28eka/"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200">
+            Connect with me
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- GitHub Contact -->
+    <div
+      class="group bg-gray-50 dark:bg-gray-900/50 rounded-lg p-6 hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-all duration-300 border border-gray-200 dark:border-gray-800">
+      <div class="flex items-center gap-4">
+        <div
+          class="flex-shrink-0 w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+          <Github class="w-6 h-6 text-gray-600 dark:text-gray-400" />
+        </div>
+        <div>
+          <h3 class="font-semibold text-black dark:text-white">GitHub</h3>
+          <a
+            href="https://github.com/rizky28eka"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200">
+            View my projects
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Location and Map Section -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+    <!-- Location Info -->
+    <div
+      class="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-8 border border-gray-200 dark:border-gray-800">
+      <div class="flex items-start gap-4 mb-6">
+        <div
+          class="flex-shrink-0 w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
+          <MapPin class="w-6 h-6 text-green-600 dark:text-green-400" />
+        </div>
+        <div>
+          <h3 class="text-xl font-semibold text-black dark:text-white mb-2">
+            My Location
+          </h3>
+          <p class="text-gray-600 dark:text-gray-400 mb-4">
+            Based in the heart of innovation, I'm always excited to meet fellow
+            tech enthusiasts and collaborate on exciting projects.
+          </p>
+          <div class="space-y-2">
+            <div
+              class="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+              <Building2 class="w-4 h-4" />
+              <span>Yogyakarta, Indonesia</span>
+            </div>
+            <div
+              class="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+              <Clock class="w-4 h-4" />
+              <span>Western Indonesia Time (WIB, UTC+7)</span>
+            </div>
+            <div
+              class="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+              <MessageCircle class="w-4 h-4" />
+              <span>Available for remote collaboration</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Interactive Map -->
+    <div
+      class="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-2 border border-gray-200 dark:border-gray-800 overflow-hidden">
+      <div class="relative w-full h-80 rounded-lg overflow-hidden">
+        <!-- Map Container -->
+        <div
+          id="map-container"
+          class="w-full h-full bg-gray-200 dark:bg-gray-700 rounded-lg relative">
+          <!-- Google Maps Embed -->
+          <iframe
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d505883.0798090844!2d110.09463973861311!3d-7.872918277418328!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e7a5787bd5b6bc5%3A0x6d1b92b2cac8b3f0!2sDaerah%20Istimewa%20Yogyakarta!5e0!3m2!1sid!2sid!4v1748126011553!5m2!1sid!2sid"
+            width="100%"
+            height="100%"
+            style="border:0;"
+            allowfullscreen=""
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            class="rounded-lg">
+          </iframe>
+
+          <!-- Map Overlay for Dark Mode -->
+          <div
+            class="absolute inset-0 bg-gray-900/20 dark:bg-gray-900/40 pointer-events-none rounded-lg">
+          </div>
+        </div>
+
+        <!-- Map Controls -->
+        <div class="absolute top-4 right-4 flex flex-col gap-2">
+          <button
+            onclick="toggleMapView()"
+            class="bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 p-2 rounded-lg shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
+            title="Toggle map view">
+            <Maximize2 class="w-4 h-4" />
+          </button>
+          <a
+            href="https://maps.google.com/?q=San+Francisco,CA"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 p-2 rounded-lg shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
+            title="Open in Google Maps">
+            <ExternalLink class="w-4 h-4" />
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Contact Form -->
+  <div
+    class="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-8 border border-blue-200 dark:border-blue-800">
+    <div class="text-center mb-6">
+      <h3 class="text-xl font-semibold text-black dark:text-white mb-2">
+        Send me a message
+      </h3>
+      <p class="text-gray-600 dark:text-gray-400">
+        Have a project in mind? Let's discuss how we can work together.
+      </p>
+    </div>
+
+    <form class="max-w-lg mx-auto space-y-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label
+            for="name"
+            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Name
+          </label>
+          <input
+            type="text"
+            id="name"
+            name="name"
+            required
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-black dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+            placeholder="Your name"
+          />
+        </div>
+        <div>
+          <label
+            for="email"
+            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Email
+          </label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            required
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-black dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+            placeholder="r28eka@gmail.com"
+          />
+        </div>
+      </div>
+
+      <div>
+        <label
+          for="subject"
+          class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          Subject
+        </label>
+        <input
+          type="text"
+          id="subject"
+          name="subject"
+          required
+          class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-black dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+          placeholder="Project collaboration"
+        />
+      </div>
+
+      <div>
+        <label
+          for="message"
+          class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          Message
+        </label>
+        <textarea
+          id="message"
+          name="message"
+          rows="4"
+          required
+          class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-black dark:text-white placeholder-gray-500 dark:placeholder-gray-400 resize-none"
+          placeholder="Tell me about your project or idea..."></textarea>
+      </div>
+
+      <button
+        type="submit"
+        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-colors duration-200 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900">
+        Send Message
+      </button>
+    </form>
+  </div>
+
+  <!-- Alternative Contact Methods -->
+  <div
+    class="text-center mt-8 pt-8 border-t border-gray-200 dark:border-gray-800">
+    <p class="text-gray-600 dark:text-gray-400 mb-4">
+      Prefer other ways to connect?
+    </p>
+    <div class="flex justify-center gap-4">
+      {
+        contactSocials.map((social) => (
+          <a
+            href={social.HREF}
+            target="_blank"
+            rel="noopener noreferrer"
+            class={`inline-flex items-center gap-2 text-gray-600 dark:text-gray-400 transition-colors duration-200 ${
+              social.NAME === "Instagram" ?
+                "hover:text-pink-600 dark:hover:text-pink-400"
+              : social.NAME === "GitHub" ?
+                "hover:text-gray-900 dark:hover:text-gray-100"
+              : "hover:text-blue-600 dark:hover:text-blue-400"
+            }`}
+            aria-label={`Follow on ${social.NAME}`}>
+            {social.NAME === "GitHub" && <Github size={20} />}
+            {social.NAME === "LinkedIn" && <Linkedin size={20} />}
+            {social.NAME === "Instagram" && <Instagram size={20} />}
+            <span>{social.NAME}</span>
+          </a>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<script>
+  // Toggle map view function (declared globally)
+  declare global {
+    function toggleMapView(): void;
+  }
+
+  function toggleMapView(): void {
+    const mapContainer = document.getElementById("map-container");
+    if (!mapContainer) return;
+
+    const iframe = mapContainer.querySelector("iframe") as HTMLIFrameElement;
+    if (!iframe) return;
+
+    if (iframe.src.includes("satellite")) {
+      // Switch to roadmap view
+      iframe.src = iframe.src.replace("maptype=satellite", "maptype=roadmap");
+    } else {
+      // Switch to satellite view
+      iframe.src = iframe.src.replace("maptype=roadmap", "maptype=satellite");
+      if (!iframe.src.includes("maptype=")) {
+        iframe.src += "&maptype=satellite";
+      }
+    }
+  }
+
+  // Add smooth loading animation
+  document.addEventListener("DOMContentLoaded", function () {
+    const iframe = document.querySelector(
+      "#map-container iframe"
+    ) as HTMLIFrameElement;
+    const overlay = document.querySelector(
+      "#map-container .absolute"
+    ) as HTMLElement;
+
+    if (iframe && overlay) {
+      iframe.addEventListener("load", function () {
+        setTimeout(() => {
+          overlay.style.opacity = "0";
+          setTimeout(() => {
+            overlay.style.display = "none";
+          }, 300);
+        }, 1000);
+      });
+    }
+  });
+
+  // Make function globally available
+  (window as any).toggleMapView = toggleMapView;
+</script>
