@@ -1,90 +1,200 @@
-![Astro Sphere Lighthouse Score](_astrosphere.jpg)
+# Astro Portfolio
 
-Astro Sphere is a static, minimalist, lightweight, lightning fast portfolio and blog theme based on my personal website.
+A modern, responsive portfolio website built with Astro, showcasing professional experience, education, blog posts, and projects. This portfolio features a clean design with support for multiple content types including work experience, educational background, and technical blog posts.
 
-It is primarily Astro, Tailwind and Typescript, with a very small amount of SolidJS for stateful components.
+## Description
 
-## 🚀 Deploy your own
+This is a personal portfolio website that demonstrates professional experience in software development, training, and freelance work. The site includes sections for work experience, education, blog posts, and legal pages, all built with modern web technologies for optimal performance and SEO.
 
-[![Deploy with Vercel](_deploy_vercel.svg)](https://vercel.com/new/clone?repository-url=https://github.com/markhorn-dev/astro-sphere)  [![Deploy with Netlify](_deploy_netlify.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/markhorn-dev/astro-sphere)
+## Features
 
-## 📋 Features
+- 🚀 **Fast Performance** - Built with Astro for optimal loading speeds
+- 📱 **Responsive Design** - Works seamlessly across all devices
+- 📝 **Content Management** - Markdown-based content for easy updates
+- 🎨 **Modern UI** - Clean and professional design with Tailwind CSS
+- 📊 **Work Experience Showcase** - Detailed work history with technologies used
+- 🎓 **Education Section** - Academic background and achievements
+- 📖 **Technical Blog** - Share knowledge and tutorials
+- 🔍 **SEO Optimized** - Built-in SEO best practices
+- 📄 **Legal Pages** - Privacy policy and terms of use included
+- 🏷️ **Content Categorization** - Organized content with tags and metadata
 
-- ✅ 100/100 Lighthouse performance
-- ✅ Responsive
-- ✅ Accessible
-- ✅ SEO-friendly
-- ✅ Typesafe
-- ✅ Minimal style
-- ✅ Light/Dark Theme
-- ✅ Animated UI
-- ✅ Tailwind styling
-- ✅ Auto generated sitemap
-- ✅ Auto generated RSS Feed
-- ✅ Markdown support
-- ✅ MDX Support (components in your markdown)
-- ✅ Searchable content (posts and projects)
-- ✅ Code Blocks - copy to clipboard
+## Installation
 
-## 💯 Lighthouse score
-![Astro Sphere Lighthouse Score](_lighthouse.png)
+1. **Clone the repository**
 
-## 🕊️ Lightweight
-All pages under 100kb (including fonts)
+   ```bash
+   git clone https://github.com/yourusername/astro-portfolio.git
+   ```
 
-## ⚡︎ Fast
-Rendered in ~40ms on localhost
+2. **Navigate to the project directory**
 
-## 📄 Configuration
+   ```bash
+   cd astro-portfolio
+   ```
 
-The blog posts on the demo serve as the documentation and configuration.
+3. **Install dependencies**
 
-## 💻 Commands
+   ```bash
+   npm install
+   ```
 
-All commands are run from the root of the project, from a terminal:
+4. **Start the development server**
 
-Replace npm with your package manager of choice. `npm`, `pnpm`, `yarn`, `bun`, etc
+   ```bash
+   npm run dev
+   ```
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run dev:network`     | Starts dev server on local network               |
-| `npm run sync`            | Generates TypeScript types for all Astro modules.|
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run preview:network` | Starts preview server on local network           |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-| `npm run lint`            | Run ESLint                                       |
-| `npm run lint:fix`        | Auto-fix ESLint issues                           |
+5. **Open your browser**
+   Navigate to `http://localhost:4321` to view the portfolio
 
-## 🗺️ Roadmap
+## Usage
 
-A few features I plan to implement
-- ⬜ Article Pages - Table of Contents
-- ⬜ Article Pages - Share on social media
+### Adding Work Experience
 
-## ✨ Acknowledgement
+Create a new markdown file in `src/content/work/` with the following frontmatter:
 
-Theme inspired by [Paco Coursey](https://paco.me/), [Lee Robinson](https://leerob.io/) and [Hayden Bleasel](https://www.haydenbleasel.com/)
+```markdown
+---
+company: "Company Name"
+role: "Your Role"
+location: "City, Country"
+dateStart: "YYYY-MM"
+dateEnd: "YYYY-MM" # or "Present"
+summary: "Brief description of your role"
+technologies:
+  - "Technology 1"
+  - "Technology 2"
+draft: false
+---
 
+Your detailed work experience description here...
+```
 
-## 🏛️ License
+### Adding Education
 
-MIT
+Create a new markdown file in `src/content/education/` with the following frontmatter:
 
+```markdown
+---
+school: "School Name"
+degree: "Your Degree"
+dateStart: "YYYY-MM"
+dateEnd: "YYYY-MM"
+description: "Brief description"
+draft: false
+location: "City, Country"
+---
 
-# 1.0.1 Update
+Your detailed education description here...
+```
 
-Added ability to run dev and preview on local network.
-added npm run dev:network
-added npm run preview:network
+### Adding Blog Posts
 
-Added slightly more particle density in both light and dark mode.
+Create a new markdown file in `src/content/blog/` with the following frontmatter:
 
-Added subtle dark mode star and meteor animations.
+```markdown
+---
+title: "Your Blog Post Title"
+summary: "Brief summary of the post"
+date: "YYYY, MM, DD"
+draft: false
+tags:
+  - "Tag1"
+  - "Tag2"
+---
 
-Removed eslint config
+Your blog post content here...
+```
 
-# astro-portfolio
+### Customizing Contact Information
+
+Update the contact information in `src/consts.ts`:
+
+```typescript
+export const CONTACT: Page = {
+  TITLE: "Contact",
+  DESCRIPTION: "Your custom contact description",
+};
+```
+
+## Tech Stack / Technologies Used
+
+- **Framework**: [Astro](https://astro.build/) - Modern static site generator
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS framework
+- **Content**: Markdown with frontmatter for content management
+- **TypeScript**: For type-safe development
+- **Utilities**:
+  - `clsx` and `tailwind-merge` for conditional styling
+  - Custom date parsing and sorting utilities
+
+### Technologies Showcased in Portfolio
+
+- **Frontend**: React, Next.js, Flutter, HTML, CSS, JavaScript
+- **Backend**: Laravel, PHP, Node.js
+- **Mobile**: Flutter (Dart), Kotlin, Android
+- **Database**: MySQL
+- **Cloud**: Amazon S3
+- **Machine Learning**: Python, TensorFlow, scikit-learn
+- **Other**: Bootstrap, Blade Templating, MVVM Architecture
+
+## Contribution Guide
+
+Contributions are welcome! Here's how you can help:
+
+1. **Fork the repository**
+2. **Create a feature branch**
+   ```bash
+   git checkout -b feature/amazing-feature
+   ```
+3. **Make your changes**
+4. **Commit your changes**
+   ```bash
+   git commit -m 'Add some amazing feature'
+   ```
+5. **Push to the branch**
+   ```bash
+   git push origin feature/amazing-feature
+   ```
+6. **Open a Pull Request**
+
+### Areas for Contribution
+
+- UI/UX improvements
+- Performance optimizations
+- Additional content types
+- Accessibility enhancements
+- Documentation improvements
+
+## Project Structure
+
+```
+astro-portfolio/
+├── src/
+│   ├── content/
+│   │   ├── blog/          # Blog posts
+│   │   ├── education/     # Education entries
+│   │   ├── legal/         # Legal pages
+│   │   └── work/          # Work experience
+│   ├── lib/
+│   │   ├── data.ts        # Data utilities
+│   │   └── utils.ts       # General utilities
+│   └── consts.ts          # Site constants
+├── public/                # Static assets
+└── README.md
+```
+
+## License
+
+[Add License Info Here]
+
+## Contact Information
+
+- **GitHub**: [Add GitHub Profile Here]
+- **Email**: [Add Email Here]
+- **LinkedIn**: [Add LinkedIn Profile Here]
+- **Portfolio**: [Add Live Portfolio URL Here]
+
+---
+
+Built with ❤️ using Astro and modern web technologies.
