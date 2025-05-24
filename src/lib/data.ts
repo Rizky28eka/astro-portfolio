@@ -89,6 +89,9 @@ export const skills = {
   dataAnalysis: [
     "Python", "R", "SQL", "Pandas", "NumPy", "Matplotlib", "Tableau", "Power BI"
   ],
+  machineLearning: [ // <- Tambahan bagian ini
+    "Scikit-Learn", "TensorFlow", "Keras", "PyTorch", "XGBoost", "LightGBM", "HuggingFace Transformers"
+  ],
   tools: [
     "Git", "GitHub", "GitLab", "Bitbucket", "Postman", "XAMPP", "MAMP",
     "VSCode", "Android Studio", "Xcode"
@@ -97,6 +100,7 @@ export const skills = {
     "Figma", "Canva", "Adobe XD"
   ]
 };
+
 
 // Achievements/Certifications
 export const achievements = [

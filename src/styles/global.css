@@ -1,11 +1,24 @@
+/* ==========================================================================
+   TAILWIND DIRECTIVES
+   ========================================================================== */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root{
-  --copy-btn-margin:10px;
+/* ==========================================================================
+   CSS CUSTOM PROPERTIES
+   ========================================================================== */
+:root {
+  --copy-btn-margin: 10px;
+  --transition-speed: 300ms;
+  --transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
+  --blur-strength: 12px;
+  --saturate-strength: 200%;
 }
 
+/* ==========================================================================
+   FONT FACES
+   ========================================================================== */
 @layer base {
   @font-face {
     font-family: "Atkinson";
@@ -24,12 +37,15 @@
   }
 }
 
+/* ==========================================================================
+   BASE STYLES
+   ========================================================================== */
 html {
   overflow-y: scroll;
   color-scheme: light;
   background-color: white;
-  font-family: "Atkinson", sans-serif;
-  
+  font-family: "Atkinson", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  scroll-behavior: smooth;
 }
 
 html.dark {
@@ -42,58 +58,84 @@ body {
   @apply h-full w-full antialiased;
   @apply bg-white dark:bg-black;
   @apply text-black/75 dark:text-white/75;
+  @apply transition-colors duration-300 ease-in-out;
 }
 
 body {
   @apply relative flex flex-col;
+  line-height: 1.6;
 }
 
+/* ==========================================================================
+   LAYOUT COMPONENTS
+   ========================================================================== */
 main {
   @apply flex flex-col flex-1 bg-white dark:bg-black;
+  @apply transition-colors duration-300 ease-in-out;
 }
 
 header {
-  @apply border-b;
-  @apply transition-all duration-300 ease-in-out;
+  @apply border-b z-50 sticky top-0;
+  transition: all var(--transition-speed) var(--transition-easing);
 }
 
 header:not(.scrolled) {
   @apply bg-transparent border-transparent;
+  transform: translateY(0);
 }
 
 header.scrolled {
-  @apply bg-white/75 dark:bg-black/50;
-  @apply border-black/10 dark:border-white/25;
-  @apply backdrop-blur-sm saturate-200;
+  @apply bg-white/80 dark:bg-black/60;
+  @apply border-black/10 dark:border-white/20;
+  backdrop-filter: blur(var(--blur-strength)) saturate(var(--saturate-strength));
+  -webkit-backdrop-filter: blur(var(--blur-strength)) saturate(var(--saturate-strength));
 }
 
+/* ==========================================================================
+   CONTENT STYLES
+   ========================================================================== */
 article {
   @apply prose dark:prose-invert max-w-full pb-12;
+  @apply prose-headings:font-semibold prose-headings:text-black dark:prose-headings:text-white;
+  @apply prose-p:leading-relaxed prose-li:leading-relaxed;
+}
+
+article img {
+  @apply block mx-auto my-8 rounded-lg shadow-sm;
+  @apply transition-transform duration-300 ease-in-out;
+  @apply hover:scale-105 hover:shadow-lg;
 }
 
 .page-heading {
   @apply font-semibold text-black dark:text-white;
+  @apply tracking-tight leading-tight;
 }
 
 .blend {
-  @apply transition-all duration-300 ease-in-out;
+  transition: all var(--transition-speed) var(--transition-easing);
 }
 
-/** Light theme particles on home page */
+/* ==========================================================================
+   ANIMATIONS & EFFECTS
+   ========================================================================== */
 @keyframes animateParticle {
   from {
-    transform: translateY(0px);
+    transform: translateY(0px) rotate(0deg);
+    opacity: 1;
   }
   to {
-    transform: translateY(-2000px);
+    transform: translateY(-2000px) rotate(360deg);
+    opacity: 0;
   }
 }
 
-/** styles for public /animation.js */
+/* Scroll animations */
 .animate {
   opacity: 0;
   transform: translateY(50px);
-  transition: opacity 1s ease, transform 1s ease;
+  transition: 
+    opacity 1s var(--transition-easing),
+    transform 1s var(--transition-easing);
 }
 
 .animate.show {
@@ -101,40 +143,33 @@ article {
   transform: translateY(0);
 }
 
-article img {
-  padding-top: 20px;
-  padding-bottom: 20px;
-  display: block;
-  margin: 0 auto;
-}
-
-/**
- * TWINKLE STARS
- */
-
- #twinkle-star.template {
-  @apply absolute -left-full; /* hide offscreen */
+/* ==========================================================================
+   STAR EFFECTS
+   ========================================================================== */
+#twinkle-star.template {
+  @apply absolute -left-full pointer-events-none;
 }
 
 #twinkle-star.twinkle {
-  @apply animate-twinkle; /* defined in tailwind.config */
+  @apply animate-twinkle;
 }
 
-
-/**
- * Meteors
- */
-
+/* ==========================================================================
+   METEOR EFFECTS
+   ========================================================================== */
 #meteors .shower {
-  @apply absolute inset-0 top-0;;
+  @apply absolute inset-0 top-0 pointer-events-none;
   @apply left-1/2 -translate-x-1/2;
   @apply w-screen aspect-square;
+  @apply overflow-hidden;
 }
 
 #meteors .meteor {
-  @apply animate-meteor; /* defined in tailwind.config */
+  @apply animate-meteor;
   @apply absolute top-1/2 left-1/2 w-px h-[75vh];
-  @apply bg-gradient-to-b from-white to-transparent;
+  @apply bg-gradient-to-b from-white via-white/50 to-transparent;
+  @apply rounded-full;
+  filter: blur(0.5px);
 }
 
 #meteors .shower.ur {
@@ -153,16 +188,87 @@ article img {
   @apply rotate-315;
 }
 
-.copy-cnt{
-  @apply absolute w-full;
-  top:var(--copy-btn-margin);
+/* ==========================================================================
+   COPY BUTTON COMPONENT
+   ========================================================================== */
+.copy-cnt {
+  @apply absolute w-full pointer-events-none;
+  top: var(--copy-btn-margin);
 }
+
 .copy-btn {
-  @apply  w-[30px] fixed;
-  left:calc(100% - var(--copy-btn-margin));
+  @apply w-8 h-8 fixed pointer-events-auto;
+  @apply bg-black/10 dark:bg-white/10 backdrop-blur-sm;
+  @apply rounded-md shadow-sm;
+  @apply transition-all duration-200 ease-in-out;
+  @apply hover:bg-black/20 dark:hover:bg-white/20;
+  @apply hover:scale-110 hover:shadow-md;
+  @apply focus:outline-none focus:ring-2 focus:ring-blue-500/50;
+  left: calc(100% - var(--copy-btn-margin));
   transform: translateX(-100%);
 }
 
 .copy-svg {
-  @apply w-full aspect-square text-white opacity-70 hover:opacity-90;
+  @apply w-full h-full p-1.5;
+  @apply text-black/70 dark:text-white/70;
+  @apply transition-colors duration-200 ease-in-out;
+}
+
+.copy-btn:hover .copy-svg {
+  @apply text-black/90 dark:text-white/90;
+}
+
+/* ==========================================================================
+   UTILITY CLASSES
+   ========================================================================== */
+.glass-effect {
+  backdrop-filter: blur(var(--blur-strength)) saturate(var(--saturate-strength));
+  -webkit-backdrop-filter: blur(var(--blur-strength)) saturate(var(--saturate-strength));
+}
+
+.smooth-transition {
+  transition: all var(--transition-speed) var(--transition-easing);
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN
+   ========================================================================== */
+@media (max-width: 768px) {
+  :root {
+    --copy-btn-margin: 8px;
+  }
+  
+  .copy-btn {
+    @apply w-7 h-7;
+  }
+  
+  article img {
+    @apply my-6;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .animate {
+    transition: none;
+  }
+  
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* ==========================================================================
+   DARK MODE ENHANCEMENTS
+   ========================================================================== */
+@media (prefers-color-scheme: dark) {
+  html:not(.light) {
+    color-scheme: dark;
+    background-color: black;
+  }
 }
