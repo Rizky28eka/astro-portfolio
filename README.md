@@ -170,18 +170,44 @@ Contributions are welcome! Here's how you can help:
 
 ```
 astro-portfolio/
-├── src/
-│   ├── content/
-│   │   ├── blog/          # Blog posts
-│   │   ├── education/     # Education entries
-│   │   ├── legal/         # Legal pages
-│   │   └── work/          # Work experience
-│   ├── lib/
-│   │   ├── data.ts        # Data utilities
-│   │   └── utils.ts       # General utilities
-│   └── consts.ts          # Site constants
-├── public/                # Static assets
-└── README.md
+│
+src/
+├── components/            # Reusable UI components and layout elements
+│   ├── effects/           # Visual or animation effects (e.g. scroll, hover)
+│   ├── features/          # Feature-based components (e.g. blog cards, filters)
+│   ├── layout/            # Layout components (header, footer, grid wrappers)
+│   ├── sections/          # Page sections like hero, testimonials, etc.
+│   └── ui/                # Small UI elements like buttons, inputs, badges
+│
+├── content/               # Static content files
+│   ├── blog/              # Blog posts in MD/MDX format
+│   ├── education/         # Educational background or certifications
+│   ├── legal/             # Legal pages (privacy policy, terms of use)
+│   ├── projects/          # Project case studies
+│   │   └── project-1/     # A specific project folder (images, descriptions)
+│   ├── work/              # Work experience content
+│   └── config.ts          # Content configuration (e.g. tags, categories)
+│
+├── layouts/               # Page templates and layout wrappers
+│
+├── lib/                   # Utility functions and helper modules
+│
+├── pages/                 # Astro file-based routing
+│   ├── blog/              # Blog listing and post pages
+│   ├── education/         # Education-related pages
+│   ├── projects/          # Projects overview and detail pages
+│   ├── search/            # Search functionality (UI + logic)
+│   ├── work/              # Work experience pages
+│   ├── index.astro        # Homepage
+│   ├── robots.txt.ts      # Dynamic `robots.txt` generation
+│   └── rss.xml.ts         # RSS feed generator
+│
+├── styles/                # Global styles (CSS/Tailwind)
+│
+├── consts.ts              # Site-wide constants and metadata
+├── env.d.ts               # Type declarations for environment variables
+├── types.ts               # Global TypeScript types and interfaces
+
 ```
 
 ## License
