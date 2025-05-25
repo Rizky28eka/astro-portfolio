@@ -118,6 +118,17 @@ export const CONTACT: Page = {
 };
 ```
 
+/**
+ * Defines the technology stack and technologies showcased in the portfolio project.
+ * 
+ * @description Provides a comprehensive overview of the technologies used in the project,
+ * including the core framework, styling approach, development tools, and a wide range of
+ * frontend, backend, mobile, database, cloud, and machine learning technologies.
+ * 
+ * @category Project Configuration
+ * @see https://astro.build/ Astro Framework
+ * @see https://tailwindcss.com/ Tailwind CSS
+ */
 ## Tech Stack / Technologies Used
 
 - **Framework**: [Astro](https://astro.build/) - Modern static site generator
