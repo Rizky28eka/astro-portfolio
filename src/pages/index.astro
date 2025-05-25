@@ -1,10 +1,7 @@
 ---
-// Layout and Core Components
 import PageLayout from "@layouts/PageLayout.astro";
 import ArrowCard from "@components/ui/ArrowCard";
-
-// Configuration and Data
-import { SITE } from "@consts";
+import { SITE, PROJECTS, BLOG } from "src/consts";
 import { getLatestPosts, getLatestProjects } from "@/lib/data";
 
 // Page Sections
@@ -14,70 +11,43 @@ import AboutSection from "@components/sections/AboutSection.astro";
 import SkillsSection from "@components/sections/SkillsSection.astro";
 import ExperienceSection from "@components/sections/ExperienceSection.astro";
 import AchievementsSection from "@components/sections/AchievementsSection.astro";
-import ContactsSection from "@components/sections/ContactsSection.astro"; // Updated import
+import ContactsSection from "@components/sections/ContactsSection.astro";
 
-// Data Fetching
 const [posts, projects] = await Promise.all([
   getLatestPosts(3),
   getLatestProjects(3),
 ]);
-
-// Configuration
-const SECTIONS_CONFIG = {
-  projects: {
-    title: "Featured Projects",
-    linkText: "View All Projects",
-    href: "/projects",
-  },
-  blog: {
-    title: "Latest Articles",
-    linkText: "Read More",
-    href: "/blog",
-  },
-};
 ---
 
 <PageLayout title="Home" description={SITE.DESCRIPTION}>
   <BackgroundEffects />
-
-  <!-- Hero Section -->
   <HeroSection />
-
-  <!-- Main Content -->
   <main class="relative bg-white dark:bg-black">
     <div class="mx-auto max-w-4xl px-5 py-16 space-y-24">
-      <!-- About Section -->
       <AboutSection />
-
-      <!-- Skills Section -->
       <SkillsSection />
-
-      <!-- Experience Section -->
       <ExperienceSection />
-
-      <!-- Achievements Section -->
       <AchievementsSection />
 
-      <!-- Featured Projects Section -->
+      <!-- Featured Projects -->
       <section class="animate" aria-labelledby="projects-heading">
         <header
           class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-8 gap-4">
           <h2
             id="projects-heading"
             class="text-2xl md:text-3xl font-bold text-black dark:text-white">
-            {SECTIONS_CONFIG.projects.title}
+            {PROJECTS.TITLE}
           </h2>
           <a
-            href={SECTIONS_CONFIG.projects.href}
-            class="group inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium transition-colors duration-200 self-start"
+            href="/projects"
+            class="nav-link group"
             aria-label="View all projects">
-            <span>{SECTIONS_CONFIG.projects.linkText}</span>
+            <span>View All Projects</span>
             <svg
               class="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200"
               fill="none"
               stroke="currentColor"
-              viewBox="0 0 24 24"
-              aria-hidden="true">
+              viewBox="0 0 24 24">
               <path
                 stroke-linecap="round"
                 stroke-linejoin="round"
@@ -87,18 +57,24 @@ const SECTIONS_CONFIG = {
           </a>
         </header>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {
-            projects.slice(0, 8).map((project) => (
-              <article class="flex h-full">
-                <ArrowCard entry={project} />
-              </article>
-            ))
-          }
-        </div>
+        {
+          projects.length > 0 ?
+            <div class="projects-grid">
+              {projects.slice(0, 3).map((project, i) => (
+                <article class={`project-card project-${(i % 3) + 1}`}>
+                  <ArrowCard entry={project} />
+                </article>
+              ))}
+            </div>
+          : <div class="text-center py-12">
+              <p class="text-gray-600 dark:text-gray-400">
+                No projects available at the moment.
+              </p>
+            </div>
+        }
       </section>
 
-      <!-- Latest Articles Section -->
+      <!-- Latest Articles -->
       {
         posts.length > 0 && (
           <section class="animate" aria-labelledby="blog-heading">
@@ -106,19 +82,18 @@ const SECTIONS_CONFIG = {
               <h2
                 id="blog-heading"
                 class="text-2xl md:text-3xl font-bold text-black dark:text-white">
-                {SECTIONS_CONFIG.blog.title}
+                {BLOG.TITLE}
               </h2>
               <a
-                href={SECTIONS_CONFIG.blog.href}
-                class="group inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium transition-colors duration-200 self-start"
+                href="/blog"
+                class="nav-link group"
                 aria-label="Read more articles">
-                <span>{SECTIONS_CONFIG.blog.linkText}</span>
+                <span>Read More</span>
                 <svg
                   class="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200"
                   fill="none"
                   stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  aria-hidden="true">
+                  viewBox="0 0 24 24">
                   <path
                     stroke-linecap="round"
                     stroke-linejoin="round"
@@ -128,9 +103,8 @@ const SECTIONS_CONFIG = {
                 </svg>
               </a>
             </header>
-
             <div class="space-y-6">
-              {posts.map((post) => (
+              {posts.slice(0, 3).map((post) => (
                 <article>
                   <ArrowCard entry={post} />
                 </article>
@@ -140,67 +114,7 @@ const SECTIONS_CONFIG = {
         )
       }
 
-      <!-- Contacts Section -->
       <ContactsSection />
     </div>
   </main>
 </PageLayout>
-
-<style>
-  /* Enhanced animations and transitions */
-  .animate {
-    animation: fadeInUp 0.6s ease-out forwards;
-    opacity: 0;
-    transform: translateY(20px);
-  }
-
-  .animate:nth-child(1) {
-    animation-delay: 0.1s;
-  }
-  .animate:nth-child(2) {
-    animation-delay: 0.2s;
-  }
-  .animate:nth-child(3) {
-    animation-delay: 0.3s;
-  }
-  .animate:nth-child(4) {
-    animation-delay: 0.4s;
-  }
-  .animate:nth-child(5) {
-    animation-delay: 0.5s;
-  }
-  .animate:nth-child(6) {
-    animation-delay: 0.6s;
-  }
-  .animate:nth-child(7) {
-    animation-delay: 0.7s;
-  }
-  .animate:nth-child(8) {
-    animation-delay: 0.8s;
-  }
-
-  @keyframes fadeInUp {
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  /* Improved hover effects */
-  section:hover .group svg {
-    transform: translateX(2px);
-  }
-
-  /* Better focus states for accessibility */
-  a:focus-visible {
-    outline: 2px solid theme("colors.blue.500");
-    outline-offset: 2px;
-    border-radius: 4px;
-  }
-
-  /* Enhanced form styling */
-  input:focus,
-  textarea:focus {
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-  }
-</style>
