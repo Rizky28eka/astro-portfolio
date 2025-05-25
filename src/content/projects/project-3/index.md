@@ -1,6 +1,6 @@
 ---
-title: "TremorTrack 2.0"
-summary: "Earthquake Magnitude Prediction and Visualization"
+title: "remorTrack 2.0: Earthquake Magnitude Predictor"
+summary: "Machine Learning Earthquake Magnitude Prediction"
 date: "March 25 2025"
 draft: false
 tags:
@@ -15,135 +15,128 @@ repoUrl: https://github.com/Rizky28eka/astro-portfolio
 
 ## Project Overview
 
-TremorTrack 2.0 is an advanced, interactive web application designed to predict earthquake magnitudes and visualize seismic data using state-of-the-art machine learning and data visualization techniques. The platform empowers seismologists, emergency managers, and researchers to make data-driven decisions and gain deeper insights into earthquake phenomena.
+TremorTrack 2.0 is a machine learning-based application for predicting and visualizing earthquake magnitudes. This project is designed to assist professionals, researchers, and the public in objectively and interactively analyzing and predicting earthquake strength.
 
 ## Problem Statement
 
-Accurately predicting earthquake magnitudes and understanding their impact is a persistent challenge in seismology. Traditional methods often lack real-time predictive capabilities and comprehensive visualization, limiting their utility for rapid response and scientific analysis. TremorTrack 2.0 addresses this gap by providing an automated, user-friendly tool for magnitude prediction and seismic data exploration.
+Manual assessment of earthquake magnitude is often subjective and time-consuming. There is a need for an automated, accurate, and scalable solution to predict earthquake magnitude from seismic data, supporting better decision-making in disaster mitigation.
 
 ## Target Users / Use Cases
 
-- **Seismologists & Researchers**: For rapid earthquake analysis and hypothesis testing.
-- **Disaster Management Agencies**: To support emergency preparedness and response planning.
-- **Educators & Students**: As an interactive learning tool for earthquake science.
-- **Developers & Data Scientists**: As a reference for building predictive analytics in geoscience.
+- **Seismologists & Researchers:** Analyze earthquake data and evaluate prediction models.
+- **Disaster Management Agencies:** Obtain rapid predictions for early response.
+- **General Public:** Education and earthquake risk monitoring.
+- **Developers/Data Scientists:** Reference for developing data-driven prediction applications.
 
 ## Tech Stack
 
-- **Programming Language**: Python 3.x
-- **:Web Framework**: Streamlit
-- **:Data Processing**: pandas, numpy
-- **:Machine Learning**: scikit-learn (Random Forest)
-- **:Visualization**: Plotly
-- **:Model & Data Handling**: joblib, gdown
-- **:Deployment**: Local or cloud (Streamlit sharing)
-- **:Version Control**: Git
+- **Programming Language:** Python
+- **Framework:** Streamlit
+- **Libraries:** pandas, scikit-learn, plotly, numpy, joblib, gdown
+- **Visualization:** Plotly
+- **Dependency Management:** requirements.txt
+- **Version Control:** Git
 
 ## Methodology / Workflow
 
-```mermaid
-graph TD;
-    A[Data Collection] --> B[Data Preprocessing];
-    B --> C[Feature Engineering];
-    C --> D[Model Training];
-    D --> E[Model Evaluation];
-    E --> F[Deployment];
-    F --> G[User Interaction & Feedback];
-```
+1. **Data Collection:** Gather earthquake data from USGS and ShakeMap.
+2. **Data Preprocessing:** Impute missing values, encoding, normalization.
+3. **Feature Engineering:** Select and engineer important features.
+4. **Model Training:** Train a Random Forest Regressor.
+5. **Model Evaluation:** Evaluate using MAE, MSE, R².
+6. **Deployment:** Implement an interactive app with Streamlit.
+7. **User Interaction:** Prediction & visualization based on user input.
 
 ## Project Structure
 
-```mermaid
+```
 track-tremor/
-├── app.py                      # Main Streamlit application
-├── extracted_datafinal.csv     # Cleaned and processed earthquake dataset
-├── categorical_imputer.pkl     # Pre-trained categorical imputer
-├── numerical_imputer.pkl       # Pre-trained numerical imputer
+├── app.py                      # Main application script
+├── extracted_datafinal.csv     # Preprocessed dataset
+├── categorical_imputer.pkl     # Categorical imputer
+├── numerical_imputer.pkl       # Numerical imputer
 ├── actual_vs_predicted.png     # Model performance visualization
 ├── after dropping unimportant features.png # Feature selection visualization
-├── requirements.txt            # Project dependencies
+├── requirements.txt            # Dependencies list
 ├── readme.md                   # Project documentation
-├── mermaid.md                  # Workflow and documentation diagrams
 ```
 
 ## Key Features
 
-- **Earthquake Magnitude Prediction**: Uses a Random Forest model trained on global USGS data.
-- **Interactive Visualizations**: Explore depth-magnitude correlation, ground motion, and intensity distribution.
-- **Automated Data Preprocessing**: Handles missing values and feature encoding with pre-trained imputers.
-- **User-Friendly Interface**: Intuitive navigation and real-time feedback.
-- **Comprehensive Analysis**: Includes model performance metrics and visual explanations.
+- Automated earthquake magnitude prediction
+- Data preprocessing (imputation, encoding)
+- Feature selection & engineering
+- Interactive visualizations (correlation, intensity, ground motion)
+- Modular & extensible codebase
 
 ## Data Source & Preprocessing
 
-### Data Source
-
-The data used in this project comes from several reliable sources related to global seismic activity:
-
-- **USGS Global Earthquake Database**  
-  The primary source for global earthquake data, including location, magnitude, depth, and time of occurrence.
-
-- **ShakeMap Datasets**  
-  Provides intensity and ground motion information, used for validating the impact prediction models.
-
-- **Historical Seismic Records**  
-  Past earthquake records used to train machine learning models for pattern recognition and forecasting.
-
-### 🧹 Preprocessing Steps
-
-Several preprocessing steps were applied to ensure data quality and consistency:
-
-1. **Handling Missing Values**  
-   Using pre-trained imputers to fill missing data:
-
-   - `categorical_imputer.pkl` for categorical features
-   - `numerical_imputer.pkl` for numerical features
-
-2. **Feature Selection**  
-   Removing irrelevant or low-importance variables to improve model performance and reduce overfitting.
-
-3. **Normalization & Encoding**
-
-   - Normalizing numerical features for consistent scale.
-   - Encoding categorical features using appropriate techniques (e.g., One-Hot Encoding, Label Encoding).
-
-4. **Data Cleaning & Outlier Removal**  
-   Removing invalid entries and detecting outliers using statistical or model-based approaches.
+- **Data Sources:** USGS Global Earthquake Database, ShakeMap, historical seismic data
+- **Preprocessing:**
+  - Impute missing values (pre-trained imputers)
+  - Select important features
+  - Normalize & encode categorical features
 
 ## Challenges & Solutions
 
-#### Incomplete or Noisy Data
-
-**Challenge:** Missing values and noisy records in the dataset.  
-**Solution:** Implemented robust imputation using pre-trained imputers and applied outlier detection techniques to clean the data.
-
-#### Feature Redundancy
-
-**Challenge:** Presence of irrelevant or highly correlated features that could reduce model performance.  
-**Solution:** Conducted feature importance analysis and applied feature selection to enhance generalization and reduce complexity.
-
-#### Model Overfitting
-
-**Challenge:** Risk of overfitting due to limited or unbalanced data.  
-**Solution:** Utilized cross-validation and regularization techniques during model training to improve generalization.
-
-#### Real-time Model Loading
-
-**Challenge:** Ensuring smooth model loading for end users in real-time applications.  
-**Solution:** Model files are downloaded and cached at runtime to provide a seamless user experience without repeated downloads.
+- **Incomplete/Noisy Data:** Imputation & outlier detection
+- **Feature Redundancy:** Feature analysis & selection
+- **Model Overfitting:** Cross-validation & regularization
+- **Dynamic Visualization:** Plotly integration for interactivity
 
 ## Model Performance / Evaluation Metrics
 
-- **Mean Absolute Error (MAE)**: 0.31
-- **Mean Squared Error (MSE)**: 0.17
-- **R² Score**: 0.87
+- **MAE:** 0.3067
+- **MSE:** 0.1730
+- **R² Score:** 0.8735
+- **Visualizations:**
+  - ![Actual vs Predicted](src/content/projects/project-3/images/actual_vs_predicted.png)
+  - ![Feature Selection](after dropping unimportant features.png)
 
-### Visualizations
+## Results & Impact
 
-#### Actual vs Predicted
+- High prediction accuracy with low error
+- More objective & repeatable magnitude assessment
+- Supports better disaster mitigation decision-making
 
-<img src="https://github.com/Rizky28eka/astro-portfolio/blob/main/src/content/projects/project-3/images/actual_vs_predicted.png" alt="Actual vs Predicted" width="600"/>
+## Demo / Screenshots
 
-#### Feature Selection (After Dropping Unimportant Features)
+- ![Prediction vs Actual](src/content/projects/project-3/images/after_dropping_unimportant_features.png)
+- ![Feature Selection](after dropping unimportant features.png)
 
-<img src="https://github.com/Rizky28eka/astro-portfolio/blob/main/src/content/projects/project-3/images/after_dropping_unimportant_features.png" alt="Feature Selection" width="600"/>
+## Future Improvements
+
+- Real-time data integration
+- Multi-class classification for earthquake types
+- Web/mobile deployment
+- Enhanced UI/UX & reporting features
+
+## Lessons Learned
+
+- Importance of thorough data preprocessing
+- Feature selection greatly impacts performance
+- Challenges of real-world seismic data
+- Documentation & code modularity ease development
+
+## Installation & Setup Guide
+
+1. **Clone the repository:**
+   ```bash
+   git clone <repository-url>
+   cd track-tremor
+   ```
+2. **Install dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+3. **Run the application:**
+   ```bash
+   python app.py
+   ```
+
+## Credits / Acknowledgments
+
+- Developer: Rizky Eka Haryadi
+- Data: USGS, ShakeMap
+- Thanks to the open-source community
+- Contact: r28eka@gmail.com
