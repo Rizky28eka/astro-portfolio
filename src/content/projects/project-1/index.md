@@ -5,9 +5,10 @@ date: "Mar 18 2022"
 draft: false
 tags:
   - Python
-  - Machine Learnings
   - Streamlit
-
+  - Machine Learning
+  - Data Visualization
+  - Data Science
 demoUrl: https://ai-medical-diagnosis-app-gzz76hpzfn4yi5zxbfemth.streamlit.app/
 repoUrl: https://github.com/Rizky28eka/AI-Medical-Diagnosis-App
 ---

@@ -1,5 +1,5 @@
 ---
-title: "remorTrack 2.0: Earthquake Magnitude Predictor"
+title: "TremorTrack 2.0: Earthquake Magnitude Predictor"
 summary: "Machine Learning Earthquake Magnitude Prediction"
 date: "March 25 2025"
 draft: false
@@ -9,8 +9,8 @@ tags:
   - Machine Learning
   - Data Visualization
   - Data Science
-demoUrl: https://myportfolio2-iota.vercel.app/
-repoUrl: https://github.com/Rizky28eka/astro-portfolio
+demoUrl: https://track-tremor-ddi6fap46rjvvqvx52zh4p.streamlit.app/
+repoUrl: https://github.com/Rizky28eka/track-tremor
 ---
 
 ## Project Overview

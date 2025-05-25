@@ -1,142 +1,183 @@
 ---
-title: "AI-Powered Medical Diagnosis Application"
-summary: "AI-based medical diagnosis tool."
-date: "Mar 18 2022"
+title: "WinterStore: Next-Gen Flutter Commerce"
+summary: "Modern cross-platform e-commerce application"
+date: "March 25 2024"
 draft: false
 tags:
   - Python
+  - Streamlit
   - Machine Learning
-demoUrl: https://ai-medical-diagnosis-app-gzz76hpzfn4yi5zxbfemth.streamlit.app/
-repoUrl: https://github.com/Rizky28eka/AI-Medical-Diagnosis-App
+  - Data Visualization
+  - Data Science
+demoUrl: https://track-tremor-ddi6fap46rjvvqvx52zh4p.streamlit.app/
+repoUrl: https://github.com/Rizky28eka/track-tremor
 ---
 
-### 📌 Project Overview
+## Project Overview
 
-This AI-based Medical Diagnosis Application is a student project developed at Universitas Amikom Yogyakarta. It leverages Machine Learning (ML) models to predict diseases based on user input data and provides informative data visualizations.
+WinterStore is a next-generation, cross-platform e-commerce application built with Flutter. It delivers a seamless, high-performance shopping experience with a modern UI, robust product management, and real-time data integration using Firebase. Designed for scalability and flexibility, WinterStore is suitable for both rapid prototyping and production-ready deployments.
 
-### 💾 Repository Contents
+---
 
-This repository includes:
+## Problem Statement
 
-- Preprocessed medical datasets
-- Google Colab Notebooks for model training
-- Trained model files (.pkl) for disease prediction:
-  - Breast Cancer
-  - Diabetes
-  - Fetal Health
-  - Heart Disease
-  - Kidney Disease
-  - Lung Cancer
-- Streamlit web application code
+Many e-commerce apps suffer from slow performance, poor user experience, and fragmented codebases for different platforms. WinterStore addresses these issues by providing a unified, maintainable, and scalable solution that leverages Flutter's cross-platform capabilities and Firebase's real-time backend.
 
-### 🚀 Key Features
+---
 
-- 🏥 AI-based disease prediction using Machine Learning models
-- 📊 Interactive Data Visualization with Matplotlib & Seaborn
-- 🌐 User-friendly Web Interface built with Streamlit
-- 🔍 Secure Data Handling using Pandas
-- 📱 Responsive design accessible from various devices
+## Target Users / Use Cases
 
-### 🛠️ Technologies Used
+- **Store Owners:** Digitize and expand their business online.
+- **Flutter Developers:** Use as a robust template for e-commerce projects.
+- **End Users:** Shop online with a fast, secure, and intuitive app.
 
-- **Python 🐍** - Primary programming language
-- **Streamlit 🎨** - Framework for building web apps
-- **Scikit-Learn 🤖** - Machine Learning library
-- **Pandas & NumPy 📊** - Data manipulation and analysis
-- **Matplotlib & Seaborn 📈** - Data visualization libraries
-- **Pickle 💾** - For saving and loading trained models
+---
 
-### 📋 System Requirements
+## Tech Stack
 
-- Python 3.7 or newer
-- Minimum 4GB RAM (8GB recommended)
-- At least 1GB of storage space
+- **Flutter (Dart):** Cross-platform UI (Android, iOS, Web, macOS)
+- **Firebase:** Authentication, Firestore, Storage
+- **GetX:** State management, routing, dependency injection
+- **Lottie, Shimmer, Carousel, Cached Network Image:** Modern UI/UX
+- **CI/CD:** Flutter lints, widget testing
 
-### 📌 How to Run the Application Locally
+---
 
-### Step 1: Clone the Repository
+## Methodology / Workflow
 
-```bash
-git clone https://github.com/0073212/AI_Medical_Diagnosis_App.git
-cd AI_Medical_Diagnosis_App
-```
+1. **Modular Design:** Feature-based folder structure for maintainability.
+2. **Reactive State Management:** GetX for efficient state and navigation.
+3. **Data Integration:** Real-time sync with Firestore for products, categories, brands, and banners.
+4. **Testing:** Widget tests for UI validation.
+5. **Continuous Improvement:** Codebase designed for easy scaling and updates.
 
-### Step 2: Create and Activate Virtual Environment
+---
 
-```bash
-
-# Create virtual environment
-
-python -m venv venv
-
-# Activate virtual environment
-
-# On Windows:
-
-venv\Scripts\activate
-
-# On Mac/Linux:
-
-source venv/bin/activate
-```
-
-### Step 3: Install Dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-### Step 4: Run the Application
-
-```bash
-streamlit run app.py
-```
-
-The app will open in your browser at http://localhost:8501
-
-```bash
-AI_Medical_Diagnosis_App/
-├── app.py                 # Main Streamlit app file
-├── requirements.txt       # Python dependencies
-├── models/                # Folder containing trained models (.pkl)
-│   ├── breast_cancer_model.pkl
-│   ├── diabetes_model.pkl
-│   ├── fetal_health_model.pkl
-│   ├── heart_disease_model.pkl
-│   ├── kidney_disease_model.pkl
-│   └── lung_cancer_model.pkl
-├── data/                  # Folder with datasets
-├── notebooks/             # Google Colab notebooks
-└── README.md              # Project documentation
+## Project Structure
 
 ```
+lib/
+  features/
+    authentication/   # Login, signup, onboarding
+    personalization/  # Profile, address, settings
+    shop/             # Products, categories, brands, cart, checkout
+  data/
+    repositories/     # Firestore integration
+    dummy/            # Dummy data for development
+  commons/            # Reusable widgets
+  routes/             # App routing
+  utils/              # Helpers, constants, theme, etc
+assets/
+  images/             # Banners, products, onboarding, etc
+  icons/
+  fonts/
+test/
+  widget_test.dart    # Widget testing
+```
 
-### 📊 Available Models
+---
 
-| Disease        | Accuracy | Algorithm           | Status    |
-| -------------- | -------- | ------------------- | --------- |
-| Breast Cancer  | 95%+     | Random Forest       | ✅ Active |
-| Diabetes       | 90%+     | SVM                 | ✅ Active |
-| Fetal Health   | 92%+     | Decision Tree       | ✅ Active |
-| Heart Disease  | 88%+     | Logistic Regression | ✅ Active |
-| Kidney Disease | 94%+     | Random Forest       | ✅ Active |
-| Lung Cancer    | 91%+     | XGBoost             | ✅ Active |
+## Key Features
 
-### 🚨 Disclaimer
+- **Product & Category Management:** CRUD for products, categories, and brands.
+- **User Authentication:** Sign up, login, password recovery, Google sign-in.
+- **Cart & Checkout:** Add/remove products, order summary, checkout process.
+- **Wishlist & Favorites:** Save favorite products.
+- **Personal Profile:** Edit profile, manage addresses, view order history.
+- **Search & Filter:** Search products, filter by category/brand.
+- **Modern Animations:** Lottie, shimmer, carousel, grid layouts.
+- **Automated Data Upload:** Sync dummy data to Firestore.
 
-> ⚠️ **IMPORTANT:**  
-> This application is intended for **educational and research purposes only**.  
-> The predictions generated should **not** be used as a substitute for professional medical advice.  
-> Always consult a **healthcare provider** for diagnosis and treatment.
+---
 
-### 🤝 Contributions
+## Data Source & Preprocessing
 
-We welcome contributions from the community!
+- **Data Source:** Firestore (products, categories, brands, banners, users)
+- **Preprocessing:** Dummy data uploaded via in-app upload feature.
+- **Data Models:** Well-defined models for all entities.
+- **Data Relationships:** Product ↔ Category, Brand ↔ Category, etc.
 
-1. Fork this repository
-2. Create a new branch (git checkout -b feature/AmazingFeature)
-3. Commit your changes (git commit -m 'Add some AmazingFeature')
-4. Push to the branch (git push origin feature/AmazingFeature)
-5. Open a Pull Request
+---
 
-Made with ❤️ by a student of Universitas Amikom Yogyakarta
+## Challenges & Solutions
+
+- **Data Sync:** Addressed delays and duplication with loaders and error handling.
+- **State Management:** Leveraged GetX for efficient, maintainable state.
+- **Responsive UI:** Adaptive layouts for all screen sizes.
+- **Testing:** Widget tests to ensure UI stability during updates.
+
+---
+
+## Model Performance / Evaluation Metrics
+
+- **Widget Testing:** UI interaction validation (e.g., counter increment test).
+- **Linting & Static Analysis:** Enforced with `flutter_lints`.
+- **Manual QA:** Tested across devices and user scenarios.
+
+---
+
+## Results & Impact
+
+- **Rapid Development:** Single codebase for multiple platforms.
+- **Enhanced UX:** Modern UI, interactive animations, intuitive navigation.
+- **Scalability:** Easily extendable for small to large-scale stores.
+
+---
+
+## Demo / Screenshots
+
+| Onboarding                                    | Banner                                        | Product                                                     |
+| --------------------------------------------- | --------------------------------------------- | ----------------------------------------------------------- |
+| ![Onboarding](images/sammy-line-shopping.gif) | ![Banner](assets/images/banners/banner_1.jpg) | ![Product](assets/images/products/tshirt_yellow_collar.png) |
+
+---
+
+## Future Improvements
+
+- Online payment integration (Stripe, Midtrans, etc.)
+- Push notification support
+- Web-based admin dashboard
+- AI-powered product recommendations
+- More comprehensive unit and integration tests
+
+---
+
+## Lessons Learned
+
+- Modular code is essential for scalability.
+- GetX simplifies state management and dependency injection.
+- Firestore integration enables real-time data sync.
+- Modern UI/UX significantly improves user retention.
+
+---
+
+## Installation & Setup Guide
+
+1. **Clone the repository:**
+   ```bash
+   git clone <repo-url>
+   cd e_commerce_app
+   ```
+2. **Install dependencies:**
+   ```bash
+   flutter pub get
+   ```
+3. **Setup Firebase:**
+   - Create a project in [Firebase Console](https://console.firebase.google.com/)
+   - Download `google-services.json` (Android) & `GoogleService-Info.plist` (iOS)
+   - Place them in the appropriate folders (`android/app/`, `ios/Runner/`)
+4. **Run the app:**
+   ```bash
+   flutter run
+   ```
+5. **(Optional) Upload dummy data to Firestore:**
+   - Open the "Upload Data" menu in the app, upload categories, brands, products, banners, and relationships.
+
+---
+
+## Credits / Acknowledgments
+
+- Flutter & Firebase Community
+- Open-source packages: GetX, Lottie, Shimmer, Carousel, etc.
+- Icons & images: [Icons8](https://icons8.com/), [Freepik](https://www.freepik.com/)
+- Internal contributors & testers
