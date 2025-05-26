@@ -84,12 +84,6 @@ lib/
 3. Run `flutter pub get` to install dependencies
 4. Run `flutter run` to start the application
 
-## Demo / Screenshots
-
-| HomePage                                                         |
-| ---------------------------------------------------------------- |
-| <img src="images/homepage.png" alt="Halaman Utama" width="300"/> |
-
 ## Future Improvements
 
 - Integration with backend services
