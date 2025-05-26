@@ -124,14 +124,6 @@ test/
 
 ---
 
-## Demo / Screenshots
-
-| Onboarding                                    | Banner                                        | Product                                                     |
-| --------------------------------------------- | --------------------------------------------- | ----------------------------------------------------------- |
-| ![Onboarding](images/sammy-line-shopping.gif) | ![Banner](assets/images/banners/banner_1.jpg) | ![Product](assets/images/products/tshirt_yellow_collar.png) |
-
----
-
 ## Future Improvements
 
 - Online payment integration (Stripe, Midtrans, etc.)
