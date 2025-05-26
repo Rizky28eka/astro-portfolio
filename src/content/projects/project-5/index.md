@@ -1,7 +1,7 @@
 ---
 title: "Melodify - Modern Music Streaming Experience"
 summary: "Sleek music player with premium features"
-date: "March 25 2024"
+date: "December 23 2023"
 draft: false
 tags:
   - Python
