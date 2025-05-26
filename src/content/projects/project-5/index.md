@@ -10,7 +10,7 @@ tags:
   - Data Visualization
   - Data Science
 demoUrl: https://www.instagram.com/p/C0mmPPxyh65/
-repoUrl: https://github.com/Rizky28eka/music-app-player-ui
+repoUrl: https://github.com/Rizky28eka/melodify-music-platform
 ---
 
 ## Project Overview
@@ -121,13 +121,13 @@ lib/
 
 ## Demo / Screenshots
 
-| Halaman Utama                         | Halaman Login                           |
-| ------------------------------------- | --------------------------------------- |
-| ![Halaman Utama](images/homepage.png) | ![Halaman Login](images/searchpage.png) |
+| Home Screen                         | Search Screen                           |
+| ----------------------------------- | --------------------------------------- |
+| ![Home Screen](images/homepage.png) | ![Search Screen](images/searchpage.png) |
 
-| Dashboard                            | Profil Pengguna                  |
-| ------------------------------------ | -------------------------------- |
-| ![Dashboard](images/settingpage.png) | ![Profil](images/detailsong.png) |
+| Setting Screen                            | Song Screen                           |
+| ----------------------------------------- | ------------------------------------- |
+| ![Setting Screen](images/settingpage.png) | ![Song Screen](images/detailsong.png) |
 
 ---
 
