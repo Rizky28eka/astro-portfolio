@@ -121,28 +121,13 @@ lib/
 
 ## Demo / Screenshots
 
-<table>
-  <tr>
-    <td align="center">
-      <img src="/images/searchpage.png" width="300" /><br/>
-      <b>Search Page</b>
-    </td>
-    <td align="center">
-      <img src="/images/settingpage.png" width="300" /><br/>
-      <b>Settings Page</b>
-    </td>
-  </tr>
-  <tr>
-    <td align="center">
-      <img src="/images/detailsong.png" width="300" /><br/>
-      <b>Detail Song Page</b>
-    </td>
-    <td align="center">
-      <img src="/images/anotherpage.png" width="300" /><br/>
-      <b>Another Page</b>
-    </td>
-  </tr>
-</table>
+| Halaman Utama                         | Halaman Login                           |
+| ------------------------------------- | --------------------------------------- |
+| ![Halaman Utama](images/homepage.png) | ![Halaman Login](images/searchpage.png) |
+
+| Dashboard                            | Profil Pengguna                  |
+| ------------------------------------ | -------------------------------- |
+| ![Dashboard](images/settingpage.png) | ![Profil](images/detailsong.png) |
 
 ---
 
@@ -171,7 +156,7 @@ lib/
 1. Ensure you have Flutter SDK installed
 2. Clone the repository:
    ```bash
-   git clone [repository-url]
+   git clone [https://github.com/Rizky28eka/music-app-player-ui.git]
    ```
 3. Install dependencies:
    ```bash
@@ -190,9 +175,3 @@ lib/
 - All package contributors
 - Design inspiration from modern music apps
 - Circular Std font family creators
-
----
-
-## License
-
-[Add your license information here]
