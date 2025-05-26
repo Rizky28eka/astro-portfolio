@@ -1,102 +1,130 @@
 ---
-title: "CourseApp - Modern Learning Platform"
-summary: "Flutter-based educational content platform"
+title: "FitTrack Pro - Your Personal Fitness Companion"
+summary: "Cross-platform fitness tracking mobile application"
 date: "May 26 2025"
 draft: false
 tags:
   - Flutter
-  - Slicing UI
+  - Flutter Charts
   - Animate_do
-demoUrl: https://www.instagram.com/p/C3EoeZiSMJw/
-repoUrl: https://github.com/Rizky28eka/course-app-slicing
+demoUrl: https://www.instagram.com/p/CzIfpzxyv5W/
+repoUrl: https://github.com/Rizky28eka/fittrack-pro
 ---
 
 ## Project Overview
 
-CourseApp is a modern, cross-platform learning application built with Flutter that provides an intuitive and engaging interface for accessing educational content. The application features a clean, responsive design with smooth animations and a user-friendly experience across multiple platforms including iOS, Android, web, and desktop.
+FitTrack Pro is a comprehensive fitness tracking application built with Flutter that helps users monitor their workouts, nutrition, sleep patterns, and overall fitness progress. The application provides an intuitive interface for tracking various aspects of personal fitness and wellness.
 
 ---
 
 ## Problem Statement
 
-In today's digital learning environment, there's a need for a unified, cross-platform solution that delivers educational content in an accessible and engaging manner. Traditional learning platforms often lack modern UI/UX features and cross-platform compatibility, making it difficult for users to access content seamlessly across different devices.
-
----
+In today's fast-paced world, maintaining a consistent fitness routine and tracking progress can be challenging. Many fitness apps either focus on a single aspect of wellness or provide complex interfaces that overwhelm users. There's a need for a unified, user-friendly platform that helps individuals track their complete fitness journey.
 
 ## Target Users / Use Cases
 
-- Students seeking accessible learning materials
-- Educational institutions looking to distribute content
-- Self-learners who prefer a modern, intuitive interface
-- Educators wanting to share course materials
-- Mobile-first users who need cross-platform access
-
----
+- Fitness enthusiasts looking to track their workout progress
+- Individuals starting their fitness journey who need guidance
+- People who want to monitor their sleep patterns and nutrition
+- Users who want to maintain a visual record of their fitness transformation
+- Anyone seeking a comprehensive fitness tracking solution
 
 ## Tech Stack
 
-- Flutter (Cross-platform UI framework)
+- Flutter (Cross-platform development)
 - Dart (Programming language)
-- Google Fonts (Typography)
-- Flutter Staggered Grid View (Layout)
-- Animate_do (Animations)
+- Material Design (UI framework)
+- Flutter Charts (Data visualization)
+- Custom Calendar Agenda (Scheduling)
 
----
+**Tags**: #Flutter #FitnessApp #CrossPlatform #MobileDevelopment #HealthTech
 
 ## Methodology / Workflow
 
-The project follows a structured development approach:
+The application follows a modular architecture with separate components for different features:
 
-1. UI/UX Design Implementation
-2. Cross-platform Development
-3. Responsive Layout Design
-4. Animation Integration
-5. Asset Management
-6. Testing and Optimization
-
----
+1. User authentication and onboarding
+2. Main dashboard with activity overview
+3. Workout tracking and logging
+4. Sleep pattern monitoring
+5. Meal planning and nutrition tracking
+6. Progress photo documentation
+7. User profile management
 
 ## Project Structure
 
 ```
 lib/
-├── const/         # Constants and configuration
-├── model/         # Data models
-├── view/          # UI components and screens
-├── home.dart      # Main home screen
-└── main.dart      # Application entry point
+├── common/         # Shared utilities and constants
+├── common_widget/  # Reusable UI components
+├── pages/          # Feature-specific screens
+│   ├── home/
+│   ├── login/
+│   ├── main_tab/
+│   ├── meal_planner/
+│   ├── on_boarding/
+│   ├── photo_progress/
+│   ├── profile/
+│   ├── sleep_tracker/
+│   └── workout_tracker/
+└── main.dart       # Application entry point
 ```
 
 ## Key Features
 
-- Cross-platform compatibility (iOS, Android, Web, Desktop)
-- Modern, responsive UI design
-- Smooth animations and transitions
-- Custom typography with Google Fonts
-- Staggered grid layout for content display
-- SVG icon support
-- Asset management system
+- Workout tracking and logging
+- Sleep pattern monitoring
+- Meal planning and nutrition tracking
+- Progress photo documentation
+- Interactive charts and progress visualization
+- Customizable user profiles
+- Cross-platform compatibility
 
 ## Data Source & Preprocessing
 
-The application uses local assets for icons and images, organized in the following structure:
-
-- `assets/icons/` - SVG and icon assets
-- `assets/images/` - Image assets for the application
+The application uses local storage for user data and progress tracking. All data is processed and stored securely on the device, with options for cloud synchronization in future updates.
 
 ## Challenges & Solutions
 
-1. **Cross-platform Consistency**
-   - Solution: Implemented responsive design patterns and platform-specific adaptations
-2. **Performance Optimization**
-   - Solution: Efficient asset management and optimized animations
-3. **UI/UX Implementation**
-   - Solution: Utilized Flutter's material design and custom animations
+- **Challenge**: Creating an intuitive UI for complex fitness tracking
+  **Solution**: Implemented a tab-based navigation with clear visual hierarchy
+- **Challenge**: Cross-platform consistency
+  **Solution**: Utilized Flutter's widget system for consistent UI across platforms
+- **Challenge**: Performance optimization
+  **Solution**: Implemented efficient state management and lazy loading
+
+## Results & Impact
+
+The application provides a seamless experience for users to:
+
+- Track their fitness journey comprehensively
+- Monitor progress through visual charts and photos
+- Maintain consistent workout and nutrition habits
+- Access all fitness-related features in one platform
+
+## Future Improvements
+
+- Cloud synchronization for data backup
+- Social features for community engagement
+- Integration with wearable devices
+- AI-powered workout recommendations
+- Advanced analytics and insights
+- Custom workout plan generation
+
+## Lessons Learned
+
+- Importance of modular architecture for maintainability
+- Value of consistent UI/UX across platforms
+- Need for efficient state management in complex applications
+- Benefits of using Flutter for cross-platform development
 
 ## Installation & Setup Guide
 
-1. Ensure you have Flutter SDK installed (version >=3.1.5)
-2. Clone the repository
+1. Ensure you have Flutter SDK installed (version >=3.0.2)
+2. Clone the repository:
+   ```bash
+   git clone https://github.com/Rizky28eka/fittrack-pro.git
+   ```
 3. Install dependencies:
    ```bash
    flutter pub get
@@ -106,25 +134,8 @@ The application uses local assets for icons and images, organized in the followi
    flutter run
    ```
 
-## Future Improvements
-
-- Integration with backend services
-- User authentication system
-- Content management system
-- Offline mode support
-- Analytics and tracking features
-- Social sharing capabilities
-
-## Lessons Learned
-
-- Importance of cross-platform compatibility
-- Effective use of Flutter's widget system
-- Best practices for asset management
-- Animation optimization techniques
-- Responsive design implementation
-
 ## Credits / Acknowledgments
 
 - Flutter team for the amazing framework
-- Google Fonts for typography
-- Flutter community for various packages and support
+- Contributors to the open-source packages used in this project
+- Design inspiration from modern fitness applications
