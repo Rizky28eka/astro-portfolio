@@ -5,8 +5,7 @@ date: "May 26 2025"
 draft: false
 tags:
   - Flutter
-  - Flutter Charts
-  - Animate_do
+  - Slicing UI
 demoUrl: https://www.instagram.com/p/CzIfpzxyv5W/
 repoUrl: https://github.com/Rizky28eka/fittrack-pro
 ---
