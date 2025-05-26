@@ -86,8 +86,6 @@ lib/
 
 ## Demo / Screenshots
 
-## Demo / Screenshots
-
 | HomePage                                                         |
 | ---------------------------------------------------------------- |
 | <img src="images/homepage.png" alt="Halaman Utama" width="300"/> |
