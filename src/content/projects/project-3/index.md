@@ -7,8 +7,6 @@ tags:
   - Python
   - Streamlit
   - Machine Learning
-  - Data Visualization
-  - Data Science
 demoUrl: https://track-tremor-ddi6fap46rjvvqvx52zh4p.streamlit.app/
 repoUrl: https://github.com/Rizky28eka/track-tremor
 ---

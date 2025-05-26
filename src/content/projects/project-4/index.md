@@ -4,11 +4,10 @@ summary: "Modern cross-platform e-commerce application"
 date: "March 25 2024"
 draft: false
 tags:
-  - Python
-  - Streamlit
-  - Machine Learning
-  - Data Visualization
-  - Data Science
+  - Flutter
+  - Slicing UI
+  - Firebase
+  - GetX
 demoUrl: https://track-tremor-ddi6fap46rjvvqvx52zh4p.streamlit.app/
 repoUrl: https://github.com/Rizky28eka/track-tremor
 ---

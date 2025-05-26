@@ -5,10 +5,8 @@ date: "May 25 2025"
 draft: false
 tags:
   - Astro
-  - React.js
   - Tailwind CSS
   - TypeScript
-  - Content Management
 demoUrl: https://myportfolio2-iota.vercel.app/
 repoUrl: https://github.com/Rizky28eka/astro-portfolio
 ---

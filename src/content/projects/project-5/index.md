@@ -4,11 +4,9 @@ summary: "Sleek music player with premium features"
 date: "December 23 2023"
 draft: false
 tags:
-  - Python
-  - Streamlit
-  - Machine Learning
-  - Data Visualization
-  - Data Science
+  - Flutter
+  - GetX
+  - Slicing UI
 demoUrl: https://www.instagram.com/p/C0mmPPxyh65/
 repoUrl: https://github.com/Rizky28eka/melodify-music-platform
 ---

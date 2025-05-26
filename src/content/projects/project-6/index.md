@@ -5,12 +5,10 @@ date: "May 26 2025"
 draft: false
 tags:
   - Flutter
-  - Dart
-  - Google Fonts
-  - Carousel Slider
+  - Slicing UI
   - Material Design
-demoUrl: https://www.instagram.com/p/C0mmPPxyh65/
-repoUrl: https://github.com/Rizky28eka/melodify-music-platform
+demoUrl: https://www.instagram.com/p/C3DyR96yU53/
+repoUrl: https://github.com/Rizky28eka/art-gallery-app
 ---
 
 ## Project Overview
