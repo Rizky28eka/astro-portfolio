@@ -5,8 +5,6 @@ date: "2025, 05, 20"
 draft: false
 tags:
   - Flutter
-  - Google
-  - Tutorial
 ---
 
 ## 🚀 Getting Started with Flutter
