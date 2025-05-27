@@ -28,6 +28,7 @@ const education = await Promise.all(
 
 function formatDate(input?: string | Date): string {
   if (!input) return "Present";
+  if (input === "present") return "Present";
 
   const date = typeof input === "string" ? new Date(input) : input;
 

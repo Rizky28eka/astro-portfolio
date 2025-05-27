@@ -4,10 +4,22 @@ import { cn } from "@lib/utils";
 const { pathname } = Astro.url;
 const subpath = pathname.match(/[^/]+/g);
 import Container from "@components/ui/Container.astro";
-const allowedLinkTexts = ["Home", "Blog", "Education", "Projects", "Work"];
+const allowedLinkTexts = [
+  "Home",
+  "Blog",
+  "Education",
+  "Projects",
+  "Work",
+  "Contact",
+];
 const filteredLinks = LINKS.filter((link) =>
   allowedLinkTexts.includes(link.TEXT)
-);
+).map((link) => {
+  if (link.TEXT === "Contact") {
+    return { ...link, HREF: "/contact" };
+  }
+  return link;
+});
 ---
 
 <header id="header" class="fixed top-0 w-full h-16 z-50">

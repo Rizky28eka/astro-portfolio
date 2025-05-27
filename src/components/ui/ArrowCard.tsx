@@ -1,4 +1,3 @@
-
 import { formatDate } from "@lib/utils"
 import type { CollectionEntry } from "astro:content"
 type Props = {
@@ -26,7 +25,7 @@ export default function ArrowCard({entry, pill}: Props) {
           {entry.data.summary}
         </div>
         {entry.data.tags && entry.data.tags.length > 0 && (
-          <ul class="flex flex-wrap mt-2 gap-1">
+          <ul class="flex flex-row flex-wrap mt-2 gap-2">
             {entry.data.tags.map((tag: string) => (
               <li class="text-xs uppercase py-0.5 px-1 rounded bg-black/5 dark:bg-white/20 text-black/75 dark:text-white/75">
                 {tag}

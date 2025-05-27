@@ -11,7 +11,6 @@ import AboutSection from "@components/sections/AboutSection.astro";
 import SkillsSection from "@components/sections/SkillsSection.astro";
 import ExperienceSection from "@components/sections/ExperienceSection.astro";
 import AchievementsSection from "@components/sections/AchievementsSection.astro";
-import ContactsSection from "@components/sections/ContactsSection.astro";
 
 const [posts, projects] = await Promise.all([
   getLatestPosts(3),
@@ -23,7 +22,7 @@ const [posts, projects] = await Promise.all([
   <BackgroundEffects />
   <HeroSection />
   <main class="relative bg-white dark:bg-black">
-    <div class="mx-auto max-w-4xl px-5 py-16 space-y-24">
+    <div class="mx-auto max-w-6xl px-5 py-16 space-y-24">
       <AboutSection />
       <SkillsSection />
       <ExperienceSection />
@@ -59,9 +58,9 @@ const [posts, projects] = await Promise.all([
 
         {
           projects.length > 0 ?
-            <div class="projects-grid">
-              {projects.slice(0, 3).map((project, i) => (
-                <article class={`project-card project-${(i % 3) + 1}`}>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {projects.slice(0, 3).map((project) => (
+                <article class="project-card">
                   <ArrowCard entry={project} />
                 </article>
               ))}
@@ -103,7 +102,7 @@ const [posts, projects] = await Promise.all([
                 </svg>
               </a>
             </header>
-            <div class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {posts.slice(0, 3).map((post) => (
                 <article>
                   <ArrowCard entry={post} />
@@ -113,8 +112,6 @@ const [posts, projects] = await Promise.all([
           </section>
         )
       }
-
-      <ContactsSection />
     </div>
   </main>
 </PageLayout>
