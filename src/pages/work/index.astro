@@ -1,8 +1,6 @@
 ---
 import { getCollection } from "astro:content";
 import PageLayout from "@layouts/PageLayout.astro";
-import TopLayout from "@layouts/TopLayout.astro";
-import BottomLayout from "@layouts/BottomLayout.astro";
 import { WORK } from "@consts";
 
 // Get work collection
@@ -41,26 +39,33 @@ function formatWorkDate(input: Date | string | undefined) {
 ---
 
 <PageLayout title={WORK.TITLE} description={WORK.DESCRIPTION}>
-  <TopLayout>
-    <div class="animate page-heading flex items-center gap-3 mb-8">
-      <span class="text-3xl">{WORK.TITLE}</span>
-      <div class="h-px flex-grow bg-gradient-to-r from-black/50 to-transparent dark:from-white/50"></div>
+  <div class="py-24 px-24 md:px-48 lg:px-72 xl:px-96 relative">
+    <!-- Background decoration -->
+    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+      <div class="absolute -top-40 -right-40 w-80 h-80 rounded-full bg-gradient-to-br from-purple-400/10 to-pink-400/10 blur-3xl"></div>
+      <div class="absolute -bottom-40 -left-40 w-80 h-80 rounded-full bg-gradient-to-tr from-blue-400/10 to-cyan-400/10 blur-3xl"></div>
     </div>
-  </TopLayout>
-  
-  <BottomLayout>
-    <div class="timeline relative">
+
+    <!-- Header Section -->
+    <div class="text-center mb-16 relative z-10">
+      <h1 class="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-gray-900 via-purple-900 to-gray-900 dark:from-white dark:via-purple-300 dark:to-white bg-clip-text text-transparent">
+        {WORK.TITLE}
+      </h1>
+      <div class="w-24 h-1 bg-gradient-to-r from-purple-500 to-pink-500 mx-auto rounded-full"></div>
+    </div>
+
+    <div class="timeline relative z-10">
       {work.map((entry, index) => (
         <div class="timeline-entry animate group relative">
           <!-- Timeline line -->
           {index < work.length - 1 && (
-            <div class="absolute left-[14px] top-14 bottom-0 w-0.5 bg-gradient-to-b from-black/20 to-black/10 dark:from-white/20 dark:to-white/10"></div>
+            <div class="absolute left-[14px] top-14 bottom-0 w-0.5 bg-gradient-to-b from-purple-500/20 to-pink-500/10"></div>
           )}
           
           <div class="flex gap-6 py-8 group-first:pt-0">
             <!-- Timeline dot -->
             <div class="relative z-10 mt-1.5">
-              <div class="timeline-dot w-7 h-7 rounded-full border-2 border-black/40 dark:border-white/40 bg-white dark:bg-gray-900 flex items-center justify-center shadow-md transition-all duration-300 group-hover:scale-110 group-hover:border-black dark:group-hover:border-white">
+              <div class="timeline-dot w-7 h-7 rounded-full border-2 border-purple-500/40 bg-white dark:bg-gray-900 flex items-center justify-center shadow-md transition-all duration-300 group-hover:scale-110 group-hover:border-purple-500">
                 <span class="text-xs font-bold">{work.length - index}</span>
               </div>
             </div>
@@ -68,8 +73,8 @@ function formatWorkDate(input: Date | string | undefined) {
             <!-- Card content -->
             <div class="flex-grow">
               <!-- Date and Location row -->
-              <div class="flex justify-between items-center flex-wrap gap-2 mb-2">
-                <div class="text-sm font-medium px-3 py-1 bg-black/5 dark:bg-white/10 rounded-full">
+              <div class="flex justify-between items-center flex-wrap gap-2 mb-3">
+                <div class="text-sm font-medium px-3 py-1 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-full">
                   {formatWorkDate(entry.data.dateStart)} – {entry.data.dateEnd ? formatWorkDate(entry.data.dateEnd) : "Present"}
                 </div>
                 
@@ -85,17 +90,17 @@ function formatWorkDate(input: Date | string | undefined) {
               </div>
               
               <!-- Company and Role -->
-              <div class="mb-4">
-                <div class="text-xl font-bold text-black dark:text-white transition-all duration-300 group-hover:text-blue-600 dark:group-hover:text-blue-400">
-                  {entry.data.company}
+              <div class="backdrop-blur-sm bg-white/50 dark:bg-gray-800/50 rounded-2xl p-8 border border-gray-200/50 dark:border-gray-700/50 shadow-xl transition-all duration-300 group-hover:shadow-2xl">
+                <div class="mb-4">
+                  <div class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                    {entry.data.company}
+                  </div>
+                  <div class="text-lg font-medium mt-1 text-gray-700 dark:text-gray-300">
+                    {entry.data.role}
+                  </div>
                 </div>
-                <div class="text-lg font-medium mt-1 text-gray-700 dark:text-gray-300">
-                  {entry.data.role}
-                </div>
-              </div>
-              
-              <!-- Content -->
-              <div class="card-content p-5 rounded-lg bg-black/5 dark:bg-white/5 transition-all duration-300 group-hover:bg-black/10 dark:group-hover:bg-white/10">
+                
+                <!-- Content -->
                 <article class="prose dark:prose-invert max-w-none">
                   <entry.Content />
                 </article>
@@ -105,27 +110,39 @@ function formatWorkDate(input: Date | string | undefined) {
         </div>
       ))}
     </div>
-  </BottomLayout>
+  </div>
 </PageLayout>
 
 <style>
-  /* Additional styles */
+  /* Custom animations */
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
   .timeline-entry {
     transition: transform 0.3s ease;
   }
+  
   .timeline-entry:hover {
     transform: translateX(4px);
   }
+
   .card-content {
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
   }
+
   @media (prefers-color-scheme: dark) {
     .card-content {
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
     }
-  }
-  .page-heading {
-    margin-bottom: 2rem;
-    font-weight: 700;
   }
 </style>

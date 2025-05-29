@@ -4,6 +4,7 @@ import { cn } from "@lib/utils";
 const { pathname } = Astro.url;
 const subpath = pathname.match(/[^/]+/g);
 import Container from "@components/ui/Container.astro";
+
 const allowedLinkTexts = [
   "Home",
   "Blog",
@@ -12,46 +13,45 @@ const allowedLinkTexts = [
   "Work",
   "Contact",
 ];
+
 const filteredLinks = LINKS.filter((link) =>
   allowedLinkTexts.includes(link.TEXT)
-).map((link) => {
-  if (link.TEXT === "Contact") {
-    return { ...link, HREF: "/contact" };
-  }
-  return link;
-});
+);
 ---
 
-<header id="header" class="fixed top-0 w-full h-16 z-50">
+<header
+  id="header"
+  class="fixed top-0 w-full h-16 z-50 bg-white/80 dark:bg-black/80 backdrop-blur-md border-b border-black/10 dark:border-white/10">
   <Container size="md">
-    <div class="relative h-full w-full">
-      <div
-        class="absolute left-0 top-1/2 -translate-y-1/2 flex gap-1 font-semibold">
+    <div class="relative h-full w-full flex items-center">
+      <!-- Logo/Brand - Left Side -->
+      <div class="flex items-center gap-2 font-semibold">
         <a
           href="/"
-          class="flex gap-1 text-current hover:text-black dark:hover:text-white transition-colors duration-300 ease-in-out">
-          <svg class="size-6 fill-current">
+          class="flex items-center gap-2 text-current hover:text-black dark:hover:text-white transition-colors duration-300 ease-in-out">
+          <svg class="size-6 fill-current flex-shrink-0">
             <use href="/brand.svg#brand"></use>
           </svg>
-          <div>
+          <span class="hidden sm:block">
             {SITE.TITLE}
-          </div>
+          </span>
         </a>
       </div>
 
-      <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-        <nav class="hidden md:flex items-center justify-center text-sm gap-1">
+      <!-- Navigation - Center -->
+      <div class="flex-1 flex items-center justify-center px-4">
+        <nav class="hidden md:flex items-center justify-center gap-2">
           {
             filteredLinks.map((LINK) => (
               <a
                 href={LINK.HREF}
                 class={cn(
-                  "h-8 rounded-full px-3 text-current",
-                  "flex items-center justify-center",
-                  "transition-colors duration-300 ease-in-out",
+                  "h-8 rounded-full px-4 text-sm font-medium",
+                  "flex items-center justify-center whitespace-nowrap",
+                  "transition-all duration-300 ease-in-out",
                   pathname === LINK.HREF || "/" + subpath?.[0] === LINK.HREF ?
-                    "bg-black dark:bg-white text-white dark:text-black"
-                  : "hover:bg-black/5 dark:hover:bg-white/20 hover:text-black dark:hover:text-white"
+                    "bg-black dark:bg-white text-white dark:text-black shadow-sm"
+                  : "hover:bg-black/5 dark:hover:bg-white/10 hover:text-black dark:hover:text-white"
                 )}>
                 {LINK.TEXT}
               </a>
@@ -60,77 +60,81 @@ const filteredLinks = LINKS.filter((link) =>
         </nav>
       </div>
 
-      <div class="buttons absolute right-0 top-1/2 -translate-y-1/2 flex gap-1">
+      <!-- Action Buttons - Right Side -->
+      <div class="flex items-center gap-2">
+        <!-- Search Button -->
         <a
           href="/search"
           aria-label={`Search blog posts and projects on ${SITE.TITLE}`}
           class={cn(
             "hidden md:flex",
             "size-9 rounded-full p-2 items-center justify-center",
-            "bg-transparent hover:bg-black/5 dark:hover:bg-white/20",
-            "stroke-current hover:stroke-black hover:dark:stroke-white",
-            "border border-black/10 dark:border-white/25",
-            "transition-colors duration-300 ease-in-out",
+            "transition-all duration-300 ease-in-out",
+            "border border-black/10 dark:border-white/20",
             pathname === "/search" || "/" + subpath?.[0] === "/search" ?
-              "pointer-events-none bg-black dark:bg-white text-white dark:text-black"
-            : ""
+              "bg-black dark:bg-white text-white dark:text-black pointer-events-none"
+            : "bg-transparent hover:bg-black/5 dark:hover:bg-white/10 stroke-current hover:stroke-black dark:hover:stroke-white"
           )}>
-          <svg class="size-full">
+          <svg class="size-4">
             <use href="/ui.svg#search"></use>
           </svg>
         </a>
 
+        <!-- RSS Button -->
         <a
           href="/rss.xml"
           target="_blank"
-          aria-label={`Rss feed for ${SITE.TITLE}`}
+          rel="noopener noreferrer"
+          aria-label={`RSS feed for ${SITE.TITLE}`}
           class={cn(
             "hidden md:flex",
             "size-9 rounded-full p-2 items-center justify-center",
-            "bg-transparent hover:bg-black/5 dark:hover:bg-white/20",
-            "stroke-current hover:stroke-black hover:dark:stroke-white",
-            "border border-black/10 dark:border-white/25",
-            "transition-colors duration-300 ease-in-out"
+            "bg-transparent hover:bg-black/5 dark:hover:bg-white/10",
+            "stroke-current hover:stroke-black dark:hover:stroke-white",
+            "border border-black/10 dark:border-white/20",
+            "transition-all duration-300 ease-in-out"
           )}>
-          <svg class="size-full">
+          <svg class="size-4">
             <use href="/ui.svg#rss"></use>
           </svg>
         </a>
 
+        <!-- Theme Toggle Button -->
         <button
           id="header-theme-button"
-          aria-label={`Toggle light and dark theme`}
+          aria-label="Toggle light and dark theme"
           class={cn(
             "hidden md:flex",
             "size-9 rounded-full p-2 items-center justify-center",
-            "bg-transparent hover:bg-black/5 dark:hover:bg-white/20",
-            "stroke-current hover:stroke-black hover:dark:stroke-white",
-            "border border-black/10 dark:border-white/25",
-            "transition-colors duration-300 ease-in-out"
+            "bg-transparent hover:bg-black/5 dark:hover:bg-white/10",
+            "stroke-current hover:stroke-black dark:hover:stroke-white",
+            "border border-black/10 dark:border-white/20",
+            "transition-all duration-300 ease-in-out"
           )}>
-          <svg class="size-full block dark:hidden">
+          <svg class="size-4 block dark:hidden">
             <use href="/ui.svg#sun"></use>
           </svg>
-          <svg class="size-full hidden dark:block">
+          <svg class="size-4 hidden dark:block">
             <use href="/ui.svg#moon"></use>
           </svg>
         </button>
 
+        <!-- Mobile Menu Button -->
         <button
           id="header-drawer-button"
-          aria-label={`Toggle drawer open and closed`}
+          aria-label="Toggle mobile menu"
           class={cn(
             "flex md:hidden",
             "size-9 rounded-full p-2 items-center justify-center",
-            "bg-transparent hover:bg-black/5 dark:hover:bg-white/20",
-            "stroke-current hover:stroke-black hover:dark:stroke-white",
-            "border border-black/10 dark:border-white/25",
-            "transition-colors duration-300 ease-in-out"
+            "bg-transparent hover:bg-black/5 dark:hover:bg-white/10",
+            "stroke-current hover:stroke-black dark:hover:stroke-white",
+            "border border-black/10 dark:border-white/20",
+            "transition-all duration-300 ease-in-out"
           )}>
-          <svg id="drawer-open" class="size-full">
+          <svg id="drawer-open" class="size-4">
             <use href="/ui.svg#menu"></use>
           </svg>
-          <svg id="drawer-close" class="size-full">
+          <svg id="drawer-close" class="size-4">
             <use href="/ui.svg#x"></use>
           </svg>
         </button>
@@ -140,6 +144,7 @@ const filteredLinks = LINKS.filter((link) =>
 </header>
 
 <style>
+  /* Mobile menu button states */
   #header-drawer-button > #drawer-open {
     @apply block;
   }
@@ -155,21 +160,63 @@ const filteredLinks = LINKS.filter((link) =>
   #header-drawer-button.open > #drawer-close {
     @apply block;
   }
+
+  /* Smooth backdrop blur transition */
+  #header {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  /* Enhanced focus styles for accessibility */
+  #header a:focus-visible,
+  #header button:focus-visible {
+    @apply outline-none ring-2 ring-black dark:ring-white ring-offset-2 ring-offset-white dark:ring-offset-black;
+  }
 </style>
 
-<script is:inline>
-  function toggleDrawer() {
-    const drawer = document.getElementById("drawer");
-    const drawerButton = document.getElementById("header-drawer-button");
-    drawer?.classList.toggle("open");
-    drawerButton?.classList.toggle("open");
+<script>
+  // Add smooth scroll behavior for anchor links
+  document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+    anchor.addEventListener(
+      "click",
+      function (this: HTMLAnchorElement, e: Event) {
+        e.preventDefault();
+        const targetId = this.getAttribute("href");
+        const targetElement = document.querySelector(targetId || "");
+
+        if (targetElement) {
+          const headerHeight =
+            document.getElementById("header")?.offsetHeight || 64;
+          const targetPosition =
+            targetElement.getBoundingClientRect().top +
+            window.pageYOffset -
+            headerHeight;
+
+          window.scrollTo({
+            top: targetPosition,
+            behavior: "smooth",
+          });
+        }
+      }
+    );
+  });
+
+  // Enhanced theme toggle functionality
+  const themeButton = document.getElementById("header-theme-button");
+  if (themeButton) {
+    themeButton.addEventListener("click", () => {
+      const isDark = document.documentElement.classList.contains("dark");
+      document.documentElement.classList.toggle("dark", !isDark);
+      localStorage.setItem("theme", isDark ? "light" : "dark");
+    });
   }
 
-  function initializeDrawerButton() {
-    const drawerButton = document.getElementById("header-drawer-button");
-    drawerButton?.addEventListener("click", toggleDrawer);
+  // Mobile menu toggle
+  const drawerButton = document.getElementById("header-drawer-button");
+  if (drawerButton) {
+    drawerButton.addEventListener("click", () => {
+      drawerButton.classList.toggle("open");
+      // Add your mobile menu toggle logic here
+    });
   }
-
-  document.addEventListener("astro:after-swap", initializeDrawerButton);
-  initializeDrawerButton();
 </script>
