@@ -30,6 +30,7 @@ const structuredData = {
 <PageLayout title="Home" description={SITE.DESCRIPTION}>
   <!-- Structured Data -->
   <script
+    is:inline
     type="application/ld+json"
     set:html={JSON.stringify(structuredData)}
   />

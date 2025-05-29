@@ -428,7 +428,7 @@ import { Github, Linkedin, Instagram } from "lucide-astro";
     const inputs = form?.querySelectorAll("input, textarea");
     inputs?.forEach((input) => {
       input.addEventListener("blur", () => {
-        if (input.checkValidity()) {
+        if ((input as HTMLInputElement).checkValidity()) {
           input.classList.remove("border-red-500");
           input.classList.add("border-green-500");
         } else {
@@ -442,7 +442,7 @@ import { Github, Linkedin, Instagram } from "lucide-astro";
     document
       .querySelectorAll('a[href^="mailto:"], a[href^="tel:"]')
       .forEach((link) => {
-        link.addEventListener("click", (e) => {
+        link.addEventListener("click", () => {
           // Add subtle animation feedback
           const icon = link.querySelector(".w-10, .w-12");
           if (icon) {

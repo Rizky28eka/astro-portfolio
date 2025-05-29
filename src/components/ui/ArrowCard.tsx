@@ -34,7 +34,7 @@ export default function ArrowCard({ entry, pill }: Props) {
           <ul class="flex flex-row flex-wrap mt-2 gap-2" role="list">
             {entry.data.tags.map((tag: string) => (
               <li 
-                key={tag}
+                data-key={tag}
                 class="text-[10px] md:text-xs uppercase py-0.5 px-1.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 tracking-wide border border-gray-200 dark:border-gray-700 group-hover:bg-purple-50 dark:group-hover:bg-purple-900/20 group-hover:border-purple-200 dark:group-hover:border-purple-800 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-all duration-200"
               >
                 {tag}
