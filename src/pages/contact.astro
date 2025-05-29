@@ -223,9 +223,12 @@ import { Github, Linkedin, Instagram } from "lucide-astro";
                 class="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl">
               </div>
               <span
-                class="relative z-10 flex items-center justify-center gap-2">
+                class="relative z-10 flex items-center justify-center gap-3">
+                <span id="submit-text" class="font-semibold text-lg sm:text-xl"
+                  >Send Message</span
+                >
                 <svg
-                  class="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform duration-300"
+                  class="w-7 h-7 sm:w-8 sm:h-8 ml-1 align-middle rotate-90"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24">
@@ -235,7 +238,6 @@ import { Github, Linkedin, Instagram } from "lucide-astro";
                     stroke-width="2"
                     d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
                 </svg>
-                <span id="submit-text">Send Message</span>
               </span>
             </button>
           </form>

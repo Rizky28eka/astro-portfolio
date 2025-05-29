@@ -1,5 +1,5 @@
 ---
-title: "FitTrack Pro - Your Personal Fitness Companion"
+title: "FitTrack Pro - Your Personal Fitness"
 summary: "Cross-platform fitness tracking mobile application"
 date: "May 26 2025"
 draft: false
