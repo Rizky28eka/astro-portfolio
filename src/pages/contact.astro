@@ -403,6 +403,11 @@ import { Github, Linkedin, Instagram } from "lucide-astro";
         try {
           const formData = new FormData(form);
 
+          // Log form data for debugging
+          for (const [key, value] of formData.entries()) {
+            console.log(`${key}: ${value}`);
+          }
+
           // Simulate form submission (replace with actual endpoint)
           await new Promise((resolve) => setTimeout(resolve, 2000));
 
