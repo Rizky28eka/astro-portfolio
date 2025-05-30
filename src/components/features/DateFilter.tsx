@@ -1,4 +1,4 @@
-import { createSignal, Show, For } from "solid-js"
+import { createSignal, Show, For, onMount, onCleanup } from "solid-js"
 import { cn } from "@lib/utils"
 
 type Props = {
@@ -24,6 +24,17 @@ export default function DateFilter(props: Props) {
       setShowFilter(false)
     }
   }
+
+  let cleanup: (() => void) | undefined
+
+  onMount(() => {
+    document.addEventListener('click', handleOutsideClick)
+    cleanup = () => document.removeEventListener('click', handleOutsideClick)
+  })
+
+  onCleanup(() => {
+    if (cleanup) cleanup()
+  })
 
   const getCurrentLabel = () => {
     const current = props.currentFilter

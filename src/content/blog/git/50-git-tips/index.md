@@ -3,7 +3,7 @@ title: "Git Tips Every Developer Should Know"
 summary: "Essential Git tips and tricks to improve your workflow and productivity as a developer"
 date: "2024, 04, 14"
 tags: ["git", "tips", "productivity", "workflow", "best-practices"]
-difficulty: "easy"
+difficulty: "beginner"
 draft: false
 ---
 

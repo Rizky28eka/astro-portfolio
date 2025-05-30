@@ -1,5 +1,5 @@
 import type { CollectionEntry } from "astro:content"
-import { createEffect, createSignal, createMemo, For, Show, batch } from "solid-js"
+import { createEffect, createSignal, createMemo, For, Show, batch, onMount } from "solid-js"
 import ArrowCard from "@components/ui/ArrowCard"
 import { cn } from "@lib/utils"
 import OtherTags from "./OtherTags"
@@ -11,8 +11,6 @@ type Props = {
   data: CollectionEntry<"blog">[]
 }
 
-type Tag = string
-type Category = string
 type DateFilterValue = typeof DATE_FILTER_OPTIONS[number]['value'] | string
 type DifficultyLevel = typeof DIFFICULTY_LEVELS[number]
 
@@ -297,7 +295,9 @@ export default function Blog({ data, tags }: Props) {
 
   const goToPage = (page: number) => {
     setCurrentPage(page)
-    document.querySelector('.posts-section')?.scrollIntoView({ behavior: 'smooth' })
+    onMount(() => {
+      document.querySelector('.posts-section')?.scrollIntoView({ behavior: 'smooth' })
+    })
   }
 
   const nextPage = () => {
