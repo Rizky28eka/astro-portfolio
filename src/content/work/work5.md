@@ -1,7 +1,7 @@
 ---
 company: "Self-Employed"
 role: "Freelance Projectts"
-location: "Bandung, Indonesia"
+location: "Remote, Indonesia"
 dateStart: "2022-08"
 dateEnd: "Present"
 summary: "Handled freelance projects involving full-stack web development, cross-platform mobile apps, and lightweight machine learning solutions."

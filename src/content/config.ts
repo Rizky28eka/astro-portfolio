@@ -29,6 +29,7 @@ const blog = defineCollection({
     date: dateUnion.optional(),
     tags: optionalStringArray,
     draft: z.boolean().optional(),
+    difficulty: z.enum(['beginner', 'medium', 'advanced']).optional(),
   }),
 });
 
