@@ -1,5 +1,5 @@
-import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
 /**
  * Combines class names using clsx and merges Tailwind classes with tailwind-merge
@@ -18,13 +18,13 @@ export function cn(...inputs: ClassValue[]): string {
 export function formatDate(date: unknown): string {
   const parsedDate = date instanceof Date ? date : new Date(date as string);
   if (isNaN(parsedDate.getTime())) {
-    return "Invalid date";
+    return 'Invalid date';
   }
 
-  return new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    day: "2-digit",
-    year: "numeric",
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+    day: '2-digit',
+    year: 'numeric',
   }).format(parsedDate);
 }
 
@@ -34,11 +34,11 @@ export function formatDate(date: unknown): string {
  * @returns Estimated reading time as a string
  */
 export function readingTime(html: string): string {
-  if (typeof html !== "string" || !html.trim()) {
-    return "1 min read";
+  if (typeof html !== 'string' || !html.trim()) {
+    return '1 min read';
   }
 
-  const textContent = html.replace(/<[^>]+>/g, " "); // Replace HTML tags with space
+  const textContent = html.replace(/<[^>]+>/g, ' '); // Replace HTML tags with space
   const words = textContent.trim().split(/\s+/).filter(Boolean);
   const wordCount = words.length;
 
