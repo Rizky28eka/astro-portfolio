@@ -1,0 +1,336 @@
+---
+title: "Kotlin DSLs: What, Why, How"
+summary: "Learn how to create readable custom syntax using Kotlin DSLs"
+date: "2025-11-13"
+category: "kotlin"
+tags: ["kotlin", "dsl", "advanced", "code-style"]
+---
+
+## Kotlin DSLs: What, Why, How
+
+Domain Specific Languages (DSLs) in Kotlin allow you to create readable, type-safe, and maintainable code. Let's explore how to create and use DSLs in Kotlin.
+
+## What are DSLs?
+
+DSLs are specialized languages designed for specific tasks. In Kotlin, we can create internal DSLs that look like natural language while maintaining type safety.
+
+## Basic DSL Structure
+
+### Function Literals
+```kotlin
+fun buildString(builder: StringBuilder.() -> Unit): String {
+    val stringBuilder = StringBuilder()
+    stringBuilder.builder()
+    return stringBuilder.toString()
+}
+
+// Usage
+val result = buildString {
+    append("Hello")
+    append(" ")
+    append("World")
+}
+```
+
+### Type-Safe Builders
+```kotlin
+class HTML {
+    fun body(init: Body.() -> Unit) {
+        val body = Body()
+        body.init()
+    }
+}
+
+class Body {
+    fun div(init: Div.() -> Unit) {
+        val div = Div()
+        div.init()
+    }
+}
+
+class Div {
+    var text: String = ""
+}
+
+fun html(init: HTML.() -> Unit): HTML {
+    val html = HTML()
+    html.init()
+    return html
+}
+
+// Usage
+val htmlContent = html {
+    body {
+        div {
+            text = "Hello World"
+        }
+    }
+}
+```
+
+## Creating a DSL
+
+### Gradle-like DSL
+```kotlin
+class DependencyHandler {
+    fun implementation(dependency: String) {
+        println("Adding dependency: $dependency")
+    }
+    
+    fun testImplementation(dependency: String) {
+        println("Adding test dependency: $dependency")
+    }
+}
+
+fun dependencies(init: DependencyHandler.() -> Unit) {
+    val handler = DependencyHandler()
+    handler.init()
+}
+
+// Usage
+dependencies {
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.8.0")
+    testImplementation("junit:junit:4.13.2")
+}
+```
+
+### HTML Builder DSL
+```kotlin
+interface Element {
+    fun render(builder: StringBuilder, indent: String)
+}
+
+class TextElement(val text: String) : Element {
+    override fun render(builder: StringBuilder, indent: String) {
+        builder.append("$indent$text\n")
+    }
+}
+
+class HTMLBuilder {
+    private val elements = mutableListOf<Element>()
+    
+    fun text(text: String) {
+        elements.add(TextElement(text))
+    }
+    
+    fun render(): String {
+        val builder = StringBuilder()
+        elements.forEach { it.render(builder, "") }
+        return builder.toString()
+    }
+}
+
+fun html(init: HTMLBuilder.() -> Unit): String {
+    val builder = HTMLBuilder()
+    builder.init()
+    return builder.render()
+}
+
+// Usage
+val content = html {
+    text("Hello")
+    text("World")
+}
+```
+
+## Advanced DSL Features
+
+### Infix Functions
+```kotlin
+class Configuration {
+    private val settings = mutableMapOf<String, Any>()
+    
+    infix fun set(key: String, value: Any) {
+        settings[key] = value
+    }
+    
+    fun get(key: String): Any? = settings[key]
+}
+
+fun configure(init: Configuration.() -> Unit): Configuration {
+    val config = Configuration()
+    config.init()
+    return config
+}
+
+// Usage
+val config = configure {
+    "name" set "John"
+    "age" set 30
+}
+```
+
+### Extension Functions
+```kotlin
+fun String.bold() = "<b>$this</b>"
+fun String.italic() = "<i>$this</i>"
+
+class MarkdownBuilder {
+    private val content = StringBuilder()
+    
+    fun text(text: String) {
+        content.append(text)
+    }
+    
+    fun build(): String = content.toString()
+}
+
+fun markdown(init: MarkdownBuilder.() -> Unit): String {
+    val builder = MarkdownBuilder()
+    builder.init()
+    return builder.build()
+}
+
+// Usage
+val markdown = markdown {
+    text("Hello".bold())
+    text(" ".italic())
+    text("World".bold())
+}
+```
+
+## Best Practices
+
+### Type Safety
+```kotlin
+sealed class CSSProperty {
+    data class Color(val value: String) : CSSProperty()
+    data class Size(val value: Int, val unit: String) : CSSProperty()
+}
+
+class StyleBuilder {
+    private val properties = mutableMapOf<String, CSSProperty>()
+    
+    fun color(value: String) {
+        properties["color"] = CSSProperty.Color(value)
+    }
+    
+    fun fontSize(value: Int, unit: String = "px") {
+        properties["font-size"] = CSSProperty.Size(value, unit)
+    }
+}
+
+fun style(init: StyleBuilder.() -> Unit): Map<String, CSSProperty> {
+    val builder = StyleBuilder()
+    builder.init()
+    return builder.properties
+}
+
+// Usage
+val styles = style {
+    color("red")
+    fontSize(16)
+}
+```
+
+### Error Handling
+```kotlin
+class ValidationBuilder {
+    private val errors = mutableListOf<String>()
+    
+    fun validate(condition: Boolean, message: String) {
+        if (!condition) {
+            errors.add(message)
+        }
+    }
+    
+    fun build(): List<String> = errors
+}
+
+fun validate(init: ValidationBuilder.() -> Unit): List<String> {
+    val builder = ValidationBuilder()
+    builder.init()
+    return builder.build()
+}
+
+// Usage
+val errors = validate {
+    validate(name.isNotEmpty(), "Name cannot be empty")
+    validate(age > 0, "Age must be positive")
+}
+```
+
+## Common Use Cases
+
+### Database Query DSL
+```kotlin
+class QueryBuilder {
+    private val conditions = mutableListOf<String>()
+    
+    fun where(condition: String) {
+        conditions.add(condition)
+    }
+    
+    fun build(): String {
+        return if (conditions.isEmpty()) {
+            "SELECT * FROM table"
+        } else {
+            "SELECT * FROM table WHERE ${conditions.joinToString(" AND ")}"
+        }
+    }
+}
+
+fun query(init: QueryBuilder.() -> Unit): String {
+    val builder = QueryBuilder()
+    builder.init()
+    return builder.build()
+}
+
+// Usage
+val sql = query {
+    where("age > 18")
+    where("status = 'active'")
+}
+```
+
+### Configuration DSL
+```kotlin
+class ServerConfig {
+    var host: String = "localhost"
+    var port: Int = 8080
+    var ssl: Boolean = false
+    
+    fun ssl(init: SSLConfig.() -> Unit) {
+        ssl = true
+        val sslConfig = SSLConfig()
+        sslConfig.init()
+    }
+}
+
+class SSLConfig {
+    var certificate: String = ""
+    var key: String = ""
+}
+
+fun server(init: ServerConfig.() -> Unit): ServerConfig {
+    val config = ServerConfig()
+    config.init()
+    return config
+}
+
+// Usage
+val config = server {
+    host = "example.com"
+    port = 443
+    ssl {
+        certificate = "cert.pem"
+        key = "key.pem"
+    }
+}
+```
+
+## Conclusion
+
+Kotlin DSLs help you:
+- Create readable, natural language-like code
+- Maintain type safety
+- Build domain-specific abstractions
+- Improve code maintainability
+
+Remember:
+- Keep DSLs focused and simple
+- Use type-safe builders
+- Follow Kotlin conventions
+- Document your DSLs
+
+Stay tuned for our next post about Kotlin for Backend with Ktor! 

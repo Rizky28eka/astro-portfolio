@@ -1,0 +1,373 @@
+---
+title: "Jetpack Compose with Kotlin"
+summary: "Learn how to build modern UIs using Jetpack Compose and Kotlin"
+date: "2025-10-09"
+category: "kotlin"
+tags: ["kotlin", "jetpack-compose", "modern-ui", "kotlin-ui"]
+---
+
+## Jetpack Compose with Kotlin
+
+Jetpack Compose is Android's modern toolkit for building native UI. Let's explore how to create beautiful and responsive UIs using Compose and Kotlin.
+
+## Project Setup
+
+### Add Dependencies
+
+```kotlin
+// build.gradle.kts
+dependencies {
+    val composeBom = platform("androidx.compose:compose-bom:2024.02.00")
+    implementation(composeBom)
+
+    implementation("androidx.compose.ui:ui")
+    implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.ui:ui-tooling-preview")
+    implementation("androidx.activity:activity-compose:1.8.2")
+
+    debugImplementation("androidx.compose.ui:ui-tooling")
+}
+```
+
+## Basic Composables
+
+### Simple Text
+
+```kotlin
+@Composable
+fun Greeting(name: String) {
+    Text(
+        text = "Hello $name!",
+        style = MaterialTheme.typography.headlineMedium
+    )
+}
+```
+
+### Button with Click
+
+```kotlin
+@Composable
+fun Counter() {
+    var count by remember { mutableStateOf(0) }
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Text(
+            text = "Count: $count",
+            style = MaterialTheme.typography.headlineMedium
+        )
+
+        Button(
+            onClick = { count++ },
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text("Increment")
+        }
+    }
+}
+```
+
+## Layouts
+
+### Column Layout
+
+```kotlin
+@Composable
+fun UserProfile(user: User) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+        Text(
+            text = user.name,
+            style = MaterialTheme.typography.headlineMedium
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = user.email,
+            style = MaterialTheme.typography.bodyLarge
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+            onClick = { /* Handle click */ },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Edit Profile")
+        }
+    }
+}
+```
+
+### Row Layout
+
+```kotlin
+@Composable
+fun UserStats(stats: UserStats) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        horizontalArrangement = Arrangement.SpaceEvenly
+    ) {
+        StatItem("Posts", stats.posts)
+        StatItem("Followers", stats.followers)
+        StatItem("Following", stats.following)
+    }
+}
+
+@Composable
+fun StatItem(label: String, value: Int) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(
+            text = value.toString(),
+            style = MaterialTheme.typography.titleLarge
+        )
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium
+        )
+    }
+}
+```
+
+## State Management
+
+### State Hoisting
+
+```kotlin
+@Composable
+fun CounterScreen() {
+    var count by remember { mutableStateOf(0) }
+
+    Counter(
+        count = count,
+        onIncrement = { count++ },
+        onDecrement = { count-- }
+    )
+}
+
+@Composable
+fun Counter(
+    count: Int,
+    onIncrement: () -> Unit,
+    onDecrement: () -> Unit
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.padding(16.dp)
+    ) {
+        Button(onClick = onDecrement) {
+            Text("-")
+        }
+
+        Text(
+            text = count.toString(),
+            modifier = Modifier.padding(horizontal = 16.dp)
+        )
+
+        Button(onClick = onIncrement) {
+            Text("+")
+        }
+    }
+}
+```
+
+## Navigation
+
+### Basic Navigation
+
+```kotlin
+@Composable
+fun AppNavigation() {
+    val navController = rememberNavController()
+
+    NavHost(
+        navController = navController,
+        startDestination = "home"
+    ) {
+        composable("home") {
+            HomeScreen(
+                onNavigateToProfile = {
+                    navController.navigate("profile")
+                }
+            )
+        }
+
+        composable("profile") {
+            ProfileScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+    }
+}
+```
+
+## Theming
+
+### Custom Theme
+
+```kotlin
+@Composable
+fun MyAppTheme(
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    content: @Composable () -> Unit
+) {
+    val colors = if (darkTheme) {
+        darkColorScheme(
+            primary = Purple80,
+            secondary = PurpleGrey80,
+            tertiary = Pink80
+        )
+    } else {
+        lightColorScheme(
+            primary = Purple40,
+            secondary = PurpleGrey40,
+            tertiary = Pink40
+        )
+    }
+
+    MaterialTheme(
+        colorScheme = colors,
+        typography = Typography,
+        content = content
+    )
+}
+```
+
+## Lists
+
+### LazyColumn
+
+```kotlin
+@Composable
+fun UserList(users: List<User>) {
+    LazyColumn {
+        items(users) { user ->
+            UserItem(user = user)
+        }
+    }
+}
+
+@Composable
+fun UserItem(user: User) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text(
+                text = user.name,
+                style = MaterialTheme.typography.titleMedium
+            )
+            Text(
+                text = user.email,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+    }
+}
+```
+
+## Animations
+
+### Basic Animation
+
+```kotlin
+@Composable
+fun AnimatedCounter() {
+    var count by remember { mutableStateOf(0) }
+    val animatedCount by animateIntAsState(
+        targetValue = count,
+        animationSpec = tween(durationMillis = 300)
+    )
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Text(
+            text = "Count: $animatedCount",
+            style = MaterialTheme.typography.headlineMedium
+        )
+
+        Button(
+            onClick = { count++ },
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text("Increment")
+        }
+    }
+}
+```
+
+## Best Practices
+
+### Reusable Components
+
+```kotlin
+@Composable
+fun PrimaryButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true
+) {
+    Button(
+        onClick = onClick,
+        modifier = modifier,
+        enabled = enabled,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.primary
+        )
+    ) {
+        Text(text = text)
+    }
+}
+```
+
+### Preview
+
+```kotlin
+@Preview(showBackground = true)
+@Composable
+fun UserProfilePreview() {
+    MyAppTheme {
+        UserProfile(
+            user = User(
+                name = "John Doe",
+                email = "john@example.com"
+            )
+        )
+    }
+}
+```
+
+## Conclusion
+
+Jetpack Compose helps you:
+
+- Build modern UIs
+- Write less code
+- Create responsive layouts
+- Implement animations easily
+
+Remember:
+
+- Use state hoisting
+- Create reusable components
+- Follow Material Design
+- Test your composables
+
+Stay tuned for our next post about Dependency Injection with Hilt!

@@ -1,0 +1,344 @@
+---
+title: "Performance Optimization in Kotlin"
+summary: "Learn techniques for optimizing Kotlin applications for better performance"
+date: "2025-09-11"
+category: "kotlin"
+tags: ["kotlin", "performance", "optimization", "programming"]
+---
+
+## Performance Optimization in Kotlin
+
+Performance optimization is crucial for building efficient Kotlin applications. Let's explore various techniques and best practices for optimizing Kotlin code.
+
+## Memory Management
+
+### Object Pooling
+
+```kotlin
+class ObjectPool<T>(
+    private val factory: () -> T,
+    private val maxSize: Int
+) {
+    private val pool = ConcurrentLinkedQueue<T>()
+
+    fun acquire(): T {
+        return pool.poll() ?: factory()
+    }
+
+    fun release(obj: T) {
+        if (pool.size < maxSize) {
+            pool.offer(obj)
+        }
+    }
+}
+
+// Usage
+val stringPool = ObjectPool({ StringBuilder() }, 100)
+val builder = stringPool.acquire()
+try {
+    builder.append("Hello")
+} finally {
+    stringPool.release(builder)
+}
+```
+
+### Memory Leak Prevention
+
+```kotlin
+class ResourceManager {
+    private val resources = WeakHashMap<Any, Resource>()
+
+    fun registerResource(key: Any, resource: Resource) {
+        resources[key] = resource
+    }
+
+    fun cleanup() {
+        resources.clear()
+    }
+}
+```
+
+## Collection Optimization
+
+### Sequence Usage
+
+```kotlin
+// Good for large collections
+val result = list.asSequence()
+    .filter { it > 0 }
+    .map { it * 2 }
+    .toList()
+
+// Avoid for small collections
+val result = list
+    .filter { it > 0 }
+    .map { it * 2 }
+```
+
+### Collection Initialization
+
+```kotlin
+// Good
+val map = HashMap<String, Int>(expectedSize)
+
+// Avoid
+val map = HashMap<String, Int>()
+```
+
+## Coroutine Optimization
+
+### Dispatcher Selection
+
+```kotlin
+// CPU-intensive work
+withContext(Dispatchers.Default) {
+    // Complex calculations
+}
+
+// IO operations
+withContext(Dispatchers.IO) {
+    // File operations
+}
+
+// UI updates
+withContext(Dispatchers.Main) {
+    // Update UI
+}
+```
+
+### Structured Concurrency
+
+```kotlin
+suspend fun processData() = coroutineScope {
+    val result1 = async { processFirst() }
+    val result2 = async { processSecond() }
+
+    Result(result1.await(), result2.await())
+}
+```
+
+## Caching
+
+### In-Memory Cache
+
+```kotlin
+class Cache<K, V>(
+    private val maxSize: Int
+) {
+    private val cache = LinkedHashMap<K, V>(maxSize, 0.75f, true)
+
+    @Synchronized
+    fun get(key: K): V? {
+        return cache[key]
+    }
+
+    @Synchronized
+    fun put(key: K, value: V) {
+        if (cache.size >= maxSize) {
+            cache.remove(cache.keys.first())
+        }
+        cache[key] = value
+    }
+}
+```
+
+### Disk Cache
+
+```kotlin
+class DiskCache(
+    private val directory: File,
+    private val maxSize: Long
+) {
+    fun get(key: String): ByteArray? {
+        val file = File(directory, key)
+        return if (file.exists()) file.readBytes() else null
+    }
+
+    fun put(key: String, data: ByteArray) {
+        val file = File(directory, key)
+        file.writeBytes(data)
+        cleanupIfNeeded()
+    }
+
+    private fun cleanupIfNeeded() {
+        var totalSize = directory.walk()
+            .filter { it.isFile }
+            .map { it.length() }
+            .sum()
+
+        if (totalSize > maxSize) {
+            directory.walk()
+                .filter { it.isFile }
+                .sortedBy { it.lastModified() }
+                .forEach { file ->
+                    if (totalSize <= maxSize) return@forEach
+                    totalSize -= file.length()
+                    file.delete()
+                }
+        }
+    }
+}
+```
+
+## Image Processing
+
+### Bitmap Optimization
+
+```kotlin
+fun optimizeBitmap(bitmap: Bitmap, maxSize: Int): Bitmap {
+    var width = bitmap.width
+    var height = bitmap.height
+
+    while (width * height > maxSize) {
+        width /= 2
+        height /= 2
+    }
+
+    return Bitmap.createScaledBitmap(bitmap, width, height, true)
+}
+```
+
+### Image Caching
+
+```kotlin
+class ImageCache {
+    private val memoryCache = LruCache<String, Bitmap>(20)
+    private val diskCache = DiskCache(File("cache/images"), 50 * 1024 * 1024)
+
+    fun getImage(url: String): Bitmap? {
+        return memoryCache.get(url) ?: diskCache.get(url)?.let {
+            BitmapFactory.decodeByteArray(it, 0, it.size)
+        }
+    }
+}
+```
+
+## Network Optimization
+
+### Connection Pooling
+
+```kotlin
+class ConnectionPool(
+    private val maxConnections: Int
+) {
+    private val pool = ArrayBlockingQueue<Connection>(maxConnections)
+
+    fun getConnection(): Connection {
+        return pool.poll() ?: createConnection()
+    }
+
+    fun releaseConnection(connection: Connection) {
+        if (pool.size < maxConnections) {
+            pool.offer(connection)
+        } else {
+            connection.close()
+        }
+    }
+}
+```
+
+### Request Batching
+
+```kotlin
+class BatchProcessor<T>(
+    private val batchSize: Int,
+    private val processor: (List<T>) -> Unit
+) {
+    private val batch = ArrayList<T>(batchSize)
+
+    @Synchronized
+    fun add(item: T) {
+        batch.add(item)
+        if (batch.size >= batchSize) {
+            processBatch()
+        }
+    }
+
+    private fun processBatch() {
+        processor(batch.toList())
+        batch.clear()
+    }
+}
+```
+
+## Best Practices
+
+### Lazy Initialization
+
+```kotlin
+// Good
+private val expensiveResource by lazy {
+    createExpensiveResource()
+}
+
+// Avoid
+private val expensiveResource = createExpensiveResource()
+```
+
+### String Concatenation
+
+```kotlin
+// Good
+val result = StringBuilder().apply {
+    append("Hello")
+    append(" ")
+    append("World")
+}.toString()
+
+// Avoid
+val result = "Hello" + " " + "World"
+```
+
+## Performance Monitoring
+
+### Metrics Collection
+
+```kotlin
+class PerformanceMonitor {
+    private val metrics = ConcurrentHashMap<String, Long>()
+
+    fun measureTime(key: String, block: () -> Unit) {
+        val startTime = System.nanoTime()
+        block()
+        val endTime = System.nanoTime()
+        metrics[key] = endTime - startTime
+    }
+
+    fun getMetrics(): Map<String, Long> {
+        return metrics.toMap()
+    }
+}
+```
+
+### Memory Profiling
+
+```kotlin
+class MemoryProfiler {
+    fun trackMemoryUsage() {
+        val runtime = Runtime.getRuntime()
+        val usedMemory = runtime.totalMemory() - runtime.freeMemory()
+        val maxMemory = runtime.maxMemory()
+
+        println("Used memory: ${usedMemory / 1024 / 1024}MB")
+        println("Max memory: ${maxMemory / 1024 / 1024}MB")
+    }
+}
+```
+
+## Conclusion
+
+Performance optimization in Kotlin helps you:
+
+- Improve application speed
+- Reduce memory usage
+- Enhance user experience
+- Scale applications efficiently
+
+Remember:
+
+- Use appropriate data structures
+- Implement caching strategies
+- Monitor performance metrics
+- Follow optimization best practices
+
+This concludes our series on Kotlin programming! We hope you've found these posts helpful in your Kotlin journey.

@@ -1,0 +1,303 @@
+---
+title: "Security Best Practices in Kotlin"
+summary: "Learn essential security practices for building secure Kotlin applications"
+date: "2025-09-04"
+category: "kotlin"
+tags: ["kotlin", "security", "best-practices", "programming"]
+---
+
+## Security Best Practices in Kotlin
+
+Security is a critical aspect of application development. Let's explore essential security practices for building secure Kotlin applications.
+
+## Input Validation
+
+### String Validation
+```kotlin
+fun validateInput(input: String): Boolean {
+    return input.matches(Regex("^[a-zA-Z0-9]+$"))
+}
+
+// Usage
+val input = "user123"
+if (!validateInput(input)) {
+    throw SecurityException("Invalid input")
+}
+```
+
+### Data Sanitization
+```kotlin
+fun sanitizeInput(input: String): String {
+    return input
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+        .replace("\"", "&quot;")
+        .replace("'", "&#x27;")
+        .replace("&", "&amp;")
+}
+```
+
+## Password Security
+
+### Password Hashing
+```kotlin
+fun hashPassword(password: String): String {
+    val salt = generateSalt()
+    return hashWithSalt(password, salt)
+}
+
+fun verifyPassword(password: String, hashedPassword: String): Boolean {
+    return verifyHash(password, hashedPassword)
+}
+```
+
+### Password Policy
+```kotlin
+fun validatePassword(password: String): Boolean {
+    val minLength = 8
+    val hasUpperCase = password.any { it.isUpperCase() }
+    val hasLowerCase = password.any { it.isLowerCase() }
+    val hasDigit = password.any { it.isDigit() }
+    val hasSpecialChar = password.any { !it.isLetterOrDigit() }
+    
+    return password.length >= minLength &&
+           hasUpperCase &&
+           hasLowerCase &&
+           hasDigit &&
+           hasSpecialChar
+}
+```
+
+## Encryption
+
+### Symmetric Encryption
+```kotlin
+class Encryption {
+    private val key = generateKey()
+    
+    fun encrypt(data: String): String {
+        val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+        cipher.init(Cipher.ENCRYPT_MODE, key)
+        return Base64.getEncoder().encodeToString(
+            cipher.doFinal(data.toByteArray())
+        )
+    }
+    
+    fun decrypt(encryptedData: String): String {
+        val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+        cipher.init(Cipher.DECRYPT_MODE, key)
+        return String(
+            cipher.doFinal(Base64.getDecoder().decode(encryptedData))
+        )
+    }
+}
+```
+
+### Asymmetric Encryption
+```kotlin
+class AsymmetricEncryption {
+    private val keyPair = generateKeyPair()
+    
+    fun encrypt(data: String): String {
+        val cipher = Cipher.getInstance("RSA")
+        cipher.init(Cipher.ENCRYPT_MODE, keyPair.public)
+        return Base64.getEncoder().encodeToString(
+            cipher.doFinal(data.toByteArray())
+        )
+    }
+    
+    fun decrypt(encryptedData: String): String {
+        val cipher = Cipher.getInstance("RSA")
+        cipher.init(Cipher.DECRYPT_MODE, keyPair.private)
+        return String(
+            cipher.doFinal(Base64.getDecoder().decode(encryptedData))
+        )
+    }
+}
+```
+
+## Secure Communication
+
+### HTTPS Configuration
+```kotlin
+class SecureHttpClient {
+    private val client = OkHttpClient.Builder()
+        .sslSocketFactory(createSSLSocketFactory(), trustManager)
+        .hostnameVerifier { hostname, _ ->
+            hostname == "api.example.com"
+        }
+        .build()
+        
+    fun makeSecureRequest(url: String): Response {
+        return client.newCall(Request.Builder()
+            .url(url)
+            .build())
+            .execute()
+    }
+}
+```
+
+### Certificate Pinning
+```kotlin
+val certificatePinner = CertificatePinner.Builder()
+    .add("api.example.com", "sha256/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")
+    .build()
+
+val client = OkHttpClient.Builder()
+    .certificatePinner(certificatePinner)
+    .build()
+```
+
+## Session Management
+
+### Secure Session Handling
+```kotlin
+class SessionManager {
+    private val sessions = ConcurrentHashMap<String, Session>()
+    
+    fun createSession(user: User): String {
+        val sessionId = generateSecureRandomId()
+        val session = Session(
+            id = sessionId,
+            userId = user.id,
+            expiresAt = Instant.now().plus(Duration.ofHours(1))
+        )
+        sessions[sessionId] = session
+        return sessionId
+    }
+    
+    fun validateSession(sessionId: String): Boolean {
+        val session = sessions[sessionId] ?: return false
+        return !session.isExpired()
+    }
+}
+```
+
+### Token Management
+```kotlin
+class TokenManager {
+    fun generateToken(user: User): String {
+        return JWT.create()
+            .withSubject(user.id)
+            .withExpiresAt(Date(System.currentTimeMillis() + 3600000))
+            .sign(Algorithm.HMAC256(secret))
+    }
+    
+    fun validateToken(token: String): Boolean {
+        return try {
+            JWT.require(Algorithm.HMAC256(secret))
+                .build()
+                .verify(token)
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+}
+```
+
+## File Security
+
+### Secure File Operations
+```kotlin
+class SecureFileHandler {
+    fun saveFileSecurely(data: ByteArray, path: String) {
+        val file = File(path)
+        file.parentFile?.mkdirs()
+        
+        file.outputStream().use { output ->
+            val encryptedData = encrypt(data)
+            output.write(encryptedData)
+        }
+    }
+    
+    fun readFileSecurely(path: String): ByteArray {
+        return File(path).inputStream().use { input ->
+            val encryptedData = input.readBytes()
+            decrypt(encryptedData)
+        }
+    }
+}
+```
+
+### File Validation
+```kotlin
+fun validateFile(file: File): Boolean {
+    val allowedExtensions = setOf("jpg", "png", "pdf")
+    val maxSize = 5 * 1024 * 1024 // 5MB
+    
+    val extension = file.extension.lowercase()
+    return allowedExtensions.contains(extension) &&
+           file.length() <= maxSize
+}
+```
+
+## Best Practices
+
+### Secure Configuration
+```kotlin
+// Good
+val config = ConfigFactory.load()
+val apiKey = config.getString("api.key")
+
+// Avoid
+val apiKey = "hardcoded-api-key"
+```
+
+### Error Handling
+```kotlin
+// Good
+try {
+    // Sensitive operation
+} catch (e: Exception) {
+    logger.error("Operation failed", e)
+    throw SecurityException("Operation failed")
+}
+
+// Avoid
+try {
+    // Sensitive operation
+} catch (e: Exception) {
+    println(e.stackTrace) // Don't expose stack traces
+}
+```
+
+## Common Security Patterns
+
+### Rate Limiting
+```kotlin
+class RateLimiter {
+    private val requests = ConcurrentHashMap<String, AtomicInteger>()
+    
+    fun isAllowed(ip: String): Boolean {
+        val count = requests.computeIfAbsent(ip) { AtomicInteger(0) }
+        return count.incrementAndGet() <= MAX_REQUESTS_PER_MINUTE
+    }
+}
+```
+
+### Input Validation
+```kotlin
+class InputValidator {
+    fun validateUserInput(input: String): Boolean {
+        return input.length <= MAX_LENGTH &&
+               input.matches(Regex("^[a-zA-Z0-9\\s]+$"))
+    }
+}
+```
+
+## Conclusion
+
+Security in Kotlin helps you:
+- Protect sensitive data
+- Prevent common vulnerabilities
+- Maintain application integrity
+- Build trust with users
+
+Remember:
+- Validate all inputs
+- Use secure encryption
+- Implement proper authentication
+- Follow security best practices
+
+Stay tuned for more Kotlin security tips! 

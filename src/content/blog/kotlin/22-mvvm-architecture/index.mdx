@@ -1,0 +1,288 @@
+---
+title: "MVVM Architecture in Kotlin"
+summary: "Learn how to structure your Android app using MVVM architecture pattern with Kotlin"
+date: "2025-09-25"
+category: "kotlin"
+tags: ["kotlin", "mvvm", "clean-architecture", "kotlin-android"]
+---
+
+## MVVM Architecture in Kotlin
+
+MVVM (Model-View-ViewModel) is a software architectural pattern that helps separate the UI from the business logic. Let's implement MVVM in a Kotlin Android app.
+
+## Project Structure
+
+### Basic Structure
+```
+app/
+├── data/
+│   ├── repository/
+│   └── model/
+├── di/
+├── ui/
+│   ├── main/
+│   └── common/
+└── utils/
+```
+
+## Dependencies
+
+### Add Required Dependencies
+```kotlin
+// build.gradle.kts
+dependencies {
+    // ViewModel
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.7.0")
+    
+    // Coroutines
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    
+    // Dependency Injection
+    implementation("com.google.dagger:hilt-android:2.50")
+    kapt("com.google.dagger:hilt-compiler:2.50")
+}
+```
+
+## Model Layer
+
+### Data Class
+```kotlin
+// data/model/User.kt
+data class User(
+    val id: Int,
+    val name: String,
+    val email: String
+)
+```
+
+### Repository
+```kotlin
+// data/repository/UserRepository.kt
+interface UserRepository {
+    suspend fun getUser(id: Int): User
+    suspend fun updateUser(user: User)
+}
+
+class UserRepositoryImpl : UserRepository {
+    override suspend fun getUser(id: Int): User {
+        // Simulate network call
+        return User(id, "John Doe", "john@example.com")
+    }
+    
+    override suspend fun updateUser(user: User) {
+        // Update user logic
+    }
+}
+```
+
+## ViewModel Layer
+
+### Basic ViewModel
+```kotlin
+// ui/main/MainViewModel.kt
+class MainViewModel(
+    private val repository: UserRepository
+) : ViewModel() {
+    private val _user = MutableLiveData<User>()
+    val user: LiveData<User> = _user
+    
+    fun loadUser(id: Int) {
+        viewModelScope.launch {
+            try {
+                val user = repository.getUser(id)
+                _user.value = user
+            } catch (e: Exception) {
+                // Handle error
+            }
+        }
+    }
+}
+```
+
+## View Layer
+
+### Activity
+```kotlin
+// ui/main/MainActivity.kt
+@AndroidEntryPoint
+class MainActivity : AppCompatActivity() {
+    private val viewModel: MainViewModel by viewModels()
+    private lateinit var binding: ActivityMainBinding
+    
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        
+        setupObservers()
+        viewModel.loadUser(1)
+    }
+    
+    private fun setupObservers() {
+        viewModel.user.observe(this) { user ->
+            binding.nameText.text = user.name
+            binding.emailText.text = user.email
+        }
+    }
+}
+```
+
+## Dependency Injection
+
+### Hilt Module
+```kotlin
+// di/AppModule.kt
+@Module
+@InstallIn(SingletonComponent::class)
+object AppModule {
+    @Provides
+    @Singleton
+    fun provideUserRepository(): UserRepository {
+        return UserRepositoryImpl()
+    }
+}
+```
+
+## Error Handling
+
+### Result Wrapper
+```kotlin
+// utils/Result.kt
+sealed class Result<out T> {
+    data class Success<T>(val data: T) : Result<T>()
+    data class Error(val exception: Exception) : Result<Nothing>()
+    object Loading : Result<Nothing>()
+}
+
+// ViewModel with Result
+class MainViewModel(
+    private val repository: UserRepository
+) : ViewModel() {
+    private val _userState = MutableLiveData<Result<User>>()
+    val userState: LiveData<Result<User>> = _userState
+    
+    fun loadUser(id: Int) {
+        viewModelScope.launch {
+            _userState.value = Result.Loading
+            try {
+                val user = repository.getUser(id)
+                _userState.value = Result.Success(user)
+            } catch (e: Exception) {
+                _userState.value = Result.Error(e)
+            }
+        }
+    }
+}
+```
+
+## State Management
+
+### UI State
+```kotlin
+// ui/main/MainUiState.kt
+data class MainUiState(
+    val isLoading: Boolean = false,
+    val user: User? = null,
+    val error: String? = null
+)
+
+// ViewModel with UI State
+class MainViewModel(
+    private val repository: UserRepository
+) : ViewModel() {
+    private val _uiState = MutableStateFlow(MainUiState())
+    val uiState: StateFlow<MainUiState> = _uiState.asStateFlow()
+    
+    fun loadUser(id: Int) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true)
+            try {
+                val user = repository.getUser(id)
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    user = user
+                )
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    error = e.message
+                )
+            }
+        }
+    }
+}
+```
+
+## Best Practices
+
+### Repository Pattern
+```kotlin
+class UserRepositoryImpl(
+    private val api: ApiService,
+    private val db: UserDatabase
+) : UserRepository {
+    override suspend fun getUser(id: Int): User {
+        return try {
+            // Try to get from cache first
+            db.userDao().getUser(id) ?: run {
+                // If not in cache, fetch from network
+                val user = api.getUser(id)
+                // Save to cache
+                db.userDao().insertUser(user)
+                user
+            }
+        } catch (e: Exception) {
+            // If network fails, try to get from cache
+            db.userDao().getUser(id) ?: throw e
+        }
+    }
+}
+```
+
+### Coroutine Scopes
+```kotlin
+class MainViewModel(
+    private val repository: UserRepository
+) : ViewModel() {
+    private val _uiState = MutableStateFlow(MainUiState())
+    val uiState: StateFlow<MainUiState> = _uiState.asStateFlow()
+    
+    fun loadUser(id: Int) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true)
+            try {
+                withContext(Dispatchers.IO) {
+                    repository.getUser(id)
+                }.let { user ->
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        user = user
+                    )
+                }
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    error = e.message
+                )
+            }
+        }
+    }
+}
+```
+
+## Conclusion
+
+MVVM architecture helps you:
+- Separate concerns
+- Make code testable
+- Handle configuration changes
+- Maintain clean code
+
+Remember:
+- Keep ViewModels focused
+- Use proper scoping
+- Handle errors gracefully
+- Follow SOLID principles
+
+Stay tuned for our next post about Using LiveData and ViewModel in Kotlin! 

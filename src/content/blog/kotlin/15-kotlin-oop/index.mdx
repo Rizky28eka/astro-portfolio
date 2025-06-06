@@ -1,1 +1,361 @@
- 
+---
+title: "Object-Oriented Programming in Kotlin"
+summary: "Master object-oriented programming concepts in Kotlin with practical examples"
+date: "2025-08-07"
+category: "kotlin"
+tags: ["kotlin", "oop", "programming", "basics"]
+---
+
+## Object-Oriented Programming in Kotlin
+
+Kotlin provides a modern and concise way to implement object-oriented programming concepts. Let's explore how Kotlin handles classes, inheritance, interfaces, and other OOP features.
+
+## Classes and Objects
+
+### Basic Class
+
+```kotlin
+class Person(
+    val name: String,
+    var age: Int
+) {
+    fun greet() {
+        println("Hello, I'm $name")
+    }
+}
+
+// Usage
+val person = Person("John", 30)
+person.greet()
+```
+
+### Primary and Secondary Constructors
+
+```kotlin
+class User(
+    val name: String,
+    var age: Int
+) {
+    var email: String = ""
+
+    constructor(name: String, age: Int, email: String) : this(name, age) {
+        this.email = email
+    }
+}
+```
+
+## Inheritance
+
+### Basic Inheritance
+
+```kotlin
+open class Animal(val name: String) {
+    open fun makeSound() {
+        println("Some sound")
+    }
+}
+
+class Dog(name: String) : Animal(name) {
+    override fun makeSound() {
+        println("Woof!")
+    }
+}
+```
+
+### Abstract Classes
+
+```kotlin
+abstract class Shape {
+    abstract fun calculateArea(): Double
+    abstract fun calculatePerimeter(): Double
+}
+
+class Circle(val radius: Double) : Shape() {
+    override fun calculateArea(): Double = Math.PI * radius * radius
+    override fun calculatePerimeter(): Double = 2 * Math.PI * radius
+}
+```
+
+## Interfaces
+
+### Basic Interface
+
+```kotlin
+interface Drawable {
+    fun draw()
+    val color: String
+}
+
+class Circle : Drawable {
+    override val color: String = "Red"
+    override fun draw() {
+        println("Drawing a $color circle")
+    }
+}
+```
+
+### Interface with Default Implementation
+
+```kotlin
+interface Logger {
+    fun log(message: String) {
+        println("Log: $message")
+    }
+}
+
+class ConsoleLogger : Logger {
+    // Uses default implementation
+}
+```
+
+## Properties
+
+### Custom Getters and Setters
+
+```kotlin
+class Rectangle(
+    var width: Double,
+    var height: Double
+) {
+    val area: Double
+        get() = width * height
+
+    var perimeter: Double
+        get() = 2 * (width + height)
+        set(value) {
+            val ratio = value / (2 * (width + height))
+            width *= ratio
+            height *= ratio
+        }
+}
+```
+
+### Lazy Properties
+
+```kotlin
+class Database {
+    val connection by lazy {
+        // Expensive database connection
+        createConnection()
+    }
+}
+```
+
+## Visibility Modifiers
+
+### Access Levels
+
+```kotlin
+class Example {
+    private val privateProperty = 1
+    protected val protectedProperty = 2
+    internal val internalProperty = 3
+    public val publicProperty = 4
+}
+```
+
+### Visibility in Inheritance
+
+```kotlin
+open class Parent {
+    protected open fun doSomething() {
+        // Implementation
+    }
+}
+
+class Child : Parent() {
+    override fun doSomething() {
+        // Override implementation
+    }
+}
+```
+
+## Object Declarations
+
+### Singleton
+
+```kotlin
+object Database {
+    fun connect() {
+        // Connection logic
+    }
+}
+
+// Usage
+Database.connect()
+```
+
+### Companion Objects
+
+```kotlin
+class User {
+    companion object {
+        fun createAdmin(): User {
+            return User(isAdmin = true)
+        }
+    }
+}
+
+// Usage
+val admin = User.createAdmin()
+```
+
+## Data Classes
+
+### Basic Data Class
+
+```kotlin
+data class Point(
+    val x: Double,
+    val y: Double
+)
+
+// Usage
+val p1 = Point(1.0, 2.0)
+val p2 = p1.copy(x = 3.0)
+```
+
+### Destructuring
+
+```kotlin
+data class Person(
+    val name: String,
+    val age: Int
+)
+
+val (name, age) = Person("John", 30)
+```
+
+## Common Use Cases
+
+### Builder Pattern
+
+```kotlin
+class Car private constructor(
+    val brand: String,
+    val model: String,
+    val year: Int
+) {
+    class Builder {
+        private var brand: String = ""
+        private var model: String = ""
+        private var year: Int = 0
+
+        fun brand(brand: String) = apply { this.brand = brand }
+        fun model(model: String) = apply { this.model = model }
+        fun year(year: Int) = apply { this.year = year }
+
+        fun build() = Car(brand, model, year)
+    }
+}
+```
+
+### Factory Pattern
+
+```kotlin
+interface Animal
+class Dog : Animal
+class Cat : Animal
+
+object AnimalFactory {
+    fun createAnimal(type: String): Animal {
+        return when (type) {
+            "dog" -> Dog()
+            "cat" -> Cat()
+            else -> throw IllegalArgumentException("Unknown animal type")
+        }
+    }
+}
+```
+
+## Best Practices
+
+1. **Use data classes for pure data holders**
+
+   ```kotlin
+   // Good
+   data class User(val name: String, val age: Int)
+
+   // Avoid
+   class User(val name: String, val age: Int) {
+       override fun equals(other: Any?): Boolean { /* ... */ }
+       override fun hashCode(): Int { /* ... */ }
+       override fun toString(): String { /* ... */ }
+   }
+   ```
+
+2. **Prefer composition over inheritance**
+
+   ```kotlin
+   // Good
+   class Car {
+       private val engine = Engine()
+       private val wheels = List(4) { Wheel() }
+   }
+
+   // Avoid
+   class Car : Vehicle {
+       // Inheriting everything from Vehicle
+   }
+   ```
+
+3. **Use interfaces for abstraction**
+
+   ```kotlin
+   // Good
+   interface Repository<T> {
+       fun save(item: T)
+       fun find(id: String): T?
+   }
+
+   // Avoid
+   abstract class Repository<T> {
+       abstract fun save(item: T)
+       abstract fun find(id: String): T?
+   }
+   ```
+
+## Advanced Features
+
+### Sealed Classes
+
+```kotlin
+sealed class Result<out T> {
+    data class Success<T>(val data: T) : Result<T>()
+    data class Error(val exception: Exception) : Result<Nothing>()
+}
+```
+
+### Delegation
+
+```kotlin
+interface Repository {
+    fun save(data: String)
+}
+
+class RepositoryImpl : Repository {
+    override fun save(data: String) {
+        // Implementation
+    }
+}
+
+class RepositoryDelegate(private val repository: Repository) : Repository by repository
+```
+
+## Conclusion
+
+Kotlin's OOP features help you:
+
+- Write clean and concise code
+- Implement design patterns effectively
+- Create maintainable applications
+- Follow SOLID principles
+
+Remember:
+
+- Use appropriate visibility modifiers
+- Leverage data classes
+- Prefer composition over inheritance
+- Follow Kotlin idioms
+
+This concludes our series on Kotlin programming! We hope you've found these posts helpful in your Kotlin journey.

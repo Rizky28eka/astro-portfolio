@@ -1,0 +1,316 @@
+---
+title: "Navigation Component in Kotlin"
+summary: "Learn how to implement and manage navigation in your Android app using the Navigation Component"
+date: "2025-10-23"
+category: "kotlin"
+tags: ["kotlin", "navigation-component", "kotlin-nav", "android-ui"]
+---
+
+## Navigation Component in Kotlin
+
+The Navigation Component is a framework for managing navigation in Android apps. Let's explore how to implement it effectively in your Kotlin Android application.
+
+## Project Setup
+
+### Add Dependencies
+
+```kotlin
+// build.gradle.kts
+dependencies {
+    val navVersion = "2.7.7"
+    implementation("androidx.navigation:navigation-fragment-ktx:$navVersion")
+    implementation("androidx.navigation:navigation-ui-ktx:$navVersion")
+    implementation("androidx.navigation:navigation-dynamic-features-fragment:$navVersion")
+}
+```
+
+## Basic Navigation
+
+### Navigation Graph
+
+```xml
+<!-- res/navigation/nav_graph.xml -->
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/homeFragment">
+
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.example.app.ui.home.HomeFragment"
+        android:label="Home">
+        <action
+            android:id="@+id/action_home_to_detail"
+            app:destination="@id/detailFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/detailFragment"
+        android:name="com.example.app.ui.detail.DetailFragment"
+        android:label="Detail">
+        <argument
+            android:name="itemId"
+            app:argType="integer" />
+    </fragment>
+</navigation>
+```
+
+### Activity Setup
+
+```kotlin
+class MainActivity : AppCompatActivity() {
+    private lateinit var binding: ActivityMainBinding
+    private lateinit var navController: NavController
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        val navHostFragment = supportFragmentManager
+            .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        navController = navHostFragment.navController
+
+        setupBottomNav()
+    }
+
+    private fun setupBottomNav() {
+        binding.bottomNav.setupWithNavController(navController)
+    }
+}
+```
+
+## Navigation Actions
+
+### Safe Args
+
+```kotlin
+// build.gradle.kts (project level)
+plugins {
+    id("androidx.navigation.safeargs.kotlin") version "2.7.7" apply false
+}
+
+// build.gradle.kts (app level)
+plugins {
+    id("androidx.navigation.safeargs.kotlin")
+}
+
+// Navigation in Fragment
+class HomeFragment : Fragment() {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        binding.detailButton.setOnClickListener {
+            val action = HomeFragmentDirections
+                .actionHomeToDetail(itemId = 123)
+            findNavController().navigate(action)
+        }
+    }
+}
+```
+
+## Deep Links
+
+### Implicit Deep Links
+
+```xml
+<fragment
+    android:id="@+id/detailFragment"
+    android:name="com.example.app.ui.detail.DetailFragment"
+    android:label="Detail">
+    <argument
+        android:name="itemId"
+        app:argType="integer" />
+    <deepLink
+        android:id="@+id/deepLink"
+        app:uri="example://detail/{itemId}" />
+</fragment>
+```
+
+### Deep Link Handling
+
+```kotlin
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        val deepLinkIntent = intent
+        if (deepLinkIntent != null) {
+            navController.handleDeepLink(deepLinkIntent)
+        }
+    }
+}
+```
+
+## Navigation with Arguments
+
+### Passing Arguments
+
+```kotlin
+class DetailFragment : Fragment() {
+    private val args: DetailFragmentArgs by navArgs()
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        val itemId = args.itemId
+        // Use itemId
+    }
+}
+```
+
+### Optional Arguments
+
+```xml
+<fragment
+    android:id="@+id/searchFragment"
+    android:name="com.example.app.ui.search.SearchFragment"
+    android:label="Search">
+    <argument
+        android:name="query"
+        app:argType="string"
+        app:nullable="true"
+        android:defaultValue="@null" />
+</fragment>
+```
+
+## Navigation Patterns
+
+### Bottom Navigation
+
+```kotlin
+@MenuRes
+private fun getBottomNavMenu(): Int = R.menu.bottom_nav_menu
+
+private fun setupBottomNav() {
+    binding.bottomNav.setupWithNavController(navController)
+
+    navController.addOnDestinationChangedListener { _, destination, _ ->
+        binding.bottomNav.isVisible = destination.id in getBottomNavDestinations()
+    }
+}
+
+private fun getBottomNavDestinations(): Set<Int> = setOf(
+    R.id.homeFragment,
+    R.id.searchFragment,
+    R.id.profileFragment
+)
+```
+
+### Navigation Drawer
+
+```kotlin
+class MainActivity : AppCompatActivity() {
+    private lateinit var appBarConfiguration: AppBarConfiguration
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        appBarConfiguration = AppBarConfiguration(
+            setOf(R.id.homeFragment, R.id.searchFragment),
+            binding.drawerLayout
+        )
+
+        setupActionBarWithNavController(navController, appBarConfiguration)
+        binding.navView.setupWithNavController(navController)
+    }
+
+    override fun onSupportNavigateUp(): Boolean {
+        return navController.navigateUp(appBarConfiguration) ||
+               super.onSupportNavigateUp()
+    }
+}
+```
+
+## Navigation with Animations
+
+### Custom Transitions
+
+```xml
+<action
+    android:id="@+id/action_home_to_detail"
+    app:destination="@id/detailFragment"
+    app:enterAnim="@anim/slide_in_right"
+    app:exitAnim="@anim/slide_out_left"
+    app:popEnterAnim="@anim/slide_in_left"
+    app:popExitAnim="@anim/slide_out_right" />
+```
+
+### Shared Element Transitions
+
+```kotlin
+class HomeFragment : Fragment() {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        binding.itemCard.setOnClickListener {
+            val extras = FragmentNavigatorExtras(
+                binding.itemImage to "item_image",
+                binding.itemTitle to "item_title"
+            )
+
+            val action = HomeFragmentDirections
+                .actionHomeToDetail(itemId = 123)
+            findNavController().navigate(action, extras)
+        }
+    }
+}
+```
+
+## Best Practices
+
+### Navigation Component with ViewModel
+
+```kotlin
+class SharedViewModel : ViewModel() {
+    private val _navigationEvent = MutableLiveData<NavigationCommand>()
+    val navigationEvent: LiveData<NavigationCommand> = _navigationEvent
+
+    fun navigate(command: NavigationCommand) {
+        _navigationEvent.value = command
+    }
+}
+
+sealed class NavigationCommand {
+    data class NavigateToDetail(val itemId: Int) : NavigationCommand()
+    object NavigateBack : NavigationCommand()
+}
+```
+
+### Error Handling
+
+```kotlin
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            try {
+                // Navigation logic
+            } catch (e: Exception) {
+                // Handle navigation errors
+                Log.e("Navigation", "Error navigating to ${destination.label}", e)
+            }
+        }
+    }
+}
+```
+
+## Conclusion
+
+Navigation Component helps you:
+
+- Manage navigation flow
+- Handle deep links
+- Implement animations
+- Pass arguments safely
+
+Remember:
+
+- Use Safe Args
+- Handle navigation errors
+- Follow Material Design
+- Test navigation flows
+
+Stay tuned for our next post about Room Database with Kotlin!

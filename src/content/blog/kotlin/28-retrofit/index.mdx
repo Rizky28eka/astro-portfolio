@@ -1,0 +1,363 @@
+---
+title: "Working with Retrofit in Kotlin"
+summary: "Learn how to make API calls in your Android app using Retrofit"
+date: "2025-11-06"
+category: "kotlin"
+tags: ["kotlin", "retrofit", "networking", "kotlin-api"]
+---
+
+## Working with Retrofit in Kotlin
+
+Retrofit is a type-safe HTTP client for Android and Java. Let's explore how to implement Retrofit in your Kotlin Android application.
+
+## Project Setup
+
+### Add Dependencies
+
+```kotlin
+// build.gradle.kts
+dependencies {
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+}
+```
+
+## API Interface
+
+### Basic API Interface
+
+```kotlin
+interface ApiService {
+    @GET("users")
+    suspend fun getUsers(): List<User>
+
+    @GET("users/{id}")
+    suspend fun getUserById(@Path("id") id: Int): User
+
+    @POST("users")
+    suspend fun createUser(@Body user: User): User
+
+    @PUT("users/{id}")
+    suspend fun updateUser(
+        @Path("id") id: Int,
+        @Body user: User
+    ): User
+
+    @DELETE("users/{id}")
+    suspend fun deleteUser(@Path("id") id: Int)
+}
+```
+
+### Complex API Interface
+
+```kotlin
+interface ApiService {
+    @GET("users")
+    suspend fun getUsers(
+        @Query("page") page: Int,
+        @Query("limit") limit: Int,
+        @Query("sort") sort: String = "name"
+    ): PagedResponse<User>
+
+    @GET("users/search")
+    suspend fun searchUsers(
+        @Query("q") query: String,
+        @Query("fields") fields: List<String>
+    ): List<User>
+
+    @Multipart
+    @POST("users/upload")
+    suspend fun uploadUserPhoto(
+        @Part("id") id: Int,
+        @Part photo: MultipartBody.Part
+    ): User
+}
+```
+
+## Retrofit Setup
+
+### Basic Setup
+
+```kotlin
+object RetrofitClient {
+    private const val BASE_URL = "https://api.example.com/"
+
+    private val loggingInterceptor = HttpLoggingInterceptor().apply {
+        level = HttpLoggingInterceptor.Level.BODY
+    }
+
+    private val client = OkHttpClient.Builder()
+        .addInterceptor(loggingInterceptor)
+        .build()
+
+    private val retrofit = Retrofit.Builder()
+        .baseUrl(BASE_URL)
+        .client(client)
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+
+    val apiService: ApiService = retrofit.create(ApiService::class.java)
+}
+```
+
+### Custom Setup
+
+```kotlin
+class RetrofitClient @Inject constructor() {
+    private val authInterceptor = Interceptor { chain ->
+        val request = chain.request().newBuilder()
+            .addHeader("Authorization", "Bearer ${getToken()}")
+            .build()
+        chain.proceed(request)
+    }
+
+    private val client = OkHttpClient.Builder()
+        .addInterceptor(authInterceptor)
+        .addInterceptor(HttpLoggingInterceptor().apply {
+            level = HttpLoggingInterceptor.Level.BODY
+        })
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS)
+        .build()
+
+    private val retrofit = Retrofit.Builder()
+        .baseUrl(BASE_URL)
+        .client(client)
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+
+    val apiService: ApiService = retrofit.create(ApiService::class.java)
+}
+```
+
+## Data Models
+
+### Basic Models
+
+```kotlin
+data class User(
+    val id: Int,
+    val name: String,
+    val email: String
+)
+
+data class PagedResponse<T>(
+    val data: List<T>,
+    val page: Int,
+    val totalPages: Int,
+    val totalItems: Int
+)
+```
+
+### Custom Serialization
+
+```kotlin
+data class User(
+    val id: Int,
+    val name: String,
+    @SerializedName("email_address")
+    val email: String,
+    @SerializedName("created_at")
+    @JsonAdapter(DateAdapter::class)
+    val createdAt: Date
+)
+
+class DateAdapter : JsonDeserializer<Date>, JsonSerializer<Date> {
+    private val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault())
+
+    override fun deserialize(
+        json: JsonElement,
+        typeOfT: Type,
+        context: JsonDeserializationContext
+    ): Date {
+        return format.parse(json.asString) ?: Date()
+    }
+
+    override fun serialize(
+        src: Date,
+        typeOfSrc: Type,
+        context: JsonSerializationContext
+    ): JsonElement {
+        return JsonPrimitive(format.format(src))
+    }
+}
+```
+
+## Repository Pattern
+
+### Repository Implementation
+
+```kotlin
+class UserRepository @Inject constructor(
+    private val apiService: ApiService
+) {
+    suspend fun getUsers(): Result<List<User>> {
+        return try {
+            val users = apiService.getUsers()
+            Result.success(users)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getUserById(id: Int): Result<User> {
+        return try {
+            val user = apiService.getUserById(id)
+            Result.success(user)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+}
+```
+
+## Error Handling
+
+### Custom Error Handling
+
+```kotlin
+sealed class NetworkResult<T> {
+    data class Success<T>(val data: T) : NetworkResult<T>()
+    data class Error<T>(val code: Int, val message: String) : NetworkResult<T>()
+    class Loading<T> : NetworkResult<T>()
+}
+
+class ApiException(
+    val code: Int,
+    override val message: String
+) : Exception(message)
+
+class UserRepository @Inject constructor(
+    private val apiService: ApiService
+) {
+    suspend fun getUsers(): NetworkResult<List<User>> {
+        return try {
+            val users = apiService.getUsers()
+            NetworkResult.Success(users)
+        } catch (e: HttpException) {
+            NetworkResult.Error(e.code(), e.message())
+        } catch (e: Exception) {
+            NetworkResult.Error(500, e.message ?: "Unknown error")
+        }
+    }
+}
+```
+
+## Testing
+
+### API Testing
+
+```kotlin
+@RunWith(AndroidJUnit4::class)
+class ApiServiceTest {
+    private lateinit var apiService: ApiService
+
+    @Before
+    fun setup() {
+        val mockWebServer = MockWebServer()
+        mockWebServer.start()
+
+        val retrofit = Retrofit.Builder()
+            .baseUrl(mockWebServer.url("/"))
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+        apiService = retrofit.create(ApiService::class.java)
+    }
+
+    @Test
+    fun testGetUsers() = runBlocking {
+        val mockResponse = """
+            [
+                {"id": 1, "name": "John", "email": "john@example.com"},
+                {"id": 2, "name": "Jane", "email": "jane@example.com"}
+            ]
+        """.trimIndent()
+
+        mockWebServer.enqueue(
+            MockResponse()
+                .setResponseCode(200)
+                .setBody(mockResponse)
+        )
+
+        val users = apiService.getUsers()
+        assertThat(users.size, equalTo(2))
+        assertThat(users[0].name, equalTo("John"))
+    }
+}
+```
+
+## Best Practices
+
+### Coroutines Support
+
+```kotlin
+class UserViewModel @Inject constructor(
+    private val repository: UserRepository
+) : ViewModel() {
+    private val _users = MutableStateFlow<List<User>>(emptyList())
+    val users: StateFlow<List<User>> = _users.asStateFlow()
+
+    fun loadUsers() {
+        viewModelScope.launch {
+            try {
+                val result = repository.getUsers()
+                when (result) {
+                    is NetworkResult.Success -> {
+                        _users.value = result.data
+                    }
+                    is NetworkResult.Error -> {
+                        // Handle error
+                    }
+                    is NetworkResult.Loading -> {
+                        // Show loading
+                    }
+                }
+            } catch (e: Exception) {
+                // Handle exception
+            }
+        }
+    }
+}
+```
+
+### Caching
+
+```kotlin
+class CachingInterceptor : Interceptor {
+    override fun intercept(chain: Interceptor.Chain): Response {
+        val request = chain.request()
+        val response = chain.proceed(request)
+
+        return response.newBuilder()
+            .header("Cache-Control", "public, max-age=60")
+            .build()
+    }
+}
+
+// Add to OkHttpClient
+val client = OkHttpClient.Builder()
+    .addInterceptor(CachingInterceptor())
+    .cache(Cache(cacheDir, 10 * 1024 * 1024)) // 10 MB cache
+    .build()
+```
+
+## Conclusion
+
+Retrofit helps you:
+
+- Make type-safe API calls
+- Handle responses easily
+- Implement caching
+- Test API calls
+
+Remember:
+
+- Use coroutines for async operations
+- Implement proper error handling
+- Follow repository pattern
+- Test your API calls
+
+Stay tuned for our next post about Kotlin DSLs!

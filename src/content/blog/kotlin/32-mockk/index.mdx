@@ -1,0 +1,320 @@
+---
+title: "MockK for Kotlin Unit Testing"
+summary: "Learn how to mock dependencies easily in your Kotlin tests"
+date: "2025-12-04"
+category: "kotlin"
+tags: ["kotlin", "mockk", "unit-test", "testing-tools"]
+---
+
+## MockK for Kotlin Unit Testing
+
+MockK is a mocking library for Kotlin that makes it easy to create and manage mocks in your unit tests. Let's explore how to use MockK effectively.
+
+## Project Setup
+
+### Add Dependencies
+```kotlin
+// build.gradle.kts
+dependencies {
+    testImplementation("io.mockk:mockk:1.13.5")
+    testImplementation("io.mockk:mockk-agent-jvm:1.13.5")
+}
+```
+
+## Basic Mocking
+
+### Simple Mock
+```kotlin
+class UserServiceTest {
+    private val userRepository = mockk<UserRepository>()
+    private val userService = UserService(userRepository)
+    
+    @Test
+    fun `test get user by id`() {
+        // Given
+        val user = User(1, "John", "john@example.com")
+        every { userRepository.findById(1) } returns user
+        
+        // When
+        val result = userService.getUserById(1)
+        
+        // Then
+        assertEquals(user, result)
+        verify { userRepository.findById(1) }
+    }
+}
+```
+
+### Mock with Arguments
+```kotlin
+@Test
+fun `test find users by name`() {
+    // Given
+    val users = listOf(
+        User(1, "John", "john@example.com"),
+        User(2, "Johnny", "johnny@example.com")
+    )
+    every { 
+        userRepository.findByName(match { it.startsWith("John") })
+    } returns users
+    
+    // When
+    val result = userService.findUsersByName("John")
+    
+    // Then
+    assertEquals(users, result)
+    verify { userRepository.findByName(any()) }
+}
+```
+
+## Coroutine Support
+
+### Mocking Suspend Functions
+```kotlin
+class CoroutineTest {
+    private val repository = mockk<UserRepository>()
+    
+    @Test
+    fun `test suspend function`() = runTest {
+        // Given
+        val user = User(1, "John", "john@example.com")
+        coEvery { repository.getUserById(1) } returns user
+        
+        // When
+        val result = userService.getUserById(1)
+        
+        // Then
+        assertEquals(user, result)
+        coVerify { repository.getUserById(1) }
+    }
+}
+```
+
+### Mocking Flow
+```kotlin
+@Test
+fun `test flow emission`() = runTest {
+    // Given
+    val users = flowOf(
+        User(1, "John", "john@example.com"),
+        User(2, "Jane", "jane@example.com")
+    )
+    every { repository.getUsers() } returns users
+    
+    // When
+    val result = userService.getUsers().toList()
+    
+    // Then
+    assertEquals(2, result.size)
+    verify { repository.getUsers() }
+}
+```
+
+## Verification
+
+### Basic Verification
+```kotlin
+@Test
+fun `test method calls`() {
+    // Given
+    val user = User(1, "John", "john@example.com")
+    every { userRepository.save(any()) } returns user
+    
+    // When
+    userService.createUser(user)
+    
+    // Then
+    verify(exactly = 1) { userRepository.save(user) }
+    verify(exactly = 0) { userRepository.delete(any()) }
+}
+```
+
+### Order Verification
+```kotlin
+@Test
+fun `test method call order`() {
+    // Given
+    val user = User(1, "John", "john@example.com")
+    every { userRepository.save(any()) } returns user
+    every { userRepository.notifyUser(any()) } just Runs
+    
+    // When
+    userService.createUserAndNotify(user)
+    
+    // Then
+    verifyOrder {
+        userRepository.save(user)
+        userRepository.notifyUser(user)
+    }
+}
+```
+
+## Argument Matching
+
+### Custom Matchers
+```kotlin
+@Test
+fun `test with custom matcher`() {
+    // Given
+    val user = User(1, "John", "john@example.com")
+    every { 
+        userRepository.save(match { it.name.length > 3 })
+    } returns user
+    
+    // When
+    val result = userService.createUser(user)
+    
+    // Then
+    assertEquals(user, result)
+    verify { userRepository.save(match { it.name.length > 3 }) }
+}
+```
+
+### Capturing Arguments
+```kotlin
+@Test
+fun `test argument capturing`() {
+    // Given
+    val userSlot = slot<User>()
+    every { userRepository.save(capture(userSlot)) } returns User(1, "John", "john@example.com")
+    
+    // When
+    userService.createUser(User(0, "John", "john@example.com"))
+    
+    // Then
+    assertEquals("John", userSlot.captured.name)
+    assertEquals("john@example.com", userSlot.captured.email)
+}
+```
+
+## Relaxed Mocks
+
+### Using Relaxed Mocks
+```kotlin
+@Test
+fun `test with relaxed mock`() {
+    // Given
+    val repository = mockk<UserRepository>(relaxed = true)
+    val service = UserService(repository)
+    
+    // When
+    val result = service.getUserById(1)
+    
+    // Then
+    assertNotNull(result)
+    verify { repository.findById(1) }
+}
+```
+
+### Partial Relaxation
+```kotlin
+@Test
+fun `test with partial relaxation`() {
+    // Given
+    val repository = mockk<UserRepository>(relaxUnitFun = true)
+    every { repository.findById(any()) } returns User(1, "John", "john@example.com")
+    
+    // When
+    repository.notifyUser(User(1, "John", "john@example.com"))
+    
+    // Then
+    verify { repository.notifyUser(any()) }
+}
+```
+
+## Best Practices
+
+### Test Organization
+```kotlin
+class UserServiceTest {
+    private lateinit var userRepository: UserRepository
+    private lateinit var userService: UserService
+    
+    @BeforeEach
+    fun setup() {
+        userRepository = mockk()
+        userService = UserService(userRepository)
+    }
+    
+    @AfterEach
+    fun tearDown() {
+        clearAllMocks()
+    }
+    
+    @Test
+    fun `test user creation`() {
+        // Given
+        val user = User(1, "John", "john@example.com")
+        every { userRepository.save(any()) } returns user
+        
+        // When
+        val result = userService.createUser(user)
+        
+        // Then
+        assertEquals(user, result)
+        verify { userRepository.save(user) }
+    }
+}
+```
+
+## Common Patterns
+
+### Mocking Static Methods
+```kotlin
+@Test
+fun `test static method`() {
+    // Given
+    mockkObject(StringUtils)
+    every { StringUtils.validateEmail(any()) } returns true
+    
+    // When
+    val result = userService.isValidEmail("test@example.com")
+    
+    // Then
+    assertTrue(result)
+    verify { StringUtils.validateEmail("test@example.com") }
+    
+    // Cleanup
+    unmockkObject(StringUtils)
+}
+```
+
+### Mocking Constructors
+```kotlin
+@Test
+fun `test constructor mocking`() {
+    // Given
+    mockkConstructor(User::class)
+    every { 
+        anyConstructed<User>().validate()
+    } returns true
+    
+    // When
+    val user = User(1, "John", "john@example.com")
+    val result = user.isValid()
+    
+    // Then
+    assertTrue(result)
+    verify { anyConstructed<User>().validate() }
+    
+    // Cleanup
+    unmockkConstructor(User::class)
+}
+```
+
+## Conclusion
+
+MockK helps you:
+- Create mocks easily
+- Verify method calls
+- Test coroutines
+- Mock static methods
+- Handle complex scenarios
+
+Remember:
+- Use appropriate verification
+- Clean up mocks after tests
+- Follow best practices
+- Keep tests focused
+
+Stay tuned for our next post about Kotlin Multiplatform Mobile (KMM)! 

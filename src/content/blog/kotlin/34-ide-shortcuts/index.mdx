@@ -1,0 +1,335 @@
+---
+title: "Top Kotlin IDE Shortcuts"
+summary: "Learn essential shortcuts to code faster in Kotlin"
+date: "2025-12-18"
+category: "kotlin"
+tags: ["kotlin", "productivity", "kotlin-tips", "dev-speed"]
+---
+
+## Top Kotlin IDE Shortcuts
+
+Mastering IDE shortcuts can significantly improve your productivity as a Kotlin developer. Let's explore the most useful shortcuts in IntelliJ IDEA.
+
+## Navigation Shortcuts
+
+### Basic Navigation
+
+```kotlin
+// Navigate to class
+// Windows/Linux: Ctrl + N
+// macOS: Cmd + O
+class UserService {
+    // Navigate to file
+    // Windows/Linux: Ctrl + Shift + N
+    // macOS: Cmd + Shift + O
+    fun getUser() {
+        // Navigate to symbol
+        // Windows/Linux: Ctrl + Alt + Shift + N
+        // macOS: Cmd + Option + Shift + O
+        val user = User()
+    }
+}
+
+// Navigate to declaration
+// Windows/Linux: Ctrl + B
+// macOS: Cmd + B
+class User {
+    // Navigate to implementation
+    // Windows/Linux: Ctrl + Alt + B
+    // macOS: Cmd + Option + B
+    fun getName(): String {
+        return name
+    }
+}
+```
+
+### Advanced Navigation
+
+```kotlin
+// Recent files
+// Windows/Linux: Ctrl + E
+// macOS: Cmd + E
+
+// Recent locations
+// Windows/Linux: Ctrl + Shift + E
+// macOS: Cmd + Shift + E
+
+// Last edit location
+// Windows/Linux: Ctrl + Shift + Backspace
+// macOS: Cmd + Shift + Backspace
+
+// Back/Forward
+// Windows/Linux: Alt + Left/Right
+// macOS: Cmd + Alt + Left/Right
+```
+
+## Editing Shortcuts
+
+### Basic Editing
+
+```kotlin
+// Duplicate line
+// Windows/Linux: Ctrl + D
+// macOS: Cmd + D
+val name = "John"
+val name = "John"
+
+// Delete line
+// Windows/Linux: Ctrl + Y
+// macOS: Cmd + Delete
+val unused = "test"
+
+// Move line up/down
+// Windows/Linux: Alt + Shift + Up/Down
+// macOS: Option + Shift + Up/Down
+val first = 1
+val second = 2
+val third = 3
+```
+
+### Code Generation
+
+```kotlin
+// Generate code
+// Windows/Linux: Alt + Insert
+// macOS: Cmd + N
+class User {
+    // Generate getters/setters
+    // Windows/Linux: Alt + Insert
+    // macOS: Cmd + N
+    private val name: String
+    private val age: Int
+
+    // Generate constructor
+    // Windows/Linux: Alt + Insert
+    // macOS: Cmd + N
+    constructor(name: String, age: Int) {
+        this.name = name
+        this.age = age
+    }
+}
+```
+
+## Refactoring Shortcuts
+
+### Basic Refactoring
+
+```kotlin
+// Rename
+// Windows/Linux: Shift + F6
+// macOS: Shift + F6
+val oldName = "test"
+val newName = "test"
+
+// Extract variable
+// Windows/Linux: Ctrl + Alt + V
+// macOS: Cmd + Option + V
+val result = calculate(5, 10)
+
+// Extract method
+// Windows/Linux: Ctrl + Alt + M
+// macOS: Cmd + Option + M
+fun process() {
+    val result = calculate(5, 10)
+    println(result)
+}
+```
+
+### Advanced Refactoring
+
+```kotlin
+// Inline
+// Windows/Linux: Ctrl + Alt + N
+// macOS: Cmd + Option + N
+val constant = 42
+val result = constant * 2
+
+// Move
+// Windows/Linux: F6
+// macOS: F6
+class User {
+    // Move to another class
+    val name: String
+}
+
+// Change signature
+// Windows/Linux: Ctrl + F6
+// macOS: Cmd + F6
+fun process(name: String, age: Int) {
+    // Change parameters
+}
+```
+
+## Search and Replace
+
+### Basic Search
+
+```kotlin
+// Find
+// Windows/Linux: Ctrl + F
+// macOS: Cmd + F
+val searchTerm = "test"
+
+// Replace
+// Windows/Linux: Ctrl + R
+// macOS: Cmd + R
+val oldValue = "test"
+val newValue = "test"
+
+// Find in path
+// Windows/Linux: Ctrl + Shift + F
+// macOS: Cmd + Shift + F
+// Search in all files
+```
+
+### Advanced Search
+
+```kotlin
+// Find usages
+// Windows/Linux: Alt + F7
+// macOS: Option + F7
+val usedVariable = "test"
+
+// Find action
+// Windows/Linux: Ctrl + Shift + A
+// macOS: Cmd + Shift + A
+// Quick access to any action
+
+// Recent changes
+// Windows/Linux: Alt + Shift + C
+// macOS: Option + Shift + C
+// View recent changes
+```
+
+## Code Completion
+
+### Basic Completion
+
+```kotlin
+// Basic completion
+// Windows/Linux: Ctrl + Space
+// macOS: Cmd + Space
+val list = ArrayList<String>()
+
+// Smart completion
+// Windows/Linux: Ctrl + Shift + Space
+// macOS: Cmd + Shift + Space
+val user = User()
+
+// Postfix completion
+// Windows/Linux: Ctrl + Space
+// macOS: Cmd + Space
+val list = listOf(1, 2, 3)
+```
+
+### Advanced Completion
+
+```kotlin
+// Parameter info
+// Windows/Linux: Ctrl + P
+// macOS: Cmd + P
+fun process(name: String, age: Int) {
+    // Show parameter info
+}
+
+// Quick documentation
+// Windows/Linux: Ctrl + Q
+// macOS: F1
+// Show documentation
+
+// External documentation
+// Windows/Linux: Shift + F1
+// macOS: Shift + F1
+// Open documentation in browser
+```
+
+## Debugging Shortcuts
+
+### Basic Debugging
+
+```kotlin
+// Debug
+// Windows/Linux: Shift + F9
+// macOS: Ctrl + D
+
+// Step over
+// Windows/Linux: F8
+// macOS: F8
+
+// Step into
+// Windows/Linux: F7
+// macOS: F7
+
+// Step out
+// Windows/Linux: Shift + F8
+// macOS: Shift + F8
+```
+
+### Advanced Debugging
+
+```kotlin
+// Evaluate expression
+// Windows/Linux: Alt + F8
+// macOS: Option + F8
+
+// Resume program
+// Windows/Linux: F9
+// macOS: F9
+
+// Toggle breakpoint
+// Windows/Linux: Ctrl + F8
+// macOS: Cmd + F8
+```
+
+## Version Control
+
+### Basic VCS
+
+```kotlin
+// Commit
+// Windows/Linux: Ctrl + K
+// macOS: Cmd + K
+
+// Update project
+// Windows/Linux: Ctrl + T
+// macOS: Cmd + T
+
+// Show history
+// Windows/Linux: Alt + Shift + C
+// macOS: Option + Shift + C
+```
+
+### Advanced VCS
+
+```kotlin
+// Show diff
+// Windows/Linux: Ctrl + D
+// macOS: Cmd + D
+
+// Revert changes
+// Windows/Linux: Ctrl + Alt + Z
+// macOS: Cmd + Option + Z
+
+// Shelve changes
+// Windows/Linux: Ctrl + Shift + S
+// macOS: Cmd + Shift + S
+```
+
+## Conclusion
+
+These shortcuts help you:
+
+- Navigate code faster
+- Edit code efficiently
+- Refactor code safely
+- Debug code effectively
+- Manage version control
+
+Remember:
+
+- Practice regularly
+- Customize shortcuts
+- Use keyboard navigation
+- Learn new shortcuts
+
+Stay tuned for our next post about Using Anko in Kotlin!

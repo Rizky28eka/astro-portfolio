@@ -1,0 +1,323 @@
+---
+title: "Kotlin for Backend with Ktor"
+summary: "Learn how to build modern, scalable APIs using Kotlin and Ktor"
+date: "2025-11-20"
+category: "kotlin"
+tags: ["kotlin", "ktor", "backend", "fullstack"]
+---
+
+## Kotlin for Backend with Ktor
+
+Ktor is a framework for building asynchronous servers and clients in connected systems using Kotlin. Let's explore how to build modern backend applications with Ktor.
+
+## Project Setup
+
+### Add Dependencies
+
+```kotlin
+// build.gradle.kts
+plugins {
+    kotlin("jvm") version "1.8.0"
+    kotlin("plugin.serialization") version "1.8.0"
+    id("io.ktor.plugin") version "2.3.0"
+}
+
+dependencies {
+    implementation("io.ktor:ktor-server-core:2.3.0")
+    implementation("io.ktor:ktor-server-netty:2.3.0")
+    implementation("io.ktor:ktor-server-content-negotiation:2.3.0")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.0")
+    implementation("ch.qos.logback:logback-classic:1.4.5")
+}
+```
+
+## Basic Server Setup
+
+### Application Configuration
+
+```kotlin
+fun main() {
+    embeddedServer(Netty, port = 8080) {
+        install(ContentNegotiation) {
+            json()
+        }
+        install(CORS) {
+            allowMethod(HttpMethod.Options)
+            allowMethod(HttpMethod.Get)
+            allowMethod(HttpMethod.Post)
+            allowHeader(HttpHeaders.Authorization)
+            anyHost()
+        }
+        configureRouting()
+    }.start(wait = true)
+}
+```
+
+### Routing Configuration
+
+```kotlin
+fun Application.configureRouting() {
+    routing {
+        route("/api") {
+            get("/health") {
+                call.respondText("OK")
+            }
+
+            route("/users") {
+                get {
+                    val users = userService.getAllUsers()
+                    call.respond(users)
+                }
+
+                get("{id}") {
+                    val id = call.parameters["id"]?.toIntOrNull()
+                    if (id == null) {
+                        call.respond(HttpStatusCode.BadRequest)
+                        return@get
+                    }
+                    val user = userService.getUserById(id)
+                    if (user == null) {
+                        call.respond(HttpStatusCode.NotFound)
+                    } else {
+                        call.respond(user)
+                    }
+                }
+
+                post {
+                    val user = call.receive<User>()
+                    val createdUser = userService.createUser(user)
+                    call.respond(HttpStatusCode.Created, createdUser)
+                }
+            }
+        }
+    }
+}
+```
+
+## Data Models
+
+### Basic Models
+
+```kotlin
+@Serializable
+data class User(
+    val id: Int,
+    val name: String,
+    val email: String
+)
+
+@Serializable
+data class ErrorResponse(
+    val message: String,
+    val code: Int
+)
+```
+
+### Request/Response Models
+
+```kotlin
+@Serializable
+data class CreateUserRequest(
+    val name: String,
+    val email: String,
+    val password: String
+)
+
+@Serializable
+data class UserResponse(
+    val id: Int,
+    val name: String,
+    val email: String,
+    val createdAt: String
+)
+```
+
+## Authentication
+
+### JWT Authentication
+
+```kotlin
+fun Application.configureSecurity() {
+    install(Authentication) {
+        jwt {
+            verifier(JwtConfig.verifier)
+            validate { credential ->
+                if (credential.payload.getClaim("username").asString() != "") {
+                    JWTPrincipal(credential.payload)
+                } else {
+                    null
+                }
+            }
+        }
+    }
+}
+
+object JwtConfig {
+    private const val secret = "your-secret-key"
+    private const val issuer = "your-issuer"
+    private const val validityInMs = 36_000_00 * 24 // 24 hours
+
+    val verifier = JWT.require(Algorithm.HMAC256(secret))
+        .withIssuer(issuer)
+        .build()
+
+    fun makeToken(user: User): String = JWT.create()
+        .withSubject("Authentication")
+        .withIssuer(issuer)
+        .withClaim("username", user.email)
+        .withExpiresAt(getExpiration())
+        .sign(Algorithm.HMAC256(secret))
+
+    private fun getExpiration() = Date(System.currentTimeMillis() + validityInMs)
+}
+```
+
+## Database Integration
+
+### Exposed Setup
+
+```kotlin
+object DatabaseFactory {
+    fun init() {
+        val driverClassName = "org.postgresql.Driver"
+        val jdbcURL = "jdbc:postgresql://localhost:5432/ktor_db"
+        val database = Database.connect(jdbcURL, driverClassName)
+
+        transaction(database) {
+            SchemaUtils.create(Users)
+        }
+    }
+}
+
+object Users : Table() {
+    val id = integer("id").autoIncrement()
+    val name = varchar("name", 50)
+    val email = varchar("email", 50).uniqueIndex()
+    val password = varchar("password", 100)
+
+    override val primaryKey = PrimaryKey(id)
+}
+```
+
+## Error Handling
+
+### Global Exception Handling
+
+```kotlin
+fun Application.configureExceptionHandling() {
+    install(StatusPages) {
+        exception<AuthenticationException> { cause ->
+            call.respond(HttpStatusCode.Unauthorized, ErrorResponse(cause.message ?: "Unauthorized", 401))
+        }
+        exception<AuthorizationException> { cause ->
+            call.respond(HttpStatusCode.Forbidden, ErrorResponse(cause.message ?: "Forbidden", 403))
+        }
+        exception<NotFoundException> { cause ->
+            call.respond(HttpStatusCode.NotFound, ErrorResponse(cause.message ?: "Not Found", 404))
+        }
+        exception<ValidationException> { cause ->
+            call.respond(HttpStatusCode.BadRequest, ErrorResponse(cause.message ?: "Bad Request", 400))
+        }
+        exception<Exception> { cause ->
+            call.respond(HttpStatusCode.InternalServerError, ErrorResponse(cause.message ?: "Internal Server Error", 500))
+        }
+    }
+}
+```
+
+## Testing
+
+### Application Test
+
+```kotlin
+class ApplicationTest {
+    @Test
+    fun testRoot() = testApplication {
+        application {
+            configureRouting()
+        }
+        client.get("/api/health").apply {
+            assertEquals(HttpStatusCode.OK, status)
+            assertEquals("OK", bodyAsText())
+        }
+    }
+}
+
+@Test
+fun testGetUser() = testApplication {
+    application {
+        configureRouting()
+    }
+    client.get("/api/users/1").apply {
+        assertEquals(HttpStatusCode.OK, status)
+        val user = body<User>()
+        assertEquals(1, user.id)
+    }
+}
+```
+
+## Best Practices
+
+### Dependency Injection
+
+```kotlin
+class UserService(
+    private val userRepository: UserRepository,
+    private val passwordEncoder: PasswordEncoder
+) {
+    suspend fun createUser(request: CreateUserRequest): User {
+        val hashedPassword = passwordEncoder.encode(request.password)
+        return userRepository.createUser(
+            name = request.name,
+            email = request.email,
+            password = hashedPassword
+        )
+    }
+}
+
+fun Application.configureDependencyInjection() {
+    val userRepository = UserRepository()
+    val passwordEncoder = BCryptPasswordEncoder()
+    val userService = UserService(userRepository, passwordEncoder)
+
+    install(DependencyInjection) {
+        bind { userService }
+    }
+}
+```
+
+### Logging
+
+```kotlin
+fun Application.configureLogging() {
+    install(CallLogging) {
+        level = Level.INFO
+        filter { call -> call.request.path().startsWith("/api") }
+    }
+    install(CallId) {
+        header(HttpHeaders.XRequestId)
+        verify { callId: String ->
+            callId.isNotEmpty()
+        }
+    }
+}
+```
+
+## Conclusion
+
+Ktor helps you:
+
+- Build asynchronous servers
+- Create type-safe APIs
+- Handle authentication
+- Manage database operations
+- Test your endpoints
+
+Remember:
+
+- Use proper error handling
+- Implement security measures
+- Follow REST principles
+- Write comprehensive tests
+
+Stay tuned for our next post about Unit Testing in Kotlin!

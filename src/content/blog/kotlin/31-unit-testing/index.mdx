@@ -1,0 +1,322 @@
+---
+title: "Unit Testing in Kotlin"
+summary: "Learn how to write and run your first tests in Kotlin"
+date: "2025-11-27"
+category: "kotlin"
+tags: ["kotlin", "testing", "junit", "kotlintest"]
+---
+
+## Unit Testing in Kotlin
+
+Unit testing is a crucial part of software development. Let's explore how to write effective unit tests in Kotlin.
+
+## Project Setup
+
+### Add Dependencies
+
+```kotlin
+// build.gradle.kts
+dependencies {
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.jetbrains.kotlin:kotlin-test")
+    testImplementation("io.mockk:mockk:1.13.5")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+}
+```
+
+## Basic Testing
+
+### Simple Test
+
+```kotlin
+class CalculatorTest {
+    @Test
+    fun `test addition`() {
+        val calculator = Calculator()
+        val result = calculator.add(2, 3)
+        assertEquals(5, result)
+    }
+
+    @Test
+    fun `test subtraction`() {
+        val calculator = Calculator()
+        val result = calculator.subtract(5, 3)
+        assertEquals(2, result)
+    }
+}
+```
+
+### Test with Multiple Assertions
+
+```kotlin
+class StringUtilsTest {
+    @Test
+    fun `test string operations`() {
+        val input = "Hello World"
+
+        assertAll(
+            { assertTrue(input.isNotEmpty()) },
+            { assertEquals(11, input.length) },
+            { assertTrue(input.contains("Hello")) },
+            { assertFalse(input.contains("Goodbye")) }
+        )
+    }
+}
+```
+
+## Test Organization
+
+### Test Classes
+
+```kotlin
+@DisplayName("User Service Tests")
+class UserServiceTest {
+    private lateinit var userService: UserService
+    private lateinit var userRepository: UserRepository
+
+    @BeforeEach
+    fun setup() {
+        userRepository = mockk()
+        userService = UserService(userRepository)
+    }
+
+    @Nested
+    @DisplayName("User Creation")
+    inner class UserCreation {
+        @Test
+        fun `should create user successfully`() {
+            // Given
+            val user = User(name = "John", email = "john@example.com")
+            coEvery { userRepository.save(any()) } returns user
+
+            // When
+            val result = runBlocking { userService.createUser(user) }
+
+            // Then
+            assertEquals(user, result)
+            coVerify { userRepository.save(user) }
+        }
+
+        @Test
+        fun `should throw exception when email is invalid`() {
+            // Given
+            val user = User(name = "John", email = "invalid-email")
+
+            // When/Then
+            assertThrows<InvalidEmailException> {
+                runBlocking { userService.createUser(user) }
+            }
+        }
+    }
+}
+```
+
+## Testing Coroutines
+
+### Coroutine Testing
+
+```kotlin
+class CoroutineTest {
+    @Test
+    fun `test coroutine execution`() = runTest {
+        val result = async {
+            delay(1000)
+            "Hello"
+        }
+
+        assertEquals("Hello", result.await())
+    }
+
+    @Test
+    fun `test coroutine cancellation`() = runTest {
+        val job = launch {
+            try {
+                delay(1000)
+                fail("Should not reach here")
+            } catch (e: CancellationException) {
+                // Expected
+            }
+        }
+
+        job.cancel()
+        job.join()
+    }
+}
+```
+
+## Testing Exceptions
+
+### Exception Testing
+
+```kotlin
+class ExceptionTest {
+    @Test
+    fun `test exception handling`() {
+        val calculator = Calculator()
+
+        val exception = assertThrows<ArithmeticException> {
+            calculator.divide(10, 0)
+        }
+
+        assertEquals("Division by zero", exception.message)
+    }
+
+    @Test
+    fun `test multiple exceptions`() {
+        val validator = InputValidator()
+
+        assertAll(
+            {
+                val exception = assertThrows<ValidationException> {
+                    validator.validateAge(-1)
+                }
+                assertEquals("Age cannot be negative", exception.message)
+            },
+            {
+                val exception = assertThrows<ValidationException> {
+                    validator.validateName("")
+                }
+                assertEquals("Name cannot be empty", exception.message)
+            }
+        )
+    }
+}
+```
+
+## Parameterized Tests
+
+### Parameterized Testing
+
+```kotlin
+class ParameterizedTest {
+    @ParameterizedTest
+    @ValueSource(ints = [2, 4, 6, 8, 10])
+    fun `test even numbers`(number: Int) {
+        assertTrue(isEven(number))
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+        "2, 3, 5",
+        "0, 0, 0",
+        "-1, 1, 0",
+        "10, 20, 30"
+    )
+    fun `test addition with multiple inputs`(a: Int, b: Int, expected: Int) {
+        val calculator = Calculator()
+        assertEquals(expected, calculator.add(a, b))
+    }
+}
+```
+
+## Test Fixtures
+
+### Test Fixtures
+
+```kotlin
+class TestFixtures {
+    companion object {
+        @JvmStatic
+        fun validUsers(): Stream<Arguments> {
+            return Stream.of(
+                Arguments.of(User("John", "john@example.com")),
+                Arguments.of(User("Jane", "jane@example.com")),
+                Arguments.of(User("Bob", "bob@example.com"))
+            )
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("validUsers")
+    fun `test valid user creation`(user: User) {
+        val validator = UserValidator()
+        assertTrue(validator.isValid(user))
+    }
+}
+```
+
+## Best Practices
+
+### Test Organization
+
+```kotlin
+@DisplayName("User Service Tests")
+class UserServiceTest {
+    private lateinit var userService: UserService
+    private lateinit var userRepository: UserRepository
+
+    @BeforeEach
+    fun setup() {
+        userRepository = mockk()
+        userService = UserService(userRepository)
+    }
+
+    @AfterEach
+    fun tearDown() {
+        clearAllMocks()
+    }
+
+    @Test
+    fun `should follow AAA pattern`() {
+        // Arrange
+        val user = User("John", "john@example.com")
+        coEvery { userRepository.save(any()) } returns user
+
+        // Act
+        val result = runBlocking { userService.createUser(user) }
+
+        // Assert
+        assertEquals(user, result)
+        coVerify { userRepository.save(user) }
+    }
+}
+```
+
+## Common Patterns
+
+### Testing Private Methods
+
+```kotlin
+class PrivateMethodTest {
+    @Test
+    fun `test private method using reflection`() {
+        val calculator = Calculator()
+        val method = calculator::class.java.getDeclaredMethod("validateInput", Int::class.java)
+        method.isAccessible = true
+
+        val result = method.invoke(calculator, 5) as Boolean
+        assertTrue(result)
+    }
+}
+```
+
+### Testing Static Methods
+
+```kotlin
+class StaticMethodTest {
+    @Test
+    fun `test static method`() {
+        val result = StringUtils.reverse("Hello")
+        assertEquals("olleH", result)
+    }
+}
+```
+
+## Conclusion
+
+Unit testing helps you:
+
+- Verify code behavior
+- Catch bugs early
+- Refactor with confidence
+- Document code behavior
+
+Remember:
+
+- Write clear test names
+- Follow AAA pattern
+- Test edge cases
+- Keep tests independent
+- Use appropriate assertions
+
+Stay tuned for our next post about MockK for Kotlin Unit Testing!

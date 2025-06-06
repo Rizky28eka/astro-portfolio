@@ -1,0 +1,336 @@
+---
+title: "Testing and Debugging in Kotlin"
+summary: "Master testing and debugging techniques for Kotlin applications"
+date: "2025-08-28"
+category: "kotlin"
+tags: ["kotlin", "testing", "debugging", "programming"]
+---
+
+## Testing and Debugging in Kotlin
+
+Testing and debugging are crucial aspects of software development. Let's explore various testing and debugging techniques in Kotlin to ensure code quality and reliability.
+
+## Unit Testing
+
+### Basic UnitTests
+
+```kotlin
+class CalculatorTest {
+    private val calculator = Calculator()
+
+    @Test
+    fun testAddition() {
+        val result = calculator.add(2, 3)
+        assertEquals(5, result)
+    }
+
+    @Test
+    fun testSubtraction() {
+        val result = calculator.subtract(5, 3)
+        assertEquals(2, result)
+    }
+}
+```
+
+### Parameterized Tests
+
+```kotlin
+@ParameterizedTest
+@CsvSource(
+    "2, 3, 5",
+    "0, 0, 0",
+    "-1, 1, 0"
+)
+fun testAddition(a: Int, b: Int, expected: Int) {
+    val result = calculator.add(a, b)
+    assertEquals(expected, result)
+}
+```
+
+## Coroutine Testing
+
+### Basic Coroutine Tests
+
+```kotlin
+@Test
+fun testCoroutine() = runTest {
+    val result = async { computeValue() }.await()
+    assertEquals(expected, result)
+}
+```
+
+### Testing Timeouts
+
+```kotlin
+@Test
+fun testTimeout() = runTest {
+    assertThrows<TimeoutCancellationException> {
+        withTimeout(1000) {
+            delay(2000)
+        }
+    }
+}
+```
+
+## Mocking
+
+### Using MockK
+
+```kotlin
+class UserServiceTest {
+    private val userRepository = mockk<UserRepository>()
+    private val userService = UserService(userRepository)
+
+    @Test
+    fun testGetUser() {
+        coEvery { userRepository.getUser(any()) } returns User("John")
+
+        val user = userService.getUser("123")
+
+        assertEquals("John", user.name)
+        coVerify { userRepository.getUser("123") }
+    }
+}
+```
+
+### Mocking Coroutines
+
+```kotlin
+@Test
+fun testAsyncOperation() = runTest {
+    val mockApi = mockk<Api>()
+    coEvery { mockApi.fetchData() } returns "Data"
+
+    val result = async { mockApi.fetchData() }.await()
+
+    assertEquals("Data", result)
+}
+```
+
+## Integration Testing
+
+### Testing Database Operations
+
+```kotlin
+@Test
+fun testDatabaseOperations() = runBlocking {
+    val db = createTestDatabase()
+    val dao = db.userDao()
+
+    val user = User("John")
+    dao.insert(user)
+
+    val retrieved = dao.getUser(user.id)
+    assertEquals(user, retrieved)
+}
+```
+
+### Testing API Calls
+
+```kotlin
+@Test
+fun testApiCall() = runTest {
+    val mockServer = MockWebServer()
+    mockServer.enqueue(MockResponse().setBody("""{"name": "John"}"""))
+
+    val api = createApi(mockServer.url("/"))
+    val response = api.getUser()
+
+    assertEquals("John", response.name)
+}
+```
+
+## Debugging Techniques
+
+### Logging
+
+```kotlin
+class Logger {
+    fun debug(message: String) {
+        println("[DEBUG] $message")
+    }
+
+    fun error(message: String, throwable: Throwable) {
+        println("[ERROR] $message")
+        throwable.printStackTrace()
+    }
+}
+```
+
+### Breakpoints
+
+```kotlin
+fun processData(data: List<Int>) {
+    // Set breakpoint here
+    val filtered = data.filter { it > 0 }
+    // Set breakpoint here
+    val result = filtered.map { it * 2 }
+    // Set breakpoint here
+    println(result)
+}
+```
+
+## Performance Testing
+
+### Benchmarking
+
+```kotlin
+@Benchmark
+fun benchmarkOperation() {
+    // Operation to benchmark
+    val result = expensiveOperation()
+    Blackhole.consume(result)
+}
+```
+
+### Memory Profiling
+
+```kotlin
+class MemoryProfiler {
+    fun trackMemoryUsage() {
+        val runtime = Runtime.getRuntime()
+        val usedMemory = runtime.totalMemory() - runtime.freeMemory()
+        println("Used memory: $usedMemory bytes")
+    }
+}
+```
+
+## Test Coverage
+
+### Coverage Reports
+
+```kotlin
+// build.gradle.kts
+plugins {
+    id("jacoco")
+}
+
+jacoco {
+    toolVersion = "0.8.7"
+}
+
+tasks.jacocoTestReport {
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
+}
+```
+
+### Coverage Analysis
+
+```kotlin
+@Test
+fun testAllPaths() {
+    val calculator = Calculator()
+
+    // Test positive numbers
+    assertEquals(5, calculator.add(2, 3))
+
+    // Test negative numbers
+    assertEquals(-1, calculator.add(2, -3))
+
+    // Test zero
+    assertEquals(0, calculator.add(0, 0))
+}
+```
+
+## Best Practices
+
+### Test Organization
+
+```kotlin
+// Good
+class UserServiceTest {
+    @Test
+    fun `should return user when valid id provided`() {
+        // Test implementation
+    }
+
+    @Test
+    fun `should throw exception when invalid id provided`() {
+        // Test implementation
+    }
+}
+
+// Avoid
+class UserServiceTest {
+    @Test
+    fun test1() {
+        // Test implementation
+    }
+
+    @Test
+    fun test2() {
+        // Test implementation
+    }
+}
+```
+
+### Assertion Messages
+
+```kotlin
+// Good
+assertEquals("Expected user name to be John", "John", user.name)
+
+// Avoid
+assertEquals("John", user.name)
+```
+
+## Common Testing Patterns
+
+### Given-When-Then
+
+```kotlin
+@Test
+fun testUserCreation() {
+    // Given
+    val userService = UserService()
+    val userData = UserData("John", "john@example.com")
+
+    // When
+    val user = userService.createUser(userData)
+
+    // Then
+    assertEquals("John", user.name)
+    assertEquals("john@example.com", user.email)
+}
+```
+
+### Test Fixtures
+
+```kotlin
+class UserServiceTest {
+    private lateinit var userService: UserService
+    private lateinit var userRepository: UserRepository
+
+    @BeforeEach
+    fun setup() {
+        userRepository = mockk()
+        userService = UserService(userRepository)
+    }
+
+    @Test
+    fun testGetUser() {
+        // Test implementation
+    }
+}
+```
+
+## Conclusion
+
+Testing and debugging in Kotlin help you:
+
+- Ensure code quality
+- Catch bugs early
+- Maintain code reliability
+- Improve code maintainability
+
+Remember:
+
+- Write comprehensive tests
+- Use appropriate testing tools
+- Follow testing best practices
+- Monitor performance
+
+Stay tuned for more Kotlin testing and debugging tips!

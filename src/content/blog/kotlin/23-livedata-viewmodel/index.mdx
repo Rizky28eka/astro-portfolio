@@ -1,0 +1,278 @@
+---
+title: "Using LiveData and ViewModel"
+summary: "Master data observation and lifecycle-aware components in Android with LiveData and ViewModel"
+date: "2025-10-02"
+category: "kotlin"
+tags: ["kotlin", "livedata", "viewmodel", "jetpack"]
+---
+
+## Using LiveData and ViewModel
+
+LiveData and ViewModel are essential components in Android development that help manage UI-related data and handle configuration changes. Let's explore how to use them effectively.
+
+## ViewModel Basics
+
+### Basic ViewModel
+
+```kotlin
+class UserViewModel : ViewModel() {
+    private val _userName = MutableLiveData<String>()
+    val userName: LiveData<String> = _userName
+
+    fun updateUserName(name: String) {
+        _userName.value = name
+    }
+}
+```
+
+### ViewModel with Coroutines
+
+```kotlin
+class UserViewModel(
+    private val repository: UserRepository
+) : ViewModel() {
+    private val _user = MutableLiveData<User>()
+    val user: LiveData<User> = _user
+
+    fun loadUser(id: Int) {
+        viewModelScope.launch {
+            try {
+                val user = repository.getUser(id)
+                _user.value = user
+            } catch (e: Exception) {
+                // Handle error
+            }
+        }
+    }
+}
+```
+
+## LiveData Usage
+
+### Basic LiveData
+
+```kotlin
+class MainViewModel : ViewModel() {
+    private val _counter = MutableLiveData<Int>()
+    val counter: LiveData<Int> = _counter
+
+    init {
+        _counter.value = 0
+    }
+
+    fun increment() {
+        _counter.value = (_counter.value ?: 0) + 1
+    }
+}
+```
+
+### LiveData with Transformations
+
+```kotlin
+class UserViewModel : ViewModel() {
+    private val _user = MutableLiveData<User>()
+    val user: LiveData<User> = _user
+
+    val userName: LiveData<String> = Transformations.map(_user) { user ->
+        user.name
+    }
+
+    val userEmail: LiveData<String> = Transformations.map(_user) { user ->
+        user.email
+    }
+}
+```
+
+## State Management
+
+### UI State with LiveData
+
+```kotlin
+data class UserUiState(
+    val isLoading: Boolean = false,
+    val user: User? = null,
+    val error: String? = null
+)
+
+class UserViewModel : ViewModel() {
+    private val _uiState = MutableLiveData<UserUiState>()
+    val uiState: LiveData<UserUiState> = _uiState
+
+    fun loadUser(id: Int) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value?.copy(isLoading = true)
+            try {
+                val user = repository.getUser(id)
+                _uiState.value = UserUiState(user = user)
+            } catch (e: Exception) {
+                _uiState.value = UserUiState(error = e.message)
+            }
+        }
+    }
+}
+```
+
+## MediatorLiveData
+
+### Combining LiveData Sources
+
+```kotlin
+class UserViewModel : ViewModel() {
+    private val _firstName = MutableLiveData<String>()
+    private val _lastName = MutableLiveData<String>()
+
+    val fullName = MediatorLiveData<String>().apply {
+        fun updateFullName() {
+            val firstName = _firstName.value ?: ""
+            val lastName = _lastName.value ?: ""
+            value = "$firstName $lastName"
+        }
+
+        addSource(_firstName) { updateFullName() }
+        addSource(_lastName) { updateFullName() }
+    }
+}
+```
+
+## LiveData in Activity
+
+### Basic Usage
+
+```kotlin
+class MainActivity : AppCompatActivity() {
+    private val viewModel: UserViewModel by viewModels()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        viewModel.user.observe(this) { user ->
+            // Update UI with user data
+            updateUserUI(user)
+        }
+    }
+
+    private fun updateUserUI(user: User) {
+        // Update UI elements
+    }
+}
+```
+
+## LiveData in Fragment
+
+### Fragment Usage
+
+```kotlin
+class UserFragment : Fragment() {
+    private val viewModel: UserViewModel by viewModels()
+    private var _binding: FragmentUserBinding? = null
+    private val binding get() = _binding!!
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentUserBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        viewModel.uiState.observe(viewLifecycleOwner) { state ->
+            when {
+                state.isLoading -> showLoading()
+                state.error != null -> showError(state.error)
+                state.user != null -> showUser(state.user)
+            }
+        }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+}
+```
+
+## Best Practices
+
+### ViewModel Factory
+
+```kotlin
+class UserViewModelFactory(
+    private val repository: UserRepository
+) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(UserViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return UserViewModel(repository) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
+}
+
+// Usage in Activity/Fragment
+val factory = UserViewModelFactory(repository)
+val viewModel: UserViewModel by viewModels { factory }
+```
+
+### SavedStateHandle
+
+```kotlin
+class UserViewModel(
+    private val savedStateHandle: SavedStateHandle
+) : ViewModel() {
+    var userId: Int
+        get() = savedStateHandle.get<Int>("userId") ?: 0
+        set(value) = savedStateHandle.set("userId", value)
+}
+```
+
+## Error Handling
+
+### Error Handling with LiveData
+
+```kotlin
+sealed class Result<out T> {
+    data class Success<T>(val data: T) : Result<T>()
+    data class Error(val message: String) : Result<Nothing>()
+    object Loading : Result<Nothing>()
+}
+
+class UserViewModel : ViewModel() {
+    private val _userState = MutableLiveData<Result<User>>()
+    val userState: LiveData<Result<User>> = _userState
+
+    fun loadUser(id: Int) {
+        viewModelScope.launch {
+            _userState.value = Result.Loading
+            try {
+                val user = repository.getUser(id)
+                _userState.value = Result.Success(user)
+            } catch (e: Exception) {
+                _userState.value = Result.Error(e.message ?: "Unknown error")
+            }
+        }
+    }
+}
+```
+
+## Conclusion
+
+LiveData and ViewModel help you:
+
+- Handle configuration changes
+- Manage UI-related data
+- Observe data changes
+- Maintain clean architecture
+
+Remember:
+
+- Use ViewModel for UI-related data
+- Observe LiveData in the correct lifecycle
+- Handle errors properly
+- Follow best practices
+
+Stay tuned for our next post about Jetpack Compose with Kotlin!

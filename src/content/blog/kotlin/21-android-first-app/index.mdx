@@ -1,0 +1,266 @@
+---
+title: "Build Your First Android App in Kotlin"
+summary: "Learn how to create your first Android application using Kotlin, from layout to main activity"
+date: "2025-09-18"
+category: "kotlin"
+tags: ["kotlin", "android", "first-app", "mobile-dev"]
+---
+
+## Build Your First Android App in Kotlin
+
+Let's create a simple Android app using Kotlin. We'll build a basic counter application that demonstrates fundamental Android concepts.
+
+## Project Setup
+
+### Create New Project
+
+```kotlin
+// build.gradle.kts (app level)
+plugins {
+    id("com.android.application")
+    id("org.jetbrains.kotlin.android")
+}
+
+android {
+    namespace = "com.example.myfirstapp"
+    compileSdk = 34
+
+    defaultConfig {
+        applicationId = "com.example.myfirstapp"
+        minSdk = 24
+        targetSdk = 34
+        versionCode = 1
+        versionName = "1.0"
+    }
+}
+
+dependencies {
+    implementation("androidx.core:core-ktx:1.12.0")
+    implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation("com.google.android.material:material:1.11.0")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+}
+```
+
+## Layout Design
+
+### Main Layout
+
+```xml
+<!-- res/layout/activity_main.xml -->
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/counterText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="0"
+        android:textSize="48sp"
+        app:layout_constraintBottom_toTopOf="@+id/incrementButton"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/incrementButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Increment"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+```
+
+## Main Activity
+
+### Basic Activity
+
+```kotlin
+// MainActivity.kt
+class MainActivity : AppCompatActivity() {
+    private var counter = 0
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        val counterText = findViewById<TextView>(R.id.counterText)
+        val incrementButton = findViewById<Button>(R.id.incrementButton)
+
+        incrementButton.setOnClickListener {
+            counter++
+            counterText.text = counter.toString()
+        }
+    }
+}
+```
+
+## Adding Features
+
+### Save State
+
+```kotlin
+class MainActivity : AppCompatActivity() {
+    private var counter = 0
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        // Restore state
+        counter = savedInstanceState?.getInt("counter", 0) ?: 0
+
+        val counterText = findViewById<TextView>(R.id.counterText)
+        val incrementButton = findViewById<Button>(R.id.incrementButton)
+
+        // Update UI
+        counterText.text = counter.toString()
+
+        incrementButton.setOnClickListener {
+            counter++
+            counterText.text = counter.toString()
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putInt("counter", counter)
+    }
+}
+```
+
+## Adding Animations
+
+### Button Animation
+
+```kotlin
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        val incrementButton = findViewById<Button>(R.id.incrementButton)
+
+        incrementButton.setOnClickListener {
+            // Scale animation
+            incrementButton.animate()
+                .scaleX(0.8f)
+                .scaleY(0.8f)
+                .setDuration(100)
+                .withEndAction {
+                    incrementButton.animate()
+                        .scaleX(1f)
+                        .scaleY(1f)
+                        .setDuration(100)
+                }
+                .start()
+
+            // Update counter
+            counter++
+            counterText.text = counter.toString()
+        }
+    }
+}
+```
+
+## Adding Styles
+
+### Custom Theme
+
+```xml
+<!-- res/values/themes.xml -->
+<resources>
+    <style name="Theme.MyFirstApp" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <item name="colorPrimary">@color/purple_500</item>
+        <item name="colorPrimaryVariant">@color/purple_700</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSecondary">@color/teal_200</item>
+        <item name="colorSecondaryVariant">@color/teal_700</item>
+        <item name="colorOnSecondary">@color/black</item>
+    </style>
+</resources>
+```
+
+## Best Practices
+
+### View Binding
+
+```kotlin
+class MainActivity : AppCompatActivity() {
+    private lateinit var binding: ActivityMainBinding
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        binding.incrementButton.setOnClickListener {
+            counter++
+            binding.counterText.text = counter.toString()
+        }
+    }
+}
+```
+
+### Constants
+
+```kotlin
+companion object {
+    private const val COUNTER_KEY = "counter"
+    private const val ANIMATION_DURATION = 100L
+}
+```
+
+## Error Handling
+
+### Basic Error Handling
+
+```kotlin
+class MainActivity : AppCompatActivity() {
+    private var counter = 0
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        try {
+            counter = savedInstanceState?.getInt(COUNTER_KEY, 0) ?: 0
+            updateCounterDisplay()
+        } catch (e: Exception) {
+            Log.e("MainActivity", "Error restoring state", e)
+            counter = 0
+            updateCounterDisplay()
+        }
+    }
+
+    private fun updateCounterDisplay() {
+        findViewById<TextView>(R.id.counterText).text = counter.toString()
+    }
+}
+```
+
+## Conclusion
+
+Building your first Android app helps you:
+
+- Understand basic Android concepts
+- Learn Kotlin for Android
+- Master UI development
+- Handle user interactions
+
+Remember:
+
+- Follow Android best practices
+- Use proper error handling
+- Implement state management
+- Add user feedback
+
+Stay tuned for our next post about MVVM Architecture in Kotlin!

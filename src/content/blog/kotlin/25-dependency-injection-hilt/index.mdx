@@ -1,0 +1,320 @@
+---
+title: "Dependency Injection with Hilt"
+summary: "Learn how to implement dependency injection in your Android app using Hilt"
+date: "2025-10-16"
+category: "kotlin"
+tags: ["kotlin", "kotlin-di", "hilt", "android-jetpack"]
+---
+
+## Dependency Injection with Hilt
+
+Hilt is a dependency injection library for Android that reduces the boilerplate of doing manual dependency injection. Let's learn how to use Hilt effectively in your Kotlin Android app.
+
+## Project Setup
+
+### Add Dependencies
+
+```kotlin
+// build.gradle.kts (project level)
+plugins {
+    id("com.google.dagger.hilt.android") version "2.50" apply false
+}
+
+// build.gradle.kts (app level)
+plugins {
+    id("com.android.application")
+    id("org.jetbrains.kotlin.android")
+    id("kotlin-kapt")
+    id("com.google.dagger.hilt.android")
+}
+
+dependencies {
+    implementation("com.google.dagger:hilt-android:2.50")
+    kapt("com.google.dagger:hilt-android-compiler:2.50")
+
+    // Hilt Navigation
+    implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
+}
+```
+
+## Application Setup
+
+### Hilt Application
+
+```kotlin
+@HiltAndroidApp
+class MyApplication : Application()
+```
+
+### AndroidManifest.xml
+
+```xml
+<application
+    android:name=".MyApplication"
+    ...>
+```
+
+## Basic Injection
+
+### Module Definition
+
+```kotlin
+@Module
+@InstallIn(SingletonComponent::class)
+object AppModule {
+    @Provides
+    @Singleton
+    fun provideUserRepository(): UserRepository {
+        return UserRepositoryImpl()
+    }
+
+    @Provides
+    @Singleton
+    fun provideApiService(): ApiService {
+        return Retrofit.Builder()
+            .baseUrl("https://api.example.com/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(ApiService::class.java)
+    }
+}
+```
+
+### Activity Injection
+
+```kotlin
+@AndroidEntryPoint
+class MainActivity : AppCompatActivity() {
+    @Inject
+    lateinit var userRepository: UserRepository
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        // Use injected repository
+        userRepository.getUser(1)
+    }
+}
+```
+
+## ViewModel Injection
+
+### ViewModel with Hilt
+
+```kotlin
+@HiltViewModel
+class UserViewModel @Inject constructor(
+    private val repository: UserRepository
+) : ViewModel() {
+    private val _user = MutableLiveData<User>()
+    val user: LiveData<User> = _user
+
+    fun loadUser(id: Int) {
+        viewModelScope.launch {
+            try {
+                val user = repository.getUser(id)
+                _user.value = user
+            } catch (e: Exception) {
+                // Handle error
+            }
+        }
+    }
+}
+```
+
+## Fragment Injection
+
+### Fragment with Hilt
+
+```kotlin
+@AndroidEntryPoint
+class UserFragment : Fragment() {
+    private val viewModel: UserViewModel by viewModels()
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        viewModel.user.observe(viewLifecycleOwner) { user ->
+            // Update UI
+        }
+    }
+}
+```
+
+## Scoped Dependencies
+
+### Activity Scoped
+
+```kotlin
+@Module
+@InstallIn(ActivityComponent::class)
+object ActivityModule {
+    @Provides
+    fun provideUserManager(
+        @ActivityContext context: Context
+    ): UserManager {
+        return UserManager(context)
+    }
+}
+```
+
+### Fragment Scoped
+
+```kotlin
+@Module
+@InstallIn(FragmentComponent::class)
+object FragmentModule {
+    @Provides
+    fun provideUserAdapter(): UserAdapter {
+        return UserAdapter()
+    }
+}
+```
+
+## Qualifiers
+
+### Custom Qualifiers
+
+```kotlin
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class AuthInterceptorOkHttpClient
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class OtherInterceptorOkHttpClient
+
+@Module
+@InstallIn(SingletonComponent::class)
+object NetworkModule {
+    @AuthInterceptorOkHttpClient
+    @Provides
+    @Singleton
+    fun provideAuthOkHttpClient(): OkHttpClient {
+        return OkHttpClient.Builder()
+            .addInterceptor(AuthInterceptor())
+            .build()
+    }
+
+    @OtherInterceptorOkHttpClient
+    @Provides
+    @Singleton
+    fun provideOtherOkHttpClient(): OkHttpClient {
+        return OkHttpClient.Builder()
+            .addInterceptor(OtherInterceptor())
+            .build()
+    }
+}
+```
+
+## Assisted Injection
+
+### ViewModel with Assisted Injection
+
+```kotlin
+@HiltViewModel
+class UserViewModel @AssistedInject constructor(
+    @Assisted private val userId: Int,
+    private val repository: UserRepository
+) : ViewModel() {
+    @Factory
+    interface Factory {
+        fun create(userId: Int): UserViewModel
+    }
+
+    // ViewModel implementation
+}
+```
+
+## Testing with Hilt
+
+### Test Module
+
+```kotlin
+@Module
+@InstallIn(SingletonComponent::class)
+object TestAppModule {
+    @Provides
+    @Singleton
+    fun provideTestUserRepository(): UserRepository {
+        return FakeUserRepository()
+    }
+}
+```
+
+### Hilt Test
+
+```kotlin
+@HiltAndroidTest
+class UserViewModelTest {
+    @get:Rule
+    val hiltRule = HiltAndroidRule(this)
+
+    @Inject
+    lateinit var viewModel: UserViewModel
+
+    @Test
+    fun testLoadUser() {
+        // Test implementation
+    }
+}
+```
+
+## Best Practices
+
+### Module Organization
+
+```kotlin
+@Module
+@InstallIn(SingletonComponent::class)
+object DatabaseModule {
+    @Provides
+    @Singleton
+    fun provideDatabase(@ApplicationContext context: Context): AppDatabase {
+        return Room.databaseBuilder(
+            context,
+            AppDatabase::class.java,
+            "app_database"
+        ).build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideUserDao(database: AppDatabase): UserDao {
+        return database.userDao()
+    }
+}
+```
+
+### Error Handling
+
+```kotlin
+@Module
+@InstallIn(SingletonComponent::class)
+object ErrorHandlingModule {
+    @Provides
+    @Singleton
+    fun provideErrorHandler(): ErrorHandler {
+        return ErrorHandlerImpl()
+    }
+}
+```
+
+## Conclusion
+
+Hilt helps you:
+
+- Reduce boilerplate code
+- Manage dependencies
+- Test your app easily
+- Follow clean architecture
+
+Remember:
+
+- Use appropriate scopes
+- Follow dependency rules
+- Test your injections
+- Keep modules focused
+
+Stay tuned for more Kotlin Android development tips!

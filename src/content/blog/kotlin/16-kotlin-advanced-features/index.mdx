@@ -1,0 +1,307 @@
+---
+title: "Advanced Features and Best Practices in Kotlin"
+summary: "Explore advanced Kotlin features and learn best practices for writing high-quality Kotlin code"
+date: "2025-08-14"
+category: "kotlin"
+tags: ["kotlin", "advanced", "best-practices", "programming"]
+---
+
+## Advanced Features and Best Practices in Kotlin
+
+Let's dive into some advanced Kotlin features and best practices that will help you write more efficient, maintainable, and idiomatic Kotlin code.
+
+## Type-Safe Builders
+
+### DSL Creation
+
+```kotlin
+class HTML {
+    fun body(init: Body.() -> Unit) {
+        val body = Body()
+        body.init()
+    }
+}
+
+class Body {
+    fun div(init: Div.() -> Unit) {
+        val div = Div()
+        div.init()
+    }
+}
+
+class Div {
+    var text: String = ""
+}
+
+fun html(init: HTML.() -> Unit): HTML {
+    val html = HTML()
+    html.init()
+    return html
+}
+
+// Usage
+val htmlContent = html {
+    body {
+        div {
+            text = "Hello, Kotlin!"
+        }
+    }
+}
+```
+
+## Inline Functions
+
+### Basic Inline
+
+```kotlin
+inline fun measureTime(action: () -> Unit): Long {
+    val startTime = System.currentTimeMillis()
+    action()
+    return System.currentTimeMillis() - startTime
+}
+
+// Usage
+val time = measureTime {
+    // Code to measure
+}
+```
+
+### Crossinline and Noinline
+
+```kotlin
+inline fun processItems(
+    items: List<Int>,
+    crossinline onItem: (Int) -> Unit,
+    noinline onComplete: () -> Unit
+) {
+    items.forEach { item ->
+        onItem(item)
+    }
+    onComplete()
+}
+```
+
+## Reified Type Parameters
+
+### Type-Safe Functions
+
+```kotlin
+inline fun <reified T> createInstance(): T {
+    return T::class.java.getDeclaredConstructor().newInstance()
+}
+
+// Usage
+val string = createInstance<String>()
+```
+
+### Type Checking
+
+```kotlin
+inline fun <reified T> List<*>.filterIsInstance(): List<T> {
+    return filter { it is T }.map { it as T }
+}
+
+// Usage
+val strings: List<String> = listOf(1, "2", 3).filterIsInstance()
+```
+
+## Delegated Properties
+
+### Lazy Initialization
+
+```kotlin
+class ExpensiveResource {
+    val data by lazy {
+        // Expensive computation
+        computeData()
+    }
+}
+```
+
+### Observable Properties
+
+```kotlin
+class User {
+    var name: String by Delegates.observable("") {
+        prop, old, new ->
+        println("$old -> $new")
+    }
+}
+```
+
+### Vetoable Properties
+
+```kotlin
+class PositiveNumber {
+    var value: Int by Delegates.vetoable(0) {
+        prop, old, new ->
+        new > 0
+    }
+}
+```
+
+## Scope Functions
+
+### Let
+
+```kotlin
+val result = nullableValue?.let {
+    // Safe call on non-null value
+    it.process()
+}
+```
+
+### With
+
+```kotlin
+val result = with(object) {
+    // Multiple operations on the same object
+    property1 = value1
+    property2 = value2
+    computeResult()
+}
+```
+
+### Apply
+
+```kotlin
+val result = object.apply {
+    // Configure object
+    property1 = value1
+    property2 = value2
+}
+```
+
+## Advanced Coroutines
+
+### Structured Concurrency
+
+```kotlin
+suspend fun fetchData() = coroutineScope {
+    val users = async { fetchUsers() }
+    val posts = async { fetchPosts() }
+
+    Data(users.await(), posts.await())
+}
+```
+
+### Supervisor Scope
+
+```kotlin
+supervisorScope {
+    val first = async { fetchFirst() }
+    val second = async { fetchSecond() }
+
+    try {
+        val result = first.await() + second.await()
+    } catch (e: Exception) {
+        // Handle error
+    }
+}
+```
+
+## Best Practices
+
+### Null Safety
+
+```kotlin
+// Good
+val length = nullableString?.length ?: 0
+
+// Avoid
+val length = if (nullableString != null) nullableString.length else 0
+```
+
+### Immutability
+
+```kotlin
+// Good
+val immutableList = listOf(1, 2, 3)
+
+// Avoid
+val mutableList = mutableListOf(1, 2, 3)
+```
+
+### Function Types
+
+```kotlin
+// Good
+typealias Handler = (String) -> Unit
+
+// Avoid
+fun handleString(string: String) { /* ... */ }
+```
+
+## Performance Optimization
+
+### Sequence Usage
+
+```kotlin
+// Good for large collections
+val result = list.asSequence()
+    .filter { it > 0 }
+    .map { it * 2 }
+    .toList()
+
+// Avoid for small collections
+val result = list
+    .filter { it > 0 }
+    .map { it * 2 }
+```
+
+### Memory Management
+
+```kotlin
+// Good
+class Resource : AutoCloseable {
+    override fun close() {
+        // Cleanup
+    }
+}
+
+// Usage
+Resource().use { resource ->
+    // Use resource
+}
+```
+
+## Testing Best Practices
+
+### Property-Based Testing
+
+```kotlin
+@Test
+fun testAddition() {
+    forAll { a: Int, b: Int ->
+        (a + b) == (b + a)
+    }
+}
+```
+
+### Coroutine Testing
+
+```kotlin
+@Test
+fun testCoroutine() = runTest {
+    val result = async { computeValue() }.await()
+    assertEquals(expected, result)
+}
+```
+
+## Conclusion
+
+Advanced Kotlin features help you:
+
+- Write more concise and expressive code
+- Improve code safety and reliability
+- Optimize performance
+- Follow best practices
+
+Remember:
+
+- Use appropriate scope functions
+- Leverage type-safe builders
+- Follow Kotlin idioms
+- Write testable code
+
+Stay tuned for more Kotlin programming tips and tricks!

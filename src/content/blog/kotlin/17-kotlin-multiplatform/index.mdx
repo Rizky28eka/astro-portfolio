@@ -1,0 +1,352 @@
+---
+title: "Kotlin Multiplatform Development"
+summary: "Learn how to build cross-platform applications using Kotlin Multiplatform"
+date: "2025-08-21"
+category: "kotlin"
+tags: ["kotlin", "multiplatform", "cross-platform", "mobile"]
+---
+
+## Kotlin Multiplatform Development
+
+Kotlin Multiplatform allows you to share code between different platforms while maintaining native performance and user experience. Let's explore how to build cross-platform applications using Kotlin Multiplatform.
+
+## Project Setup
+
+### Basic Structure
+
+```kotlin
+// build.gradle.kts
+plugins {
+    kotlin("multiplatform")
+    kotlin("native.cocoapods")
+    id("com.android.library")
+}
+
+kotlin {
+    android()
+    ios()
+
+    sourceSets {
+        val commonMain by getting {
+            dependencies {
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
+            }
+        }
+    }
+}
+```
+
+### Shared Module
+
+```kotlin
+// commonMain/kotlin/Repository.kt
+interface Repository {
+    suspend fun getData(): String
+}
+
+class RepositoryImpl : Repository {
+    override suspend fun getData(): String {
+        return "Shared data"
+    }
+}
+```
+
+## Platform-Specific Code
+
+### Android Implementation
+
+```kotlin
+// androidMain/kotlin/Platform.kt
+class AndroidPlatform : Platform {
+    override val name: String = "Android ${android.os.Build.VERSION.SDK_INT}"
+}
+
+// Usage
+val platform = AndroidPlatform()
+```
+
+### iOS Implementation
+
+```kotlin
+// iosMain/kotlin/Platform.kt
+class IOSPlatform : Platform {
+    override val name: String = UIDevice.currentDevice.systemName()
+}
+
+// Usage
+val platform = IOSPlatform()
+```
+
+## Networking
+
+### Common Network Client
+
+```kotlin
+// commonMain/kotlin/NetworkClient.kt
+interface NetworkClient {
+    suspend fun get(url: String): String
+}
+
+expect class HttpClient() {
+    suspend fun get(url: String): String
+}
+```
+
+### Platform-Specific Implementations
+
+```kotlin
+// androidMain/kotlin/NetworkClient.kt
+actual class HttpClient {
+    private val client = OkHttpClient()
+
+    actual suspend fun get(url: String): String {
+        return withContext(Dispatchers.IO) {
+            client.newCall(Request.Builder().url(url).build())
+                .execute()
+                .body?.string() ?: ""
+        }
+    }
+}
+
+// iosMain/kotlin/NetworkClient.kt
+actual class HttpClient {
+    actual suspend fun get(url: String): String {
+        return URLSession.shared.dataTask(with: URL(string: url)!!) { data, _, _ ->
+            String(data ?: ByteArray(0))
+        }.resume()
+    }
+}
+```
+
+## Database
+
+### Common Database Interface
+
+```kotlin
+// commonMain/kotlin/Database.kt
+interface Database {
+    suspend fun saveData(data: String)
+    suspend fun getData(): String
+}
+
+expect class DatabaseDriver() {
+    suspend fun saveData(data: String)
+    suspend fun getData(): String
+}
+```
+
+### Platform-Specific Implementations
+
+```kotlin
+// androidMain/kotlin/Database.kt
+actual class DatabaseDriver {
+    private val db = Room.databaseBuilder(
+        context,
+        AppDatabase::class.java,
+        "app_database"
+    ).build()
+
+    actual suspend fun saveData(data: String) {
+        db.dataDao().insert(DataEntity(data))
+    }
+
+    actual suspend fun getData(): String {
+        return db.dataDao().getData().data
+    }
+}
+
+// iosMain/kotlin/Database.kt
+actual class DatabaseDriver {
+    private val db = Database()
+
+    actual suspend fun saveData(data: String) {
+        db.save(data)
+    }
+
+    actual suspend fun getData(): String {
+        return db.get()
+    }
+}
+```
+
+## UI Components
+
+### Common UI Logic
+
+```kotlin
+// commonMain/kotlin/ViewModel.kt
+class SharedViewModel {
+    private val _state = MutableStateFlow<UiState>(UiState.Initial)
+    val state: StateFlow<UiState> = _state.asStateFlow()
+
+    fun updateState(newState: UiState) {
+        _state.value = newState
+    }
+}
+```
+
+### Platform-Specific UI
+
+```kotlin
+// androidMain/kotlin/Activity.kt
+class MainActivity : AppCompatActivity() {
+    private val viewModel: SharedViewModel by viewModels()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            AppTheme {
+                MainScreen(viewModel)
+            }
+        }
+    }
+}
+
+// iosMain/kotlin/ViewController.kt
+class MainViewController : UIViewController {
+    private let viewModel = SharedViewModel()
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        setupUI()
+    }
+}
+```
+
+## Testing
+
+### Common Tests
+
+```kotlin
+// commonTest/kotlin/RepositoryTest.kt
+class RepositoryTest {
+    @Test
+    fun testGetData() = runTest {
+        val repository = RepositoryImpl()
+        val result = repository.getData()
+        assertEquals("Shared data", result)
+    }
+}
+```
+
+### Platform-Specific Tests
+
+```kotlin
+// androidTest/kotlin/PlatformTest.kt
+class AndroidPlatformTest {
+    @Test
+    fun testPlatformName() {
+        val platform = AndroidPlatform()
+        assertTrue(platform.name.startsWith("Android"))
+    }
+}
+
+// iosTest/kotlin/PlatformTest.kt
+class IOSPlatformTest {
+    func testPlatformName() {
+        let platform = IOSPlatform()
+        XCTAssertTrue(platform.name.startsWith("iOS"))
+    }
+}
+```
+
+## Best Practices
+
+### Code Organization
+
+```kotlin
+// Good
+commonMain/
+    kotlin/
+        domain/
+        data/
+        ui/
+    resources/
+
+// Avoid
+commonMain/
+    kotlin/
+        Repository.kt
+        ViewModel.kt
+        Platform.kt
+```
+
+### Dependency Management
+
+```kotlin
+// Good
+val commonDependencies = listOf(
+    "org.jetbrains.kotlinx:kotlinx-coroutines-core",
+    "org.jetbrains.kotlinx:kotlinx-serialization-json"
+)
+
+// Avoid
+dependencies {
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json")
+}
+```
+
+## Common Challenges
+
+### Platform-Specific APIs
+
+```kotlin
+expect class PlatformSpecific() {
+    fun doSomething()
+}
+
+// Android
+actual class PlatformSpecific {
+    actual fun doSomething() {
+        // Android implementation
+    }
+}
+
+// iOS
+actual class PlatformSpecific {
+    actual fun doSomething() {
+        // iOS implementation
+    }
+}
+```
+
+### Resource Management
+
+```kotlin
+expect class ResourceManager {
+    fun getString(key: String): String
+}
+
+// Android
+actual class ResourceManager {
+    actual fun getString(key: String): String {
+        return context.getString(key)
+    }
+}
+
+// iOS
+actual class ResourceManager {
+    actual fun getString(key: String): String {
+        return NSBundle.mainBundle.localizedString(key, null, null)
+    }
+}
+```
+
+## Conclusion
+
+Kotlin Multiplatform helps you:
+
+- Share code between platforms
+- Maintain native performance
+- Reduce development time
+- Ensure consistency
+
+Remember:
+
+- Keep platform-specific code minimal
+- Use expect/actual for platform differences
+- Follow platform conventions
+- Test on all platforms
+
+Stay tuned for more Kotlin Multiplatform development tips!

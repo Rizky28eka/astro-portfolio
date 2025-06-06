@@ -1,0 +1,363 @@
+---
+title: "Kotlin Multiplatform Mobile (KMM)"
+summary: "Learn how to share code across Android and iOS platforms"
+date: "2025-12-11"
+category: "kotlin"
+tags: ["kotlin", "kmm", "cross-platform", "kotlin-native"]
+---
+
+## Kotlin Multiplatform Mobile (KMM)
+
+Kotlin Multiplatform Mobile (KMM) allows you to share code between Android and iOS platforms while maintaining native UI and platform-specific features. Let's explore how to build cross-platform mobile applications with KMM.
+
+## Project Setup
+
+### Add Dependencies
+
+```kotlin
+// build.gradle.kts
+plugins {
+    kotlin("multiplatform") version "1.8.0"
+    kotlin("native.cocoapods") version "1.8.0"
+    id("com.android.library")
+}
+
+kotlin {
+    android()
+    ios()
+
+    sourceSets {
+        val commonMain by getting {
+            dependencies {
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+                implementation("io.ktor:ktor-client-core:2.3.0")
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
+            }
+        }
+
+        val androidMain by getting {
+            dependencies {
+                implementation("io.ktor:ktor-client-android:2.3.0")
+            }
+        }
+
+        val iosMain by getting {
+            dependencies {
+                implementation("io.ktor:ktor-client-darwin:2.3.0")
+            }
+        }
+    }
+}
+```
+
+## Shared Code Structure
+
+### Common Module
+
+```kotlin
+// commonMain/kotlin/com/example/shared/Repository.kt
+class Repository {
+    suspend fun getData(): List<Item> {
+        return api.getItems()
+    }
+
+    suspend fun saveData(item: Item) {
+        api.saveItem(item)
+    }
+}
+
+// commonMain/kotlin/com/example/shared/Item.kt
+@Serializable
+data class Item(
+    val id: Int,
+    val title: String,
+    val description: String
+)
+```
+
+### Platform-Specific Code
+
+```kotlin
+// commonMain/kotlin/com/example/shared/Platform.kt
+expect class Platform() {
+    val platform: String
+}
+
+// androidMain/kotlin/com/example/shared/Platform.kt
+actual class Platform actual constructor() {
+    actual val platform: String = "Android ${android.os.Build.VERSION.SDK_INT}"
+}
+
+// iosMain/kotlin/com/example/shared/Platform.kt
+actual class Platform actual constructor() {
+    actual val platform: String = UIDevice.currentDevice.systemName() + " " + UIDevice.currentDevice.systemVersion
+}
+```
+
+## Network Layer
+
+### Common Network Code
+
+```kotlin
+// commonMain/kotlin/com/example/shared/network/Api.kt
+interface Api {
+    suspend fun getItems(): List<Item>
+    suspend fun saveItem(item: Item)
+}
+
+// commonMain/kotlin/com/example/shared/network/HttpClient.kt
+expect class HttpClient() {
+    fun create(): io.ktor.client.HttpClient
+}
+
+// androidMain/kotlin/com/example/shared/network/HttpClient.kt
+actual class HttpClient actual constructor() {
+    actual fun create(): io.ktor.client.HttpClient {
+        return io.ktor.client.HttpClient(Android) {
+            install(JsonFeature) {
+                serializer = KotlinxSerializer()
+            }
+        }
+    }
+}
+
+// iosMain/kotlin/com/example/shared/network/HttpClient.kt
+actual class HttpClient actual constructor() {
+    actual fun create(): io.ktor.client.HttpClient {
+        return io.ktor.client.HttpClient(Darwin) {
+            install(JsonFeature) {
+                serializer = KotlinxSerializer()
+            }
+        }
+    }
+}
+```
+
+## Database Layer
+
+### Common Database Code
+
+```kotlin
+// commonMain/kotlin/com/example/shared/database/Database.kt
+expect class Database() {
+    fun create(): Database
+    suspend fun insertItem(item: Item)
+    suspend fun getItems(): List<Item>
+}
+
+// androidMain/kotlin/com/example/shared/database/Database.kt
+actual class Database actual constructor() {
+    actual fun create(): Database {
+        return Room.databaseBuilder(
+            context,
+            AppDatabase::class.java,
+            "app_database"
+        ).build()
+    }
+
+    actual suspend fun insertItem(item: Item) {
+        database.itemDao().insert(item)
+    }
+
+    actual suspend fun getItems(): List<Item> {
+        return database.itemDao().getAll()
+    }
+}
+
+// iosMain/kotlin/com/example/shared/database/Database.kt
+actual class Database actual constructor() {
+    actual fun create(): Database {
+        return Database(databasePath)
+    }
+
+    actual suspend fun insertItem(item: Item) {
+        database.insert(item)
+    }
+
+    actual suspend fun getItems(): List<Item> {
+        return database.getAll()
+    }
+}
+```
+
+## UI Integration
+
+### Android Integration
+
+```kotlin
+// androidMain/kotlin/com/example/android/MainActivity.kt
+class MainActivity : AppCompatActivity() {
+    private val viewModel: MainViewModel by viewModels()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        viewModel.items.observe(this) { items ->
+            // Update UI
+        }
+    }
+}
+
+// androidMain/kotlin/com/example/android/MainViewModel.kt
+class MainViewModel : ViewModel() {
+    private val repository = Repository()
+    private val _items = MutableLiveData<List<Item>>()
+    val items: LiveData<List<Item>> = _items
+
+    fun loadItems() {
+        viewModelScope.launch {
+            _items.value = repository.getData()
+        }
+    }
+}
+```
+
+### iOS Integration
+
+```swift
+// iosApp/ContentView.swift
+struct ContentView: View {
+    @StateObject private var viewModel = MainViewModel()
+
+    var body: some View {
+        List(viewModel.items) { item in
+            ItemRow(item: item)
+        }
+        .onAppear {
+            viewModel.loadItems()
+        }
+    }
+}
+
+// iosApp/MainViewModel.swift
+class MainViewModel: ObservableObject {
+    private let repository = Repository()
+    @Published var items: [Item] = []
+
+    func loadItems() {
+        Task {
+            items = try await repository.getData()
+        }
+    }
+}
+```
+
+## Dependency Injection
+
+### Common DI Setup
+
+```kotlin
+// commonMain/kotlin/com/example/shared/di/CommonModule.kt
+object CommonModule {
+    fun provideRepository(api: Api, database: Database): Repository {
+        return Repository(api, database)
+    }
+}
+
+// androidMain/kotlin/com/example/android/di/AndroidModule.kt
+object AndroidModule {
+    fun provideApi(): Api {
+        return ApiImpl(HttpClient().create())
+    }
+
+    fun provideDatabase(): Database {
+        return Database().create()
+    }
+}
+
+// iosMain/kotlin/com/example/ios/di/IosModule.kt
+object IosModule {
+    fun provideApi(): Api {
+        return ApiImpl(HttpClient().create())
+    }
+
+    fun provideDatabase(): Database {
+        return Database().create()
+    }
+}
+```
+
+## Testing
+
+### Common Tests
+
+```kotlin
+// commonTest/kotlin/com/example/shared/RepositoryTest.kt
+class RepositoryTest {
+    private lateinit var repository: Repository
+    private lateinit var api: Api
+    private lateinit var database: Database
+
+    @BeforeTest
+    fun setup() {
+        api = mockk()
+        database = mockk()
+        repository = Repository(api, database)
+    }
+
+    @Test
+    fun `test get data`() = runTest {
+        // Given
+        val items = listOf(Item(1, "Test", "Description"))
+        coEvery { api.getItems() } returns items
+
+        // When
+        val result = repository.getData()
+
+        // Then
+        assertEquals(items, result)
+    }
+}
+```
+
+## Best Practices
+
+### Code Organization
+
+```kotlin
+// commonMain/kotlin/com/example/shared/domain/UseCase.kt
+class GetItemsUseCase(private val repository: Repository) {
+    suspend operator fun invoke(): List<Item> {
+        return repository.getData()
+    }
+}
+
+// commonMain/kotlin/com/example/shared/domain/Repository.kt
+interface Repository {
+    suspend fun getData(): List<Item>
+    suspend fun saveData(item: Item)
+}
+
+// commonMain/kotlin/com/example/shared/data/RepositoryImpl.kt
+class RepositoryImpl(
+    private val api: Api,
+    private val database: Database
+) : Repository {
+    override suspend fun getData(): List<Item> {
+        return try {
+            api.getItems()
+        } catch (e: Exception) {
+            database.getItems()
+        }
+    }
+}
+```
+
+## Conclusion
+
+KMM helps you:
+
+- Share code between platforms
+- Maintain native UI
+- Reduce development time
+- Keep platform-specific features
+
+Remember:
+
+- Follow clean architecture
+- Use proper dependency injection
+- Write comprehensive tests
+- Handle platform differences
+
+Stay tuned for our next post about Top Kotlin IDE Shortcuts!

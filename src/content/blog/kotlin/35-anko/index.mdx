@@ -1,0 +1,424 @@
+---
+title: "Using Anko in Kotlin"
+summary: "Learn how to simplify Android layouts programmatically with Anko"
+date: "2025-12-25"
+category: "kotlin"
+tags: ["kotlin", "anko", "kotlin-library", "ui"]
+---
+
+## Using Anko in Kotlin
+
+Anko is a Kotlin library that makes Android application development faster and easier. Let's explore how to use Anko for creating layouts programmatically.
+
+## Project Setup
+
+### Add Dependencies
+
+```kotlin
+// build.gradle.kts
+dependencies {
+    implementation("org.jetbrains.anko:anko:0.10.8")
+    implementation("org.jetbrains.anko:anko-commons:0.10.8")
+    implementation("org.jetbrains.anko:anko-design:0.10.8")
+    implementation("org.jetbrains.anko:anko-sdk25:0.10.8")
+}
+```
+
+## Basic Layouts
+
+### Simple Layout
+
+```kotlin
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        verticalLayout {
+            padding = dip(16)
+
+            textView {
+                text = "Hello, Anko!"
+                textSize = 24f
+                textColor = Color.BLACK
+            }
+
+            button {
+                text = "Click Me"
+                onClick { toast("Button clicked!") }
+            }
+        }
+    }
+}
+```
+
+### Complex Layout
+
+```kotlin
+class UserProfileActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        verticalLayout {
+            padding = dip(16)
+
+            imageView {
+                imageResource = R.drawable.profile_placeholder
+                scaleType = ImageView.ScaleType.CENTER_CROP
+            }.lparams(width = matchParent, height = dip(200))
+
+            textView {
+                text = "John Doe"
+                textSize = 24f
+                textColor = Color.BLACK
+            }.lparams {
+                topMargin = dip(16)
+                gravity = Gravity.CENTER
+            }
+
+            textView {
+                text = "john.doe@example.com"
+                textSize = 16f
+                textColor = Color.GRAY
+            }.lparams {
+                topMargin = dip(8)
+                gravity = Gravity.CENTER
+            }
+
+            button {
+                text = "Edit Profile"
+                onClick { startActivity<EditProfileActivity>() }
+            }.lparams {
+                topMargin = dip(16)
+                width = matchParent
+            }
+        }
+    }
+}
+```
+
+## Layout Components
+
+### Form Layout
+
+```kotlin
+class LoginActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        verticalLayout {
+            padding = dip(16)
+
+            textView {
+                text = "Login"
+                textSize = 24f
+                textColor = Color.BLACK
+            }.lparams {
+                gravity = Gravity.CENTER
+                bottomMargin = dip(32)
+            }
+
+            val emailEdit = editText {
+                hint = "Email"
+                inputType = InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
+            }.lparams(width = matchParent) {
+                bottomMargin = dip(16)
+            }
+
+            val passwordEdit = editText {
+                hint = "Password"
+                inputType = InputType.TYPE_TEXT_VARIATION_PASSWORD
+            }.lparams(width = matchParent) {
+                bottomMargin = dip(24)
+            }
+
+            button {
+                text = "Login"
+                onClick {
+                    val email = emailEdit.text.toString()
+                    val password = passwordEdit.text.toString()
+                    login(email, password)
+                }
+            }.lparams(width = matchParent)
+        }
+    }
+}
+```
+
+### List Layout
+
+```kotlin
+class UserListActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        verticalLayout {
+            padding = dip(16)
+
+            textView {
+                text = "Users"
+                textSize = 24f
+                textColor = Color.BLACK
+            }.lparams {
+                gravity = Gravity.CENTER
+                bottomMargin = dip(16)
+            }
+
+            val recyclerView = recyclerView {
+                layoutManager = LinearLayoutManager(context)
+                adapter = UserAdapter(getUsers())
+            }.lparams(width = matchParent, height = matchParent)
+        }
+    }
+}
+```
+
+## Anko Commons
+
+### Dialogs
+
+```kotlin
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        verticalLayout {
+            button {
+                text = "Show Dialog"
+                onClick {
+                    alert("Are you sure?", "Confirmation") {
+                        positiveButton("Yes") {
+                            toast("Confirmed!")
+                        }
+                        negativeButton("No") {
+                            toast("Cancelled!")
+                        }
+                    }.show()
+                }
+            }
+        }
+    }
+}
+```
+
+### Intents
+
+```kotlin
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        verticalLayout {
+            button {
+                text = "Open URL"
+                onClick {
+                    browse("https://www.example.com")
+                }
+            }
+
+            button {
+                text = "Send Email"
+                onClick {
+                    email("recipient@example.com", "Subject", "Body")
+                }
+            }
+
+            button {
+                text = "Make Call"
+                onClick {
+                    makeCall("1234567890")
+                }
+            }
+        }
+    }
+}
+```
+
+## Anko SQLite
+
+### Database Operations
+
+```kotlin
+class DatabaseHelper(ctx: Context) : ManagedSQLiteOpenHelper(ctx, "database.db", null, 1) {
+    companion object {
+        private var instance: DatabaseHelper? = null
+
+        @Synchronized
+        fun getInstance(ctx: Context): DatabaseHelper {
+            if (instance == null) {
+                instance = DatabaseHelper(ctx.applicationContext)
+            }
+            return instance!!
+        }
+    }
+
+    override fun onCreate(db: SQLiteDatabase) {
+        db.createTable("users", true,
+            "id" to INTEGER + PRIMARY_KEY + AUTOINCREMENT,
+            "name" to TEXT,
+            "email" to TEXT
+        )
+    }
+
+    override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
+        db.dropTable("users", true)
+    }
+}
+
+// Usage
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        val db = DatabaseHelper.getInstance(this)
+
+        db.use {
+            insert("users",
+                "name" to "John Doe",
+                "email" to "john@example.com"
+            )
+
+            val users = select("users").exec {
+                parseList(UserParser())
+            }
+        }
+    }
+}
+```
+
+## Anko Coroutines
+
+### Async Operations
+
+```kotlin
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        verticalLayout {
+            button {
+                text = "Load Data"
+                onClick {
+                    doAsync {
+                        val result = URL("https://api.example.com/data").readText()
+                        uiThread {
+                            toast("Data loaded: $result")
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+```
+
+## Best Practices
+
+### Layout Organization
+
+```kotlin
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        MainUI().setContentView(this)
+    }
+}
+
+class MainUI : AnkoComponent<MainActivity> {
+    override fun createView(ui: AnkoContext<MainActivity>) = with(ui) {
+        verticalLayout {
+            padding = dip(16)
+
+            titleView()
+            contentView()
+            actionButtons()
+        }
+    }
+
+    private fun _LinearLayout.titleView() {
+        textView {
+            text = "Main Screen"
+            textSize = 24f
+            textColor = Color.BLACK
+        }.lparams {
+            gravity = Gravity.CENTER
+            bottomMargin = dip(16)
+        }
+    }
+
+    private fun _LinearLayout.contentView() {
+        // Content implementation
+    }
+
+    private fun _LinearLayout.actionButtons() {
+        // Buttons implementation
+    }
+}
+```
+
+## Common Patterns
+
+### RecyclerView with Anko
+
+```kotlin
+class UserAdapter(private val users: List<User>) : RecyclerView.Adapter<UserAdapter.ViewHolder>() {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        return ViewHolder(UserItemUI().createView(AnkoContext.create(parent.context, parent)))
+    }
+
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        holder.bind(users[position])
+    }
+
+    override fun getItemCount() = users.size
+
+    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        private val nameView = view.find<TextView>(R.id.name)
+        private val emailView = view.find<TextView>(R.id.email)
+
+        fun bind(user: User) {
+            nameView.text = user.name
+            emailView.text = user.email
+        }
+    }
+}
+
+class UserItemUI : AnkoComponent<ViewGroup> {
+    override fun createView(ui: AnkoContext<ViewGroup>) = with(ui) {
+        linearLayout {
+            orientation = LinearLayout.VERTICAL
+            padding = dip(16)
+
+            textView {
+                id = R.id.name
+                textSize = 16f
+                textColor = Color.BLACK
+            }
+
+            textView {
+                id = R.id.email
+                textSize = 14f
+                textColor = Color.GRAY
+            }
+        }
+    }
+}
+```
+
+## Conclusion
+
+Anko helps you:
+
+- Create layouts programmatically
+- Simplify Android development
+- Write more concise code
+- Improve code readability
+
+Remember:
+
+- Use appropriate layouts
+- Follow best practices
+- Keep code organized
+- Handle configuration changes
+
+Stay tuned for more Kotlin tips and tricks!
