@@ -1,0 +1,215 @@
+---
+title: "Control Flow in Kotlin"
+summary: "Master if expressions, when statements, and loops in Kotlin"
+date: "2025-05-29"
+category: "kotlin"
+tags: ["kotlin", "control-flow", "conditionals", "loops"]
+---
+
+## Control Flow in Kotlin
+
+Control flow statements are essential for creating dynamic and responsive applications. Kotlin provides several ways to control the flow of your program, including if expressions, when statements, and various types of loops.
+
+## If Expressions
+
+In Kotlin, `if` is an expression that returns a value:
+
+```kotlin
+// Basic if expression
+val max = if (a > b) a else b
+
+// Multi-line if expression
+val max = if (a > b) {
+    println("Choose a")
+    a
+} else {
+    println("Choose b")
+    b
+}
+```
+
+### Traditional if-else
+
+```kotlin
+if (score >= 90) {
+    grade = "A"
+} else if (score >= 80) {
+    grade = "B"
+} else if (score >= 70) {
+    grade = "C"
+} else {
+    grade = "F"
+}
+```
+
+## When Expression
+
+Kotlin's `when` expression is a powerful replacement for switch statements:
+
+```kotlin
+// Basic when
+when (x) {
+    1 -> print("x == 1")
+    2 -> print("x == 2")
+    else -> print("x is neither 1 nor 2")
+}
+
+// When with multiple conditions
+when (x) {
+    0, 1 -> print("x == 0 or x == 1")
+    else -> print("otherwise")
+}
+
+// When with ranges
+when (x) {
+    in 1..10 -> print("x is in the range")
+    in validNumbers -> print("x is valid")
+    !in 10..20 -> print("x is outside the range")
+    else -> print("none of the above")
+}
+```
+
+## For Loops
+
+### Range-based loops
+
+```kotlin
+// Basic range
+for (i in 1..5) {
+    print(i)
+}
+
+// Down to
+for (i in 5 downTo 1) {
+    print(i)
+}
+
+// Step
+for (i in 0..10 step 2) {
+    print(i)
+}
+```
+
+### Collection iteration
+
+```kotlin
+val items = listOf("apple", "banana", "orange")
+
+// Basic iteration
+for (item in items) {
+    println(item)
+}
+
+// With index
+for ((index, value) in items.withIndex()) {
+    println("$index: $value")
+}
+```
+
+## While Loops
+
+### While
+
+```kotlin
+var x = 0
+while (x < 5) {
+    println(x)
+    x++
+}
+```
+
+### Do-while
+
+```kotlin
+var x = 0
+do {
+    println(x)
+    x++
+} while (x < 5)
+```
+
+## Break and Continue
+
+### Break
+
+```kotlin
+for (i in 1..10) {
+    if (i == 5) break
+    println(i)
+}
+```
+
+### Continue
+
+```kotlin
+for (i in 1..10) {
+    if (i % 2 == 0) continue
+    println(i)
+}
+```
+
+## Return at Labels
+
+```kotlin
+fun findUser(users: List<User>): User? {
+    users.forEach { user ->
+        if (user.isActive) {
+            return@forEach  // Returns from the lambda
+        }
+    }
+    return null
+}
+```
+
+## Best Practices
+
+1. **Prefer when over if-else chains**
+
+   ```kotlin
+   // Good
+   when {
+       x > 0 -> "positive"
+       x < 0 -> "negative"
+       else -> "zero"
+   }
+
+   // Avoid
+   if (x > 0) "positive"
+   else if (x < 0) "negative"
+   else "zero"
+   ```
+
+2. **Use ranges effectively**
+
+   ```kotlin
+   // Good
+   for (i in 0 until size)
+
+   // Avoid
+   for (i in 0..size-1)
+   ```
+
+3. **Leverage forEach for collections**
+
+   ```kotlin
+   // Good
+   items.forEach { println(it) }
+
+   // Avoid
+   for (item in items) {
+       println(item)
+   }
+   ```
+
+## Conclusion
+
+Kotlin's control flow features are designed to be:
+
+- Expressive and readable
+- Safe and null-aware
+- Flexible and powerful
+- Concise and efficient
+
+Understanding these control flow mechanisms is crucial for writing clean and maintainable Kotlin code.
+
+Stay tuned for our next post where we'll explore functions in Kotlin!

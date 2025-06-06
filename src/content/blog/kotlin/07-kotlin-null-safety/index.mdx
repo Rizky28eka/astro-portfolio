@@ -1,0 +1,204 @@
+---
+title: "Kotlin Null Safety Basics"
+summary: "Learn how to handle null values safely in Kotlin and prevent NullPointerExceptions"
+date: "2025-06-12"
+category: "kotlin"
+tags: ["kotlin", "null-safety", "programming", "basics"]
+---
+
+## Kotlin Null Safety Basics
+
+Null safety is one of Kotlin's most important features. It helps prevent the dreaded NullPointerException (NPE) by making null handling explicit and safe. Let's explore how Kotlin handles null values and how to use its null safety features effectively.
+
+## Nullable Types
+
+In Kotlin, types are non-null by default:
+
+```kotlin
+// Non-nullable String
+var name: String = "John"
+name = null  // Compilation error
+
+// Nullable String
+var nullableName: String? = "John"
+nullableName = null  // OK
+```
+
+## Safe Call Operator (?. )
+
+```kotlin
+val name: String? = null
+val length = name?.length  // Returns null instead of throwing NPE
+
+// Chain of safe calls
+val street = user?.address?.street
+```
+
+## Elvis Operator (?:)
+
+```kotlin
+// Basic usage
+val name: String? = null
+val length = name?.length ?: 0
+
+// With function calls
+fun getLength(str: String?) = str?.length ?: 0
+
+// With throw
+val name = nullableName ?: throw IllegalArgumentException("Name required")
+```
+
+## Not-null Assertion (!!)
+
+```kotlin
+val name: String? = "John"
+val length = name!!.length  // Throws NPE if name is null
+
+// Use with caution
+try {
+    val length = nullableName!!.length
+} catch (e: NullPointerException) {
+    println("Name was null")
+}
+```
+
+## Safe Casts
+
+```kotlin
+// Safe cast operator
+val any: Any = "Hello"
+val str: String? = any as? String
+
+// Traditional cast
+val str2: String = any as String  // Throws ClassCastException if cast fails
+```
+
+## Null Safety in Collections
+
+```kotlin
+// List of nullable elements
+val list: List<String?> = listOf("a", null, "c")
+
+// Filter nulls
+val nonNullList = list.filterNotNull()
+
+// Map with null safety
+val lengths = list.map { it?.length ?: 0 }
+```
+
+## Platform Types
+
+When working with Java code:
+
+```kotlin
+// Java
+public class JavaClass {
+    public String getValue() { return null; }
+}
+
+// Kotlin
+val javaClass = JavaClass()
+val value = javaClass.value  // Platform type
+val length = value?.length   // Safe call recommended
+```
+
+## Null Safety Best Practices
+
+1. **Prefer non-null types**
+
+   ```kotlin
+   // Good
+   fun processName(name: String) { }
+
+   // Avoid
+   fun processName(name: String?) { }
+   ```
+
+2. **Use safe calls by default**
+
+   ```kotlin
+   // Good
+   val length = name?.length
+
+   // Avoid
+   val length = name!!.length
+   ```
+
+3. **Provide default values**
+
+   ```kotlin
+   // Good
+   val length = name?.length ?: 0
+
+   // Avoid
+   val length = if (name != null) name.length else 0
+   ```
+
+## Common Patterns
+
+### Early Returns
+
+```kotlin
+fun processUser(user: User?) {
+    if (user == null) return
+    // Safe to use user here
+    println(user.name)
+}
+```
+
+### Let Function
+
+```kotlin
+val name: String? = "John"
+name?.let {
+    // Only executed if name is not null
+    println("Name is $it")
+}
+```
+
+### Also Function
+
+```kotlin
+val list = mutableListOf<String>()
+list.also {
+    it.add("Hello")
+    it.add("World")
+}
+```
+
+## Null Safety in Android
+
+```kotlin
+// View binding
+private var _binding: ActivityMainBinding? = null
+private val binding get() = _binding!!
+
+override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    _binding = ActivityMainBinding.inflate(layoutInflater)
+    setContentView(binding.root)
+}
+
+override fun onDestroy() {
+    super.onDestroy()
+    _binding = null
+}
+```
+
+## Conclusion
+
+Kotlin's null safety features help you:
+
+- Prevent NullPointerExceptions
+- Write more reliable code
+- Make null handling explicit
+- Improve code readability
+
+Remember:
+
+- Use nullable types when a value can be null
+- Prefer safe calls over not-null assertions
+- Provide default values when appropriate
+- Handle null cases explicitly
+
+Stay tuned for our next post where we'll explore Kotlin data classes!

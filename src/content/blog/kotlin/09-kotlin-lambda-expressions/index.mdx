@@ -1,0 +1,244 @@
+---
+title: "Lambda Expressions in Kotlin"
+summary: "Learn how to write and use lambda expressions to make your Kotlin code more concise and functional"
+date: "2025-06-26"
+category: "kotlin"
+tags: ["kotlin", "lambda", "functional-programming", "basics"]
+---
+
+## Lambda Expressions in Kotlin
+
+Lambda expressions are a powerful feature in Kotlin that allows you to write concise, functional code. They are essentially anonymous functions that can be passed around as values. Let's explore how to use them effectively.
+
+## Basic Lambda Syntax
+
+```kotlin
+// Basic lambda
+val sum = { x: Int, y: Int -> x + y }
+
+// Usage
+println(sum(5, 3))  // 8
+
+// Lambda with type declaration
+val multiply: (Int, Int) -> Int = { x, y -> x * y }
+```
+
+## Lambda with Collections
+
+### List Operations
+
+```kotlin
+val numbers = listOf(1, 2, 3, 4, 5)
+
+// map
+val doubled = numbers.map { it * 2 }
+
+// filter
+val evenNumbers = numbers.filter { it % 2 == 0 }
+
+// forEach
+numbers.forEach { println(it) }
+```
+
+### Common Collection Functions
+
+```kotlin
+val numbers = listOf(1, 2, 3, 4, 5)
+
+// any
+val hasEven = numbers.any { it % 2 == 0 }
+
+// all
+val allPositive = numbers.all { it > 0 }
+
+// find
+val firstEven = numbers.find { it % 2 == 0 }
+```
+
+## Higher-Order Functions
+
+```kotlin
+// Function that takes a lambda
+fun operation(x: Int, y: Int, op: (Int, Int) -> Int): Int {
+    return op(x, y)
+}
+
+// Usage
+val result = operation(5, 3) { a, b -> a + b }
+```
+
+## Lambda with Receivers
+
+```kotlin
+// String builder with receiver
+val message = buildString {
+    append("Hello")
+    append(" ")
+    append("World")
+}
+
+// HTML builder
+val html = buildHtml {
+    body {
+        div {
+            p("Hello World")
+        }
+    }
+}
+```
+
+## Common Use Cases
+
+### Event Handlers
+
+```kotlin
+button.setOnClickListener {
+    println("Button clicked!")
+}
+```
+
+### Callbacks
+
+```kotlin
+api.getUser { user ->
+    updateUI(user)
+}
+```
+
+### Custom DSLs
+
+```kotlin
+val config = configuration {
+    database {
+        host = "localhost"
+        port = 5432
+    }
+    server {
+        port = 8080
+    }
+}
+```
+
+## Lambda Best Practices
+
+1. **Keep lambdas short**
+
+   ```kotlin
+   // Good
+   numbers.filter { it > 0 }
+
+   // Avoid
+   numbers.filter {
+       val isPositive = it > 0
+       val isEven = it % 2 == 0
+       isPositive && isEven
+   }
+   ```
+
+2. **Use meaningful parameter names**
+
+   ```kotlin
+   // Good
+   users.map { user -> user.name }
+
+   // Avoid
+   users.map { it.name }
+   ```
+
+3. **Leverage scope functions**
+   ```kotlin
+   // Good
+   user.let {
+       updateUI(it)
+       saveToDatabase(it)
+   }
+   ```
+
+## Advanced Features
+
+### Inline Functions
+
+```kotlin
+inline fun measureTime(block: () -> Unit) {
+    val start = System.currentTimeMillis()
+    block()
+    val end = System.currentTimeMillis()
+    println("Time taken: ${end - start}ms")
+}
+```
+
+### Crossinline
+
+```kotlin
+inline fun runInBackground(crossinline block: () -> Unit) {
+    Thread {
+        block()
+    }.start()
+}
+```
+
+### Noinline
+
+```kotlin
+inline fun process(
+    noinline onSuccess: () -> Unit,
+    noinline onError: (Exception) -> Unit
+) {
+    try {
+        // Process
+        onSuccess()
+    } catch (e: Exception) {
+        onError(e)
+    }
+}
+```
+
+## Common Patterns
+
+### Safe Calls with Lambdas
+
+```kotlin
+user?.let {
+    updateUI(it)
+    saveToDatabase(it)
+}
+```
+
+### Resource Management
+
+```kotlin
+File("input.txt").use { file ->
+    val content = file.readText()
+    // Process content
+}
+```
+
+### Error Handling
+
+```kotlin
+runCatching {
+    // Risky operation
+}.onSuccess { result ->
+    // Handle success
+}.onFailure { error ->
+    // Handle error
+}
+```
+
+## Conclusion
+
+Lambda expressions in Kotlin help you:
+
+- Write more concise code
+- Create functional programming patterns
+- Build custom DSLs
+- Handle callbacks elegantly
+
+Remember:
+
+- Keep lambdas focused and short
+- Use meaningful parameter names
+- Leverage Kotlin's built-in functions
+- Consider performance implications
+
+Stay tuned for our next post where we'll explore extension functions in Kotlin!

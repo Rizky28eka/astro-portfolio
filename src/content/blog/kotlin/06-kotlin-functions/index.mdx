@@ -1,0 +1,203 @@
+---
+title: "Functions in Kotlin Explained"
+summary: "Learn how to declare and use functions in Kotlin effectively"
+date: "2025-06-05"
+category: "kotlin"
+tags: ["kotlin", "functions", "programming", "basics"]
+---
+
+## Functions in Kotlin Explained
+
+Functions are the building blocks of any Kotlin program. They help organize code, promote reusability, and make your code more maintainable. Let's explore the different ways to work with functions in Kotlin.
+
+## Basic Function Declaration
+
+```kotlin
+// Simple function
+fun greet(name: String): String {
+    return "Hello, $name!"
+}
+
+// Single-expression function
+fun square(x: Int) = x * x
+
+// Function with default parameters
+fun greet(name: String, greeting: String = "Hello") = "$greeting, $name!"
+```
+
+## Function Parameters
+
+### Named Parameters
+
+```kotlin
+fun createUser(name: String, age: Int, email: String) {
+    // Function body
+}
+
+// Call with named parameters
+createUser(
+    name = "John",
+    age = 25,
+    email = "john@example.com"
+)
+```
+
+### Variable Number of Arguments
+
+```kotlin
+fun sum(vararg numbers: Int): Int {
+    return numbers.sum()
+}
+
+// Usage
+sum(1, 2, 3, 4, 5)
+```
+
+## Function Types
+
+### Basic Function Types
+
+```kotlin
+// Function type declaration
+val operation: (Int, Int) -> Int = { a, b -> a + b }
+
+// Function as parameter
+fun calculate(x: Int, y: Int, operation: (Int, Int) -> Int): Int {
+    return operation(x, y)
+}
+```
+
+### Higher-Order Functions
+
+```kotlin
+fun processList(
+    list: List<Int>,
+    operation: (Int) -> Int
+): List<Int> {
+    return list.map(operation)
+}
+
+// Usage
+val numbers = listOf(1, 2, 3, 4, 5)
+val doubled = processList(numbers) { it * 2 }
+```
+
+## Extension Functions
+
+```kotlin
+// Add function to String class
+fun String.addExclamation() = "$this!"
+
+// Usage
+val greeting = "Hello".addExclamation() // "Hello!"
+```
+
+## Infix Functions
+
+```kotlin
+infix fun Int.times(str: String) = str.repeat(this)
+
+// Usage
+val result = 3 times "Hello" // "HelloHelloHello"
+```
+
+## Local Functions
+
+```kotlin
+fun validateUser(user: User): Boolean {
+    // Local function
+    fun validateName(name: String): Boolean {
+        return name.length >= 3
+    }
+
+    return validateName(user.name)
+}
+```
+
+## Function Scope
+
+### Top-level Functions
+
+```kotlin
+// Can be called from anywhere
+fun globalFunction() {
+    // Function body
+}
+```
+
+### Member Functions
+
+```kotlin
+class Calculator {
+    fun add(a: Int, b: Int) = a + b
+}
+```
+
+## Function Modifiers
+
+### Visibility Modifiers
+
+```kotlin
+private fun privateFunction() { }
+protected fun protectedFunction() { }
+internal fun internalFunction() { }
+public fun publicFunction() { }
+```
+
+### Other Modifiers
+
+```kotlin
+inline fun measureTime(block: () -> Unit) {
+    val start = System.currentTimeMillis()
+    block()
+    val end = System.currentTimeMillis()
+    println("Time taken: ${end - start}ms")
+}
+```
+
+## Best Practices
+
+1. **Keep functions small and focused**
+
+   ```kotlin
+   // Good
+   fun calculateTotal(items: List<Item>): Double {
+       return items.sumOf { it.price }
+   }
+
+   // Avoid
+   fun processOrder(order: Order) {
+       // Too many responsibilities
+   }
+   ```
+
+2. **Use meaningful names**
+
+   ```kotlin
+   // Good
+   fun calculateAverage(numbers: List<Int>)
+
+   // Avoid
+   fun calc(nums: List<Int>)
+   ```
+
+3. **Leverage default parameters**
+   ```kotlin
+   // Good
+   fun createUser(
+       name: String,
+       age: Int = 0,
+       email: String? = null
+   )
+   ```
+
+## Conclusion
+
+Functions in Kotlin are powerful and flexible. They help you:
+
+- Write clean, maintainable code
+- Promote code reuse
+- Make your code more testable
+- Create expressive APIs
+
+Stay tuned for our next post where we'll explore Kotlin's null safety features!

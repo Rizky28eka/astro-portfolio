@@ -1,0 +1,218 @@
+---
+title: "Understanding Kotlin Data Classes"
+summary: "Learn how to use data classes to simplify model class creation in Kotlin"
+date: "2025-06-19"
+category: "kotlin"
+tags: ["kotlin", "data-classes", "programming", "basics"]
+---
+
+## Understanding Kotlin Data Classes
+
+Data classes in Kotlin are a concise way to create classes that are primarily used to hold data. They automatically implement useful methods like `equals()`, `hashCode()`, `toString()`, and more. Let's explore how to use them effectively.
+
+## Basic Data Class
+
+```kotlin
+data class User(
+    val name: String,
+    val email: String,
+    var age: Int
+)
+```
+
+## Generated Methods
+
+### toString()
+
+```kotlin
+val user = User("John", "john@example.com", 25)
+println(user)  // User(name=John, email=john@example.com, age=25)
+```
+
+### equals() and hashCode()
+
+```kotlin
+val user1 = User("John", "john@example.com", 25)
+val user2 = User("John", "john@example.com", 25)
+println(user1 == user2)  // true
+```
+
+### copy()
+
+```kotlin
+val user = User("John", "john@example.com", 25)
+val updatedUser = user.copy(age = 26)
+```
+
+## Component Functions
+
+```kotlin
+val user = User("John", "john@example.com", 25)
+val (name, email, age) = user  // Destructuring declaration
+```
+
+## Data Class Requirements
+
+1. **Primary Constructor**
+
+   ```kotlin
+   // Valid
+   data class Point(val x: Int, val y: Int)
+
+   // Invalid
+   data class Invalid {
+       val x: Int = 0
+       val y: Int = 0
+   }
+   ```
+
+2. **Properties**
+
+   ```kotlin
+   // Valid
+   data class User(val name: String, var age: Int)
+
+   // Invalid
+   data class Invalid(val name: String, fun getAge() = 25)
+   ```
+
+## Inheritance
+
+```kotlin
+// Data class can't inherit from another data class
+data class Person(val name: String)
+
+// Valid
+data class Employee(
+    val name: String,
+    val id: Int
+) : Person(name)
+```
+
+## Custom Methods
+
+```kotlin
+data class User(
+    val name: String,
+    val email: String
+) {
+    fun getDisplayName() = "$name <$email>"
+}
+```
+
+## Common Use Cases
+
+### API Responses
+
+```kotlin
+data class ApiResponse<T>(
+    val data: T,
+    val status: Int,
+    val message: String
+)
+```
+
+### Configuration
+
+```kotlin
+data class DatabaseConfig(
+    val host: String,
+    val port: Int,
+    val username: String,
+    val password: String
+)
+```
+
+### DTOs (Data Transfer Objects)
+
+```kotlin
+data class UserDTO(
+    val id: Int,
+    val name: String,
+    val email: String,
+    val createdAt: String
+)
+```
+
+## Best Practices
+
+1. **Keep data classes focused**
+
+   ```kotlin
+   // Good
+   data class Point(val x: Int, val y: Int)
+
+   // Avoid
+   data class Point(
+       val x: Int,
+       val y: Int,
+       val color: String,
+       val isVisible: Boolean,
+       val label: String
+   )
+   ```
+
+2. **Use val for immutable properties**
+
+   ```kotlin
+   // Good
+   data class User(val name: String, val email: String)
+
+   // Avoid
+   data class User(var name: String, var email: String)
+   ```
+
+3. **Consider using sealed classes for hierarchies**
+   ```kotlin
+   sealed class Result<out T>
+   data class Success<T>(val data: T) : Result<T>()
+   data class Error(val message: String) : Result<Nothing>()
+   ```
+
+## Advanced Features
+
+### Custom equals() and hashCode()
+
+```kotlin
+data class User(
+    val name: String,
+    val email: String
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is User) return false
+        return email == other.email
+    }
+
+    override fun hashCode() = email.hashCode()
+}
+```
+
+### Custom toString()
+
+```kotlin
+data class User(
+    val name: String,
+    val email: String
+) {
+    override fun toString() = "User[name=$name]"
+}
+```
+
+## Conclusion
+
+Data classes in Kotlin help you:
+
+- Reduce boilerplate code
+- Create clean, maintainable models
+- Implement common operations automatically
+- Write more concise code
+
+Remember:
+
+- Use data classes for pure data holders
+- Keep them focused and simple
+- Leverage generated methods
+- Consider immutability
+
+Stay tuned for our next post where we'll explore lambda expressions in Kotlin!

@@ -1,0 +1,244 @@
+---
+title: "Kotlin Extension Functions"
+summary: "Learn how to add new functionality to existing classes using extension functions"
+date: "2025-07-03"
+category: "kotlin"
+tags: ["kotlin", "extension-functions", "programming", "basics"]
+---
+
+## Kotlin Extension Functions
+
+Extension functions are a powerful feature in Kotlin that allows you to add new functionality to existing classes without modifying their source code. This helps keep your code clean and organized while extending the capabilities of existing types.
+
+## Basic Extension Functions
+
+```kotlin
+// Add function to String class
+fun String.addExclamation() = "$this!"
+
+// Usage
+val greeting = "Hello".addExclamation()  // "Hello!"
+```
+
+## Extension Properties
+
+```kotlin
+// Add property to String class
+val String.lastChar: Char
+    get() = this[length - 1]
+
+// Usage
+val lastChar = "Hello".lastChar  // 'o'
+```
+
+## Extension Functions with Parameters
+
+```kotlin
+// Add function to Int class
+fun Int.times(str: String) = str.repeat(this)
+
+// Usage
+val result = 3.times("Hello")  // "HelloHelloHello"
+```
+
+## Nullable Receiver Types
+
+```kotlin
+// Extension function for nullable String
+fun String?.nullSafeToUpperCase(): String {
+    return this?.toUpperCase() ?: ""
+}
+
+// Usage
+val name: String? = null
+println(name.nullSafeToUpperCase())  // ""
+```
+
+## Generic Extension Functions
+
+```kotlin
+// Extension function for any type
+fun <T> T.printWithPrefix(prefix: String) {
+    println("$prefix: $this")
+}
+
+// Usage
+42.printWithPrefix("Number")  // "Number: 42"
+"Hello".printWithPrefix("Text")  // "Text: Hello"
+```
+
+## Common Use Cases
+
+### String Extensions
+
+```kotlin
+fun String.isEmail(): Boolean {
+    return matches(Regex("^[A-Za-z0-9+_.-]+@(.+)\$"))
+}
+
+fun String.truncate(maxLength: Int): String {
+    return if (length <= maxLength) this else substring(0, maxLength) + "..."
+}
+```
+
+### Collection Extensions
+
+```kotlin
+fun <T> List<T>.secondOrNull(): T? {
+    return if (size >= 2) this[1] else null
+}
+
+fun <T> List<T>.swap(index1: Int, index2: Int) {
+    val tmp = this[index1]
+    this[index1] = this[index2]
+    this[index2] = tmp
+}
+```
+
+### View Extensions (Android)
+
+```kotlin
+fun View.show() {
+    visibility = View.VISIBLE
+}
+
+fun View.hide() {
+    visibility = View.GONE
+}
+
+fun View.enable() {
+    isEnabled = true
+}
+
+fun View.disable() {
+    isEnabled = false
+}
+```
+
+## Extension Functions Best Practices
+
+1. **Keep extensions focused**
+
+   ```kotlin
+   // Good
+   fun String.isValidEmail(): Boolean
+
+   // Avoid
+   fun String.processAndValidateAndFormat(): String
+   ```
+
+2. **Use clear, descriptive names**
+
+   ```kotlin
+   // Good
+   fun Int.toDollars(): String
+
+   // Avoid
+   fun Int.to$(): String
+   ```
+
+3. **Consider scope and visibility**
+
+   ```kotlin
+   // File-level extension
+   private fun String.internalFormat() { }
+
+   // Public extension
+   fun String.publicFormat() { }
+   ```
+
+## Advanced Features
+
+### Extension Function Overloading
+
+```kotlin
+fun String.pad(length: Int) = padEnd(length)
+fun String.pad(length: Int, char: Char) = padEnd(length, char)
+```
+
+### Extension Functions with Receivers
+
+```kotlin
+fun buildString(block: StringBuilder.() -> Unit): String {
+    val builder = StringBuilder()
+    builder.block()
+    return builder.toString()
+}
+
+// Usage
+val result = buildString {
+    append("Hello")
+    append(" ")
+    append("World")
+}
+```
+
+### Extension Functions in Companion Objects
+
+```kotlin
+class MyClass {
+    companion object {
+        fun String.toMyClass() = MyClass()
+    }
+}
+
+// Usage
+val myClass = "Hello".toMyClass()
+```
+
+## Common Patterns
+
+### Builder Pattern
+
+```kotlin
+fun html(block: HTMLBuilder.() -> Unit): String {
+    val builder = HTMLBuilder()
+    builder.block()
+    return builder.toString()
+}
+
+// Usage
+val page = html {
+    body {
+        div {
+            p("Hello World")
+        }
+    }
+}
+```
+
+### DSL Creation
+
+```kotlin
+fun configuration(block: ConfigBuilder.() -> Unit): Config {
+    val builder = ConfigBuilder()
+    builder.block()
+    return builder.build()
+}
+
+// Usage
+val config = configuration {
+    database {
+        host = "localhost"
+        port = 5432
+    }
+}
+```
+
+## Conclusion
+
+Extension functions in Kotlin help you:
+
+- Add functionality to existing classes
+- Keep code organized and modular
+- Create domain-specific languages
+- Improve code readability
+
+Remember:
+
+- Keep extensions focused and simple
+- Use clear, descriptive names
+- Consider scope and visibility
+- Follow Kotlin conventions
+
+Stay tuned for our next post where we'll explore Kotlin collections!

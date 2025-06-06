@@ -1,0 +1,150 @@
+---
+title: "Kotlin Variables and Constants"
+summary: "Learn about val vs var and how to work with variables in Kotlin"
+date: "2025-05-22"
+category: "kotlin"
+tags: ["kotlin", "variables", "constants", "basics"]
+---
+
+## Kotlin Variables and Constants
+
+Variables and constants are fundamental building blocks in any programming language. In Kotlin, we have two main ways to declare them: `val` for constants and `var` for variables. Let's explore how they work and when to use each.
+
+## Understanding val and var
+
+### val (Immutable)
+
+```kotlin
+val name = "John"  // Type inference
+val age: Int = 25  // Explicit type
+val PI = 3.14159   // Constant value
+```
+
+### var (Mutable)
+
+```kotlin
+var count = 0
+var message: String = "Hello"
+var temperature = 36.5
+```
+
+## Type Inference
+
+Kotlin is smart enough to infer types in most cases:
+
+```kotlin
+val text = "Hello"     // String
+val number = 42        // Int
+val decimal = 3.14     // Double
+val isActive = true    // Boolean
+val list = listOf(1, 2, 3)  // List<Int>
+```
+
+## Basic Types
+
+### Numbers
+
+```kotlin
+val intNumber: Int = 42
+val longNumber: Long = 42L
+val floatNumber: Float = 42.0f
+val doubleNumber: Double = 42.0
+```
+
+### Characters and Strings
+
+```kotlin
+val char: Char = 'A'
+val string: String = "Hello"
+val multiLineString = """
+    This is a
+    multi-line
+    string
+""".trimIndent()
+```
+
+### Booleans
+
+```kotlin
+val isTrue: Boolean = true
+val isFalse: Boolean = false
+```
+
+## Variable Scope
+
+### Local Variables
+
+```kotlin
+fun example() {
+    val localVar = "I'm local"
+    println(localVar)
+}
+```
+
+### Class Properties
+
+```kotlin
+class Person {
+    val name: String = "John"  // Property
+    var age: Int = 25          // Mutable property
+}
+```
+
+## Best Practices
+
+1. **Prefer val over var**
+
+   - Use `val` by default
+   - Only use `var` when the value needs to change
+
+2. **Use meaningful names**
+
+   ```kotlin
+   // Good
+   val userAge = 25
+   val maximumCount = 100
+
+   // Avoid
+   val a = 25
+   val x = 100
+   ```
+
+3. **Constants**
+   ```kotlin
+   const val MAX_SIZE = 100
+   const val API_URL = "https://api.example.com"
+   ```
+
+## Type Safety
+
+Kotlin is statically typed, which means:
+
+- Types are checked at compile time
+- Type mismatches are caught early
+- Better IDE support and code completion
+
+```kotlin
+var number: Int = 42
+number = "Hello"  // Error: Type mismatch
+```
+
+## Null Safety
+
+Variables can be nullable or non-null:
+
+```kotlin
+var nonNullName: String = "John"  // Can't be null
+var nullableName: String? = null  // Can be null
+```
+
+## Conclusion
+
+Understanding variables and constants in Kotlin is crucial for writing clean and maintainable code. Remember:
+
+- Use `val` for immutable values
+- Use `var` only when necessary
+- Leverage type inference
+- Follow naming conventions
+- Be mindful of null safety
+
+Stay tuned for our next post where we'll explore control flow in Kotlin!

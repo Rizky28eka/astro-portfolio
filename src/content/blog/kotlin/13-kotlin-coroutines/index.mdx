@@ -1,0 +1,297 @@
+---
+title: "Working with Coroutines in Kotlin"
+summary: "Learn how to write asynchronous code efficiently using Kotlin coroutines"
+date: "2025-07-24"
+category: "kotlin"
+tags: ["kotlin", "coroutines", "async", "programming"]
+---
+
+## Working with Coroutines in Kotlin
+
+Coroutines are Kotlin's solution for writing asynchronous code in a sequential manner. They help you write clean, efficient, and maintainable asynchronous code without the complexity of traditional callback-based approaches.
+
+## Basic Coroutines
+
+### Launching a Coroutine
+
+```kotlin
+// Using GlobalScope (not recommended for production)
+GlobalScope.launch {
+    println("Coroutine is running")
+}
+
+// Using CoroutineScope
+class MyClass {
+    private val scope = CoroutineScope(Dispatchers.Main)
+
+    fun startCoroutine() {
+        scope.launch {
+            println("Coroutine is running")
+        }
+    }
+}
+```
+
+### Coroutine Builders
+
+```kotlin
+// launch - fire and forget
+scope.launch {
+    // Do something
+}
+
+// async - returns a result
+val result = scope.async {
+    // Do something and return a value
+    "Result"
+}.await()
+
+// runBlocking - blocks the current thread
+runBlocking {
+    // Do something
+}
+```
+
+## Coroutine Context
+
+### Dispatchers
+
+```kotlin
+// Main thread (UI)
+launch(Dispatchers.Main) {
+    // Update UI
+}
+
+// IO operations
+launch(Dispatchers.IO) {
+    // Network calls, file operations
+}
+
+// CPU-intensive work
+launch(Dispatchers.Default) {
+    // Complex calculations
+}
+
+// Custom dispatcher
+val customDispatcher = Executors.newFixedThreadPool(4).asCoroutineDispatcher()
+```
+
+### Job and SupervisorJob
+
+```kotlin
+// Regular job
+val job = scope.launch {
+    // Coroutine work
+}
+
+// Supervisor job
+val supervisorJob = SupervisorJob()
+val scope = CoroutineScope(supervisorJob)
+```
+
+## Coroutine Scope
+
+### ViewModelScope
+
+```kotlin
+class MyViewModel : ViewModel() {
+    fun fetchData() {
+        viewModelScope.launch {
+            // Coroutine work
+        }
+    }
+}
+```
+
+### LifecycleScope
+
+```kotlin
+class MyActivity : AppCompatActivity() {
+    fun startWork() {
+        lifecycleScope.launch {
+            // Coroutine work
+        }
+    }
+}
+```
+
+## Structured Concurrency
+
+### Parent-Child Relationship
+
+```kotlin
+scope.launch {
+    // Parent coroutine
+    launch {
+        // Child coroutine
+    }
+}
+```
+
+### Cancellation
+
+```kotlin
+val job = scope.launch {
+    try {
+        // Coroutine work
+    } catch (e: CancellationException) {
+        // Handle cancellation
+    }
+}
+
+// Cancel the coroutine
+job.cancel()
+```
+
+## Exception Handling
+
+### Try-Catch
+
+```kotlin
+scope.launch {
+    try {
+        // Risky operation
+    } catch (e: Exception) {
+        // Handle error
+    }
+}
+```
+
+### CoroutineExceptionHandler
+
+```kotlin
+val handler = CoroutineExceptionHandler { _, exception ->
+    println("Caught $exception")
+}
+
+scope.launch(handler) {
+    // Coroutine work
+}
+```
+
+## Common Use Cases
+
+### Network Calls
+
+```kotlin
+suspend fun fetchUser(id: String): User {
+    return withContext(Dispatchers.IO) {
+        api.getUser(id)
+    }
+}
+```
+
+### Parallel Operations
+
+```kotlin
+val results = coroutineScope {
+    val users = async { fetchUsers() }
+    val posts = async { fetchPosts() }
+
+    Pair(users.await(), posts.await())
+}
+```
+
+### Timeout
+
+```kotlin
+withTimeout(5000L) {
+    // Operation that should complete within 5 seconds
+}
+```
+
+## Best Practices
+
+1. **Use appropriate dispatchers**
+
+   ```kotlin
+   // Good
+   withContext(Dispatchers.IO) {
+       // IO operation
+   }
+
+   // Avoid
+   withContext(Dispatchers.Main) {
+       // IO operation
+   }
+   ```
+
+2. **Handle exceptions properly**
+
+   ```kotlin
+   // Good
+   try {
+       // Risky operation
+   } catch (e: Exception) {
+       // Handle error
+   }
+
+   // Avoid
+   // Ignoring exceptions
+   ```
+
+3. **Use structured concurrency**
+
+   ```kotlin
+   // Good
+   coroutineScope {
+       launch { /* ... */ }
+       launch { /* ... */ }
+   }
+
+   // Avoid
+   GlobalScope.launch { /* ... */ }
+   ```
+
+## Advanced Features
+
+### Flow
+
+```kotlin
+val flow = flow {
+    emit(1)
+    emit(2)
+    emit(3)
+}
+
+scope.launch {
+    flow.collect { value ->
+        println(value)
+    }
+}
+```
+
+### Channel
+
+```kotlin
+val channel = Channel<Int>()
+scope.launch {
+    channel.send(1)
+    channel.send(2)
+    channel.close()
+}
+
+scope.launch {
+    for (value in channel) {
+        println(value)
+    }
+}
+```
+
+## Conclusion
+
+Coroutines in Kotlin help you:
+
+- Write clean asynchronous code
+- Handle complex operations efficiently
+- Manage resources properly
+- Improve code readability
+
+Remember:
+
+- Use appropriate dispatchers
+- Handle exceptions properly
+- Follow structured concurrency
+- Consider cancellation
+
+Stay tuned for our next post where we'll explore Kotlin Flow for reactive programming!

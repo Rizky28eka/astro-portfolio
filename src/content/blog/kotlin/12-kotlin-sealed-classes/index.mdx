@@ -1,0 +1,243 @@
+---
+title: "Sealed Classes vs Enum in Kotlin"
+summary: "Learn how to use sealed classes and enums for better type control in Kotlin"
+date: "2025-07-17"
+category: "kotlin"
+tags: ["kotlin", "sealed-classes", "enums", "programming"]
+---
+
+## Sealed Classes vs Enum in Kotlin
+
+Sealed classes and enums are powerful features in Kotlin that help you model restricted class hierarchies and represent a fixed set of values. Let's explore when and how to use each of them effectively.
+
+## Enums
+
+### Basic Enum
+
+```kotlin
+enum class Direction {
+    NORTH, SOUTH, EAST, WEST
+}
+
+// Usage
+val direction = Direction.NORTH
+```
+
+### Enum with Properties
+
+```kotlin
+enum class Color(val rgb: Int) {
+    RED(0xFF0000),
+    GREEN(0x00FF00),
+    BLUE(0x0000FF)
+}
+
+// Usage
+val redRgb = Color.RED.rgb
+```
+
+### Enum with Methods
+
+```kotlin
+enum class HttpStatus(val code: Int) {
+    OK(200) {
+        override fun isSuccess() = true
+    },
+    NOT_FOUND(404) {
+        override fun isSuccess() = false
+    };
+
+    abstract fun isSuccess()
+}
+```
+
+## Sealed Classes
+
+### Basic Sealed Class
+
+```kotlin
+sealed class Result<out T> {
+    data class Success<T>(val data: T) : Result<T>()
+    data class Error(val message: String) : Result<Nothing>()
+}
+
+// Usage
+val result: Result<String> = Result.Success("Hello")
+```
+
+### Sealed Class with Properties
+
+```kotlin
+sealed class Shape {
+    abstract val area: Double
+
+    data class Circle(val radius: Double) : Shape() {
+        override val area: Double = Math.PI * radius * radius
+    }
+
+    data class Rectangle(val width: Double, val height: Double) : Shape() {
+        override val area: Double = width * height
+    }
+}
+```
+
+## When to Use Each
+
+### Use Enums When:
+
+```kotlin
+// Fixed set of values
+enum class DayOfWeek {
+    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY
+}
+
+// Simple state representation
+enum class ConnectionState {
+    CONNECTED, DISCONNECTED, CONNECTING
+}
+
+// Constants with associated data
+enum class HttpMethod(val requiresBody: Boolean) {
+    GET(false),
+    POST(true),
+    PUT(true),
+    DELETE(false)
+}
+```
+
+### Use Sealed Classes When:
+
+```kotlin
+// Complex state handling
+sealed class NetworkResult<out T> {
+    data class Success<T>(val data: T) : NetworkResult<T>()
+    data class Error(val exception: Exception) : NetworkResult<Nothing>()
+    object Loading : NetworkResult<Nothing>()
+}
+
+// Expression evaluation
+sealed class Expr {
+    data class Number(val value: Int) : Expr()
+    data class Sum(val left: Expr, val right: Expr) : Expr()
+    data class Multiply(val left: Expr, val right: Expr) : Expr()
+}
+```
+
+## Pattern Matching
+
+### With Enums
+
+```kotlin
+fun getDirectionName(direction: Direction): String {
+    return when (direction) {
+        Direction.NORTH -> "North"
+        Direction.SOUTH -> "South"
+        Direction.EAST -> "East"
+        Direction.WEST -> "West"
+    }
+}
+```
+
+### With Sealed Classes
+
+```kotlin
+fun evaluate(expr: Expr): Int {
+    return when (expr) {
+        is Expr.Number -> expr.value
+        is Expr.Sum -> evaluate(expr.left) + evaluate(expr.right)
+        is Expr.Multiply -> evaluate(expr.left) * evaluate(expr.right)
+    }
+}
+```
+
+## Best Practices
+
+1. **Use enums for simple constants**
+
+   ```kotlin
+   // Good
+   enum class UserRole {
+       ADMIN, USER, GUEST
+   }
+
+   // Avoid
+   sealed class UserRole {
+       object Admin : UserRole()
+       object User : UserRole()
+       object Guest : UserRole()
+   }
+   ```
+
+2. **Use sealed classes for complex hierarchies**
+
+   ```kotlin
+   // Good
+   sealed class Response<out T> {
+       data class Success<T>(val data: T) : Response<T>()
+       data class Error(val message: String) : Response<Nothing>()
+   }
+
+   // Avoid
+   enum class Response {
+       SUCCESS, ERROR
+   }
+   ```
+
+3. **Leverage exhaustive when expressions**
+   ```kotlin
+   // Good
+   when (result) {
+       is Result.Success -> handleSuccess(result.data)
+       is Result.Error -> handleError(result.message)
+   }
+   ```
+
+## Common Use Cases
+
+### API Responses
+
+```kotlin
+sealed class ApiResponse<out T> {
+    data class Success<T>(val data: T) : ApiResponse<T>()
+    data class Error(val code: Int, val message: String) : ApiResponse<Nothing>()
+    object Loading : ApiResponse<Nothing>()
+}
+```
+
+### UI States
+
+```kotlin
+sealed class ViewState {
+    object Loading : ViewState()
+    data class Content(val data: List<Item>) : ViewState()
+    data class Error(val message: String) : ViewState()
+}
+```
+
+### Authentication States
+
+```kotlin
+sealed class AuthState {
+    object Authenticated : AuthState()
+    object Unauthenticated : AuthState()
+    data class Error(val message: String) : AuthState()
+}
+```
+
+## Conclusion
+
+Sealed classes and enums in Kotlin help you:
+
+- Model restricted class hierarchies
+- Represent fixed sets of values
+- Write type-safe code
+- Handle all possible cases
+
+Remember:
+
+- Use enums for simple constants
+- Use sealed classes for complex hierarchies
+- Leverage pattern matching
+- Consider exhaustiveness
+
+Stay tuned for our next post where we'll explore working with coroutines in Kotlin!

@@ -1,0 +1,251 @@
+---
+title: "Kotlin Collections Overview"
+summary: "Master Lists, Sets, and Maps in Kotlin with practical examples"
+date: "2025-07-10"
+category: "kotlin"
+tags: ["kotlin", "collections", "data-structures", "basics"]
+---
+
+## Kotlin Collections Overview
+
+Collections are fundamental data structures in Kotlin that help you store and manipulate groups of items. Kotlin provides a rich set of collection types and operations that make working with data efficient and expressive.
+
+## Collection Types
+
+### Lists
+
+```kotlin
+// Immutable list
+val numbers = listOf(1, 2, 3, 4, 5)
+
+// Mutable list
+val mutableNumbers = mutableListOf(1, 2, 3)
+mutableNumbers.add(4)
+
+// List with type inference
+val names = listOf("John", "Jane", "Bob")
+```
+
+### Sets
+
+```kotlin
+// Immutable set
+val uniqueNumbers = setOf(1, 2, 3, 3, 4)  // [1, 2, 3, 4]
+
+// Mutable set
+val mutableSet = mutableSetOf(1, 2, 3)
+mutableSet.add(4)
+
+// HashSet
+val hashSet = hashSetOf(1, 2, 3)
+```
+
+### Maps
+
+```kotlin
+// Immutable map
+val map = mapOf(
+    "a" to 1,
+    "b" to 2,
+    "c" to 3
+)
+
+// Mutable map
+val mutableMap = mutableMapOf("a" to 1)
+mutableMap["b"] = 2
+
+// HashMap
+val hashMap = hashMapOf("a" to 1, "b" to 2)
+```
+
+## Collection Operations
+
+### Transformation Operations
+
+```kotlin
+val numbers = listOf(1, 2, 3, 4, 5)
+
+// map
+val doubled = numbers.map { it * 2 }
+
+// filter
+val evenNumbers = numbers.filter { it % 2 == 0 }
+
+// flatMap
+val result = numbers.flatMap { listOf(it, it * 2) }
+```
+
+### Aggregation Operations
+
+```kotlin
+val numbers = listOf(1, 2, 3, 4, 5)
+
+// sum
+val sum = numbers.sum()
+
+// average
+val average = numbers.average()
+
+// max/min
+val max = numbers.maxOrNull()
+val min = numbers.minOrNull()
+```
+
+### Search Operations
+
+```kotlin
+val numbers = listOf(1, 2, 3, 4, 5)
+
+// find
+val firstEven = numbers.find { it % 2 == 0 }
+
+// any
+val hasEven = numbers.any { it % 2 == 0 }
+
+// all
+val allPositive = numbers.all { it > 0 }
+```
+
+## Collection Builders
+
+### List Builder
+
+```kotlin
+val list = buildList {
+    add(1)
+    add(2)
+    add(3)
+}
+```
+
+### Map Builder
+
+```kotlin
+val map = buildMap {
+    put("a", 1)
+    put("b", 2)
+    put("c", 3)
+}
+```
+
+## Collection Sequences
+
+```kotlin
+val numbers = listOf(1, 2, 3, 4, 5)
+
+// Using sequence for better performance
+val result = numbers.asSequence()
+    .filter { it % 2 == 0 }
+    .map { it * 2 }
+    .toList()
+```
+
+## Common Use Cases
+
+### Grouping
+
+```kotlin
+val words = listOf("apple", "banana", "cherry", "date")
+
+// Group by length
+val groupedByLength = words.groupBy { it.length }
+
+// Group by first letter
+val groupedByFirstLetter = words.groupBy { it[0] }
+```
+
+### Partitioning
+
+```kotlin
+val numbers = listOf(1, 2, 3, 4, 5)
+
+// Split into even and odd
+val (even, odd) = numbers.partition { it % 2 == 0 }
+```
+
+### Zipping
+
+```kotlin
+val names = listOf("John", "Jane", "Bob")
+val ages = listOf(25, 30, 35)
+
+// Zip lists
+val nameAgePairs = names.zip(ages)
+```
+
+## Best Practices
+
+1. **Choose the right collection type**
+
+   ```kotlin
+   // For unique elements
+   val uniqueItems = setOf(1, 2, 3)
+
+   // For key-value pairs
+   val userMap = mapOf("id" to 1, "name" to "John")
+
+   // For ordered items
+   val orderedList = listOf(1, 2, 3)
+   ```
+
+2. **Use immutable collections by default**
+
+   ```kotlin
+   // Good
+   val numbers = listOf(1, 2, 3)
+
+   // Only when needed
+   val mutableNumbers = mutableListOf(1, 2, 3)
+   ```
+
+3. **Leverage collection operations**
+
+   ```kotlin
+   // Good
+   val sum = numbers.filter { it > 0 }.sum()
+
+   // Avoid
+   var sum = 0
+   for (n in numbers) {
+       if (n > 0) sum += n
+   }
+   ```
+
+## Performance Considerations
+
+### Sequence vs Collection
+
+```kotlin
+// Use sequence for large collections
+val result = largeList.asSequence()
+    .filter { it > 0 }
+    .map { it * 2 }
+    .toList()
+```
+
+### Collection Size
+
+```kotlin
+// Check size before operations
+if (list.isNotEmpty()) {
+    // Process list
+}
+```
+
+## Conclusion
+
+Kotlin collections help you:
+
+- Store and organize data efficiently
+- Transform and manipulate data easily
+- Write clean, functional code
+- Improve code readability
+
+Remember:
+
+- Choose the right collection type
+- Use immutable collections by default
+- Leverage built-in operations
+- Consider performance implications
+
+Stay tuned for our next post where we'll explore sealed classes and enums in Kotlin!

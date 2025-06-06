@@ -1,0 +1,97 @@
+---
+title: "Getting Started with Kotlin"
+summary: "Learn how to set up Kotlin in Android Studio and write your first Kotlin program"
+date: "2025-05-01"
+category: "kotlin"
+tags: ["kotlin", "android", "beginner"]
+---
+
+## Getting Started with Kotlin
+
+Kotlin is a modern programming language that makes Android development faster and more enjoyable. In this guide, we'll walk through setting up Kotlin in Android Studio and writing your first Kotlin program.
+
+## Why Choose Kotlin?
+
+Kotlin is the preferred language for Android development because it:
+
+- Reduces boilerplate code
+- Prevents common programming errors
+- Is fully interoperable with Java
+- Has excellent tooling support
+- Is officially supported by Google
+
+## Setting Up Kotlin in Android Studio
+
+1. Download and install Android Studio from [developer.android.com](https://developer.android.com/studio)
+2. Launch Android Studio
+3. Create a new project:
+   - Click "New Project"
+   - Select "Empty Activity"
+   - Name your project
+   - Choose "Kotlin" as the language
+   - Select minimum SDK version
+   - Click "Finish"
+
+## Your First Kotlin Program
+
+Here's a simple "Hello World" program in Kotlin:
+
+```kotlin
+fun main() {
+    println("Hello, Kotlin!")
+}
+```
+
+## Basic Kotlin Syntax
+
+Let's look at some fundamental Kotlin concepts:
+
+### Variables
+
+```kotlin
+// Immutable variable (like final in Java)
+val name = "John"
+
+// Mutable variable
+var age = 25
+```
+
+### Functions
+
+```kotlin
+fun greet(name: String): String {
+    return "Hello, $name!"
+}
+
+// Single-expression function
+fun square(x: Int) = x * x
+```
+
+### String Templates
+
+```kotlin
+val name = "Alice"
+println("Hello, $name!")  // Simple variable
+println("Hello, ${name.toUpperCase()}!")  // Expression
+```
+
+## Next Steps
+
+Now that you have Kotlin set up, you can:
+
+1. Explore more Kotlin features
+2. Build your first Android app
+3. Learn about Kotlin's null safety features
+4. Study Kotlin's object-oriented programming concepts
+
+## Resources
+
+- [Official Kotlin Documentation](https://kotlinlang.org/docs/home.html)
+- [Android Developer Documentation](https://developer.android.com/kotlin)
+- [Kotlin Koans](https://play.kotlinlang.org/koans/)
+
+## Conclusion
+
+Kotlin is a powerful and modern language that makes Android development more efficient and enjoyable. With its concise syntax and safety features, it's an excellent choice for both beginners and experienced developers.
+
+Stay tuned for our next post where we'll dive deeper into Kotlin's features and compare it with Java for Android development!

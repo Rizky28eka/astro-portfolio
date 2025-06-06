@@ -1,0 +1,209 @@
+---
+title: "Kotlin Syntax: A Quick Tour"
+summary: "Learn the fundamental syntax and structure of Kotlin programming language"
+date: "2025-05-15"
+category: "kotlin"
+tags: ["kotlin", "syntax", "basics", "programming"]
+---
+
+## Kotlin Syntax: A Quick Tour
+
+Kotlin's syntax is designed to be concise, safe, and expressive. In this guide, we'll explore the core syntax elements that make Kotlin a modern and powerful programming language.
+
+## Basic Structure
+
+### Package Declaration
+
+```kotlin
+package com.example.myapp
+
+import java.util.*
+```
+
+### Main Function
+
+```kotlin
+fun main() {
+    println("Hello, Kotlin!")
+}
+```
+
+## Variables and Constants
+
+### Variable Declaration
+
+```kotlin
+// Mutable variable
+var count = 0
+
+// Immutable variable (constant)
+val PI = 3.14159
+
+// Type inference
+val name = "John" // String
+val age = 25 // Int
+val height = 1.75 // Double
+```
+
+### Explicit Type Declaration
+
+```kotlin
+var message: String = "Hello"
+var number: Int = 42
+var decimal: Double = 3.14
+```
+
+## Functions
+
+### Basic Function
+
+```kotlin
+fun greet(name: String): String {
+    return "Hello, $name!"
+}
+```
+
+### Single-Expression Function
+
+```kotlin
+fun square(x: Int) = x * x
+```
+
+### Function with Default Parameters
+
+```kotlin
+fun greet(name: String, greeting: String = "Hello") = "$greeting, $name!"
+```
+
+## Control Flow
+
+### If Expression
+
+```kotlin
+val max = if (a > b) a else b
+
+// Multi-line if
+val max = if (a > b) {
+    println("Choose a")
+    a
+} else {
+    println("Choose b")
+    b
+}
+```
+
+### When Expression (Switch)
+
+```kotlin
+when (x) {
+    1 -> print("x == 1")
+    2 -> print("x == 2")
+    else -> print("x is neither 1 nor 2")
+}
+```
+
+### For Loop
+
+```kotlin
+// Range
+for (i in 1..5) {
+    print(i)
+}
+
+// List
+val items = listOf("apple", "banana", "orange")
+for (item in items) {
+    println(item)
+}
+
+// With index
+for ((index, value) in items.withIndex()) {
+    println("$index: $value")
+}
+```
+
+## Collections
+
+### Lists
+
+```kotlin
+// Immutable list
+val numbers = listOf(1, 2, 3, 4, 5)
+
+// Mutable list
+val mutableNumbers = mutableListOf(1, 2, 3)
+mutableNumbers.add(4)
+```
+
+### Maps
+
+```kotlin
+// Immutable map
+val map = mapOf(
+    "a" to 1,
+    "b" to 2,
+    "c" to 3
+)
+
+// Mutable map
+val mutableMap = mutableMapOf("a" to 1)
+mutableMap["b"] = 2
+```
+
+## String Templates
+
+```kotlin
+val name = "Alice"
+println("Hello, $name!")
+println("Hello, ${name.toUpperCase()}!")
+```
+
+## Null Safety
+
+```kotlin
+// Nullable type
+var nullableName: String? = null
+
+// Safe call
+val length = nullableName?.length
+
+// Elvis operator
+val length = nullableName?.length ?: 0
+
+// Not-null assertion
+val length = nullableName!!.length
+```
+
+## Classes
+
+```kotlin
+class Person(
+    val name: String,
+    var age: Int
+) {
+    fun greet() = "Hello, I'm $name"
+}
+```
+
+## Data Classes
+
+```kotlin
+data class User(
+    val name: String,
+    val email: String,
+    var age: Int
+)
+```
+
+## Conclusion
+
+Kotlin's syntax is designed to be:
+
+- Concise and expressive
+- Safe and null-aware
+- Interoperable with Java
+- Easy to read and maintain
+
+These features make Kotlin an excellent choice for modern Android development and other JVM-based projects.
+
+Stay tuned for our next post where we'll dive deeper into Kotlin's variables and constants!

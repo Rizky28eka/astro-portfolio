@@ -1,0 +1,288 @@
+---
+title: "Kotlin Flow for Reactive Programming"
+summary: "Master reactive programming in Kotlin using Flow for handling asynchronous data streams"
+date: "2025-07-31"
+category: "kotlin"
+tags: ["kotlin", "flow", "reactive-programming", "coroutines"]
+---
+
+## Kotlin Flow for Reactive Programming
+
+Flow is Kotlin's implementation of reactive streams, allowing you to handle asynchronous data streams in a reactive way. It's built on top of coroutines and provides a powerful way to handle streams of data.
+
+## Basic Flow
+
+### Creating a Flow
+
+```kotlin
+// Basic flow
+val flow = flow {
+    emit(1)
+    emit(2)
+    emit(3)
+}
+
+// Flow from collection
+val listFlow = listOf(1, 2, 3).asFlow()
+
+// Flow from range
+val rangeFlow = (1..3).asFlow()
+```
+
+### Collecting from Flow
+
+```kotlin
+// Basic collection
+flow.collect { value ->
+    println(value)
+}
+
+// Using launchIn
+flow.launchIn(scope)
+
+// Using collectLatest
+flow.collectLatest { value ->
+    // Handle latest value
+}
+```
+
+## Flow Operators
+
+### Transformation Operators
+
+```kotlin
+// map
+flow.map { it * 2 }
+
+// filter
+flow.filter { it > 0 }
+
+// transform
+flow.transform { value ->
+    emit(value)
+    emit(value * 2)
+}
+```
+
+### Combination Operators
+
+```kotlin
+// zip
+val flow1 = flowOf(1, 2, 3)
+val flow2 = flowOf("a", "b", "c")
+flow1.zip(flow2) { number, letter ->
+    "$number$letter"
+}
+
+// combine
+flow1.combine(flow2) { number, letter ->
+    "$number$letter"
+}
+```
+
+## Flow Context
+
+### FlowOn Operator
+
+```kotlin
+flow
+    .map { /* CPU intensive work */ }
+    .flowOn(Dispatchers.Default)
+    .collect { /* UI work */ }
+```
+
+### Buffer
+
+```kotlin
+flow
+    .buffer()
+    .collect { value ->
+        // Process values
+    }
+```
+
+## Error Handling
+
+### Try-Catch
+
+```kotlin
+try {
+    flow.collect { value ->
+        // Process value
+    }
+} catch (e: Exception) {
+    // Handle error
+}
+```
+
+### Catch Operator
+
+```kotlin
+flow
+    .catch { e ->
+        emit(-1) // Emit fallback value
+    }
+    .collect { value ->
+        // Process value
+    }
+```
+
+## StateFlow and SharedFlow
+
+### StateFlow
+
+```kotlin
+val stateFlow = MutableStateFlow(0)
+
+// Update value
+stateFlow.value = 1
+
+// Collect values
+stateFlow.collect { value ->
+    // Handle value
+}
+```
+
+### SharedFlow
+
+```kotlin
+val sharedFlow = MutableSharedFlow<Int>()
+
+// Emit value
+sharedFlow.emit(1)
+
+// Collect values
+sharedFlow.collect { value ->
+    // Handle value
+}
+```
+
+## Common Use Cases
+
+### Network Calls
+
+```kotlin
+fun fetchUsers(): Flow<List<User>> = flow {
+    val users = api.getUsers()
+    emit(users)
+}.flowOn(Dispatchers.IO)
+```
+
+### Database Operations
+
+```kotlin
+fun observeUsers(): Flow<List<User>> = flow {
+    val users = database.userDao().getAllUsers()
+    emit(users)
+}.flowOn(Dispatchers.IO)
+```
+
+### UI Events
+
+```kotlin
+val searchQuery = MutableStateFlow("")
+
+searchQuery
+    .debounce(300)
+    .distinctUntilChanged()
+    .collect { query ->
+        // Perform search
+    }
+```
+
+## Best Practices
+
+1. **Use appropriate operators**
+
+   ```kotlin
+   // Good
+   flow
+       .filter { it > 0 }
+       .map { it * 2 }
+       .collect { /* ... */ }
+
+   // Avoid
+   flow.collect { value ->
+       if (value > 0) {
+           val doubled = value * 2
+           // Process doubled value
+       }
+   }
+   ```
+
+2. **Handle errors properly**
+
+   ```kotlin
+   // Good
+   flow
+       .catch { e ->
+           // Handle error
+       }
+       .collect { /* ... */ }
+
+   // Avoid
+   try {
+       flow.collect { /* ... */ }
+   } catch (e: Exception) {
+       // Handle error
+   }
+   ```
+
+3. **Use appropriate scope**
+
+   ```kotlin
+   // Good
+   flow.launchIn(viewModelScope)
+
+   // Avoid
+   flow.launchIn(GlobalScope)
+   ```
+
+## Advanced Features
+
+### Custom Operators
+
+```kotlin
+fun <T> Flow<T>.throttleFirst(periodMillis: Long): Flow<T> = flow {
+    var lastEmissionTime = 0L
+    collect { value ->
+        val currentTime = System.currentTimeMillis()
+        if (currentTime - lastEmissionTime >= periodMillis) {
+            emit(value)
+            lastEmissionTime = currentTime
+        }
+    }
+}
+```
+
+### Testing Flow
+
+```kotlin
+@Test
+fun testFlow() = runTest {
+    val flow = flowOf(1, 2, 3)
+    val result = mutableListOf<Int>()
+
+    flow.toList(result)
+
+    assertEquals(listOf(1, 2, 3), result)
+}
+```
+
+## Conclusion
+
+Kotlin Flow helps you:
+
+- Handle asynchronous data streams
+- Implement reactive programming patterns
+- Manage UI state effectively
+- Handle complex data transformations
+
+Remember:
+
+- Use appropriate operators
+- Handle errors properly
+- Consider backpressure
+- Test your flows
+
+Stay tuned for our next post where we'll explore Object-Oriented Programming in Kotlin!
