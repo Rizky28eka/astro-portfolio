@@ -1,0 +1,147 @@
+---
+title: "Safe Calls and Elvis Operator"
+summary: "Handle nulls with confidence"
+date: "2025-08-11"
+category: "kotlin"
+tags: ["kotlin", "null-safety", "operators"]
+---
+
+## Safe Calls and Elvis Operator
+
+Kotlin provides powerful operators for handling null values safely: the safe call operator (`?.`) and the Elvis operator (`?:`).
+
+## Safe Call Operator
+
+### Basic Usage
+
+```kotlin
+// Safe call operator
+val length = name?.length
+
+// Chaining safe calls
+val street = user?.address?.street
+
+// Safe call with let
+user?.let {
+    println("User: ${it.name}")
+    processUser(it)
+}
+```
+
+### Safe Call with Functions
+
+```kotlin
+// Safe call with function
+val result = user?.getName()?.toUpperCase()
+
+// Safe call with property
+val age = user?.age
+
+// Safe call with index
+val firstChar = name?.get(0)
+```
+
+## Elvis Operator
+
+### Basic Usage
+
+```kotlin
+// Elvis operator
+val length = name?.length ?: 0
+
+// Elvis with function
+val result = user?.getName() ?: "Unknown"
+
+// Elvis with throw
+val age = user?.age ?: throw IllegalArgumentException("Age is required")
+```
+
+### Complex Examples
+
+```kotlin
+// Elvis with function call
+val displayName = user?.name ?: getDefaultName()
+
+// Elvis with property
+val address = user?.address ?: Address()
+
+// Elvis with expression
+val count = items?.size ?: 0
+```
+
+## Best Practices
+
+1. Use safe calls for nullable properties
+2. Use Elvis for default values
+3. Chain safe calls carefully
+4. Consider using let for complex operations
+5. Use Elvis with throw for required values
+
+## Common Patterns
+
+### Null Safety in Functions
+
+```kotlin
+fun processUser(user: User?) {
+    val name = user?.name ?: "Unknown"
+    val age = user?.age ?: 0
+    val address = user?.address ?: Address()
+
+    println("Processing user: $name, age: $age")
+    println("Address: $address")
+}
+```
+
+### Safe Property Access
+
+```kotlin
+class User {
+    var name: String? = null
+    var age: Int? = null
+    var address: Address? = null
+}
+
+fun User.getDisplayName(): String {
+    return name ?: "Unknown"
+}
+
+fun User.getAge(): Int {
+    return age ?: 0
+}
+
+fun User.getAddress(): Address {
+    return address ?: Address()
+}
+```
+
+### Safe Collection Operations
+
+```kotlin
+fun processList(list: List<String>?) {
+    val size = list?.size ?: 0
+    val first = list?.firstOrNull() ?: "Empty"
+    val last = list?.lastOrNull() ?: "Empty"
+
+    println("Size: $size")
+    println("First: $first")
+    println("Last: $last")
+}
+```
+
+## Performance Considerations
+
+- Safe calls have minimal overhead
+- Elvis operator is evaluated lazily
+- Consider using if-else for complex conditions
+- Use let for multiple operations
+
+## Common Mistakes
+
+1. Overusing safe calls
+2. Not using Elvis for default values
+3. Forgetting to handle null cases
+4. Chaining too many safe calls
+
+## Conclusion
+
+Safe calls and the Elvis operator are powerful tools for handling null values in Kotlin. Use them to write safer, more concise code while maintaining readability.

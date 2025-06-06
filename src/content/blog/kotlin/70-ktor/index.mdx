@@ -1,0 +1,226 @@
+---
+title: "Exploring Ktor for APIs"
+summary: "Web framework in Kotlin"
+date: "2025-10-13"
+category: "kotlin"
+tags: ["kotlin", "Ktor", "backend"]
+---
+
+## Exploring Ktor for APIs
+
+Ktor is a powerful Kotlin framework for building asynchronous servers and clients.
+
+## Basic Server Setup
+
+### Simple Server
+
+```kotlin
+// build.gradle.kts
+plugins {
+    kotlin("jvm") version "1.8.0"
+    application
+}
+
+dependencies {
+    implementation("io.ktor:ktor-server-core:2.0.0")
+    implementation("io.ktor:ktor-server-netty:2.0.0")
+}
+
+// Application.kt
+fun main() {
+    embeddedServer(Netty, port = 8080) {
+        routing {
+            get("/") {
+                call.respondText("Hello, World!")
+            }
+        }
+    }.start(wait = true)
+}
+```
+
+### REST API
+
+```kotlin
+data class User(val id: Int, val name: String)
+
+fun main() {
+    embeddedServer(Netty, port = 8080) {
+        routing {
+            route("/api/users") {
+                get {
+                    val users = listOf(
+                        User(1, "John"),
+                        User(2, "Jane")
+                    )
+                    call.respond(users)
+                }
+
+                get("/{id}") {
+                    val id = call.parameters["id"]?.toIntOrNull()
+                    if (id != null) {
+                        val user = User(id, "User $id")
+                        call.respond(user)
+                    } else {
+                        call.respond(HttpStatusCode.BadRequest)
+                    }
+                }
+
+                post {
+                    val user = call.receive<User>()
+                    call.respond(HttpStatusCode.Created, user)
+                }
+            }
+        }
+    }.start(wait = true)
+}
+```
+
+## Advanced Features
+
+### Authentication
+
+```kotlin
+fun main() {
+    embeddedServer(Netty, port = 8080) {
+        install(Authentication) {
+            basic("auth-basic") {
+                validate { credentials ->
+                    if (credentials.name == "admin" && credentials.password == "password") {
+                        UserIdPrincipal(credentials.name)
+                    } else {
+                        null
+                    }
+                }
+            }
+        }
+
+        routing {
+            authenticate("auth-basic") {
+                get("/secure") {
+                    val principal = call.principal<UserIdPrincipal>()
+                    call.respondText("Hello, ${principal?.name}!")
+                }
+            }
+        }
+    }.start(wait = true)
+}
+```
+
+### Content Negotiation
+
+```kotlin
+fun main() {
+    embeddedServer(Netty, port = 8080) {
+        install(ContentNegotiation) {
+            json(Json {
+                prettyPrint = true
+                isLenient = true
+            })
+        }
+
+        routing {
+            route("/api") {
+                get("/data") {
+                    val data = mapOf(
+                        "message" to "Hello",
+                        "timestamp" to System.currentTimeMillis()
+                    )
+                    call.respond(data)
+                }
+
+                post("/data") {
+                    val received = call.receive<Map<String, Any>>()
+                    call.respond(received)
+                }
+            }
+        }
+    }.start(wait = true)
+}
+```
+
+## Best Practices
+
+1. Use proper routing
+2. Implement error handling
+3. Add logging
+4. Use dependency injection
+5. Follow REST principles
+
+## Common Patterns
+
+### Error Handling
+
+```kotlin
+fun main() {
+    embeddedServer(Netty, port = 8080) {
+        install(StatusPages) {
+            exception<Throwable> { call, cause ->
+                call.respondText(
+                    "500: ${cause.message}",
+                    status = HttpStatusCode.InternalServerError
+                )
+            }
+
+            status(HttpStatusCode.NotFound) { call, status ->
+                call.respondText(
+                    "404: Not Found",
+                    status = status
+                )
+            }
+        }
+
+        routing {
+            get("/error") {
+                throw RuntimeException("Something went wrong")
+            }
+        }
+    }.start(wait = true)
+}
+```
+
+### Database Integration
+
+```kotlin
+fun main() {
+    embeddedServer(Netty, port = 8080) {
+        install(ContentNegotiation) {
+            json()
+        }
+
+        routing {
+            route("/api/users") {
+                get {
+                    val users = database.getAllUsers()
+                    call.respond(users)
+                }
+
+                post {
+                    val user = call.receive<User>()
+                    val saved = database.saveUser(user)
+                    call.respond(HttpStatusCode.Created, saved)
+                }
+            }
+        }
+    }.start(wait = true)
+}
+```
+
+## Performance Considerations
+
+- Connection pooling
+- Caching strategies
+- Async operations
+- Resource management
+- Monitoring
+
+## Common Mistakes
+
+1. Not handling errors
+2. Missing security
+3. Poor routing
+4. No logging
+5. Resource leaks
+
+## Conclusion
+
+Ktor is a powerful and flexible framework for building Kotlin applications. Use it to create efficient and maintainable APIs.

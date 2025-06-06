@@ -1,0 +1,156 @@
+---
+title: "Difference Between List and Array"
+summary: "Know list versus array"
+date: "2025-08-18"
+category: "kotlin"
+tags: ["kotlin", "collections", "list"]
+---
+
+## Difference Between List and Array
+
+Understanding the differences between List and Array in Kotlin is crucial for choosing the right data structure for your needs.
+
+## Basic Differences
+
+### Creation
+
+```kotlin
+// Array creation
+val array = arrayOf(1, 2, 3)
+val intArray = IntArray(3) { it + 1 }
+val stringArray = Array(3) { "Item $it" }
+
+// List creation
+val list = listOf(1, 2, 3)
+val mutableList = mutableListOf(1, 2, 3)
+val arrayList = ArrayList<Int>()
+```
+
+### Size and Modification
+
+```kotlin
+// Array
+val array = arrayOf(1, 2, 3)
+array[0] = 4  // Direct modification
+// array.add(4)  // Not possible
+
+// List
+val list = mutableListOf(1, 2, 3)
+list[0] = 4  // Direct modification
+list.add(4)  // Adding elements
+```
+
+## Performance Characteristics
+
+### Memory and Speed
+
+```kotlin
+// Array - fixed size, contiguous memory
+val array = IntArray(1000) { it }
+// Fast access, fixed size
+
+// List - dynamic size, linked structure
+val list = MutableList(1000) { it }
+// Flexible size, slightly slower access
+```
+
+### Operations
+
+```kotlin
+// Array operations
+val array = arrayOf(1, 2, 3)
+array[0] = 4  // O(1) access
+// array.add(4)  // Not possible
+
+// List operations
+val list = mutableListOf(1, 2, 3)
+list[0] = 4  // O(1) access
+list.add(4)  // O(1) amortized
+list.add(0, 5)  // O(n) insertion
+```
+
+## Use Cases
+
+### When to Use Arrays
+
+```kotlin
+// Fixed-size collections
+val board = Array(8) { Array(8) { 0 } }
+
+// Performance-critical code
+val buffer = ByteArray(1024)
+
+// Primitive types
+val numbers = IntArray(1000)
+```
+
+### When to Use Lists
+
+```kotlin
+// Dynamic collections
+val items = mutableListOf<String>()
+
+// Frequent modifications
+val queue = mutableListOf<Int>()
+
+// Complex data structures
+val tree = mutableListOf<Node>()
+```
+
+## Best Practices
+
+1. Use arrays for fixed-size collections
+2. Use lists for dynamic collections
+3. Consider performance requirements
+4. Use primitive arrays for better performance
+5. Use lists for better flexibility
+
+## Common Patterns
+
+### Array to List Conversion
+
+```kotlin
+// Array to List
+val array = arrayOf(1, 2, 3)
+val list = array.toList()
+val mutableList = array.toMutableList()
+
+// List to Array
+val list = listOf(1, 2, 3)
+val array = list.toTypedArray()
+val intArray = list.toIntArray()
+```
+
+### Working with Both
+
+```kotlin
+fun processData(data: Array<Int>) {
+    val list = data.toList()
+    // Process list
+    val result = list.toTypedArray()
+}
+
+fun processData(data: List<Int>) {
+    val array = data.toTypedArray()
+    // Process array
+    val result = array.toList()
+}
+```
+
+## Performance Considerations
+
+- Arrays have better memory locality
+- Lists have more flexible operations
+- Primitive arrays are more efficient
+- Consider the use case carefully
+
+## Common Mistakes
+
+1. Using arrays when lists are needed
+2. Using lists when arrays are more appropriate
+3. Not considering performance implications
+4. Mixing array and list operations
+
+## Conclusion
+
+Choose between List and Array based on your specific needs. Use arrays for fixed-size collections and performance-critical code, and lists for dynamic collections and more flexible operations.

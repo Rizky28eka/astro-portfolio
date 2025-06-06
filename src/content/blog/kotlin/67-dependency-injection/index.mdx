@@ -1,0 +1,253 @@
+---
+title: "Dependency Injection in Kotlin"
+summary: "Build flexible code structures"
+date: "2025-09-22"
+category: "kotlin"
+tags: ["kotlin", "DI", "architecture"]
+---
+
+## Dependency Injection in Kotlin
+
+Dependency Injection (DI) is a design pattern that helps create loosely coupled, maintainable, and testable code.
+
+## Basic Concepts
+
+### Manual Dependency Injection
+
+```kotlin
+// Service interfaces
+interface UserRepository {
+    fun getUser(id: Int): User
+}
+
+interface EmailService {
+    fun sendEmail(to: String, subject: String)
+}
+
+// Implementations
+class UserRepositoryImpl : UserRepository {
+    override fun getUser(id: Int): User {
+        return User(id, "John Doe")
+    }
+}
+
+class EmailServiceImpl : EmailService {
+    override fun sendEmail(to: String, subject: String) {
+        println("Sending email to $to: $subject")
+    }
+}
+
+// Service that uses dependencies
+class UserService(
+    private val userRepository: UserRepository,
+    private val emailService: EmailService
+) {
+    fun notifyUser(userId: Int) {
+        val user = userRepository.getUser(userId)
+        emailService.sendEmail(user.email, "Welcome!")
+    }
+}
+
+// Usage
+val userService = UserService(
+    UserRepositoryImpl(),
+    EmailServiceImpl()
+)
+```
+
+### Constructor Injection
+
+```kotlin
+class OrderService(
+    private val orderRepository: OrderRepository,
+    private val paymentProcessor: PaymentProcessor,
+    private val notificationService: NotificationService
+) {
+    fun placeOrder(order: Order) {
+        orderRepository.save(order)
+        paymentProcessor.process(order.payment)
+        notificationService.notify(order.customerId)
+    }
+}
+```
+
+## Advanced DI Patterns
+
+### Property Injection
+
+```kotlin
+class ProductService {
+    lateinit var productRepository: ProductRepository
+    lateinit var inventoryService: InventoryService
+
+    fun updateProduct(product: Product) {
+        productRepository.update(product)
+        inventoryService.updateStock(product.id)
+    }
+}
+
+// Usage
+val productService = ProductService().apply {
+    productRepository = ProductRepositoryImpl()
+    inventoryService = InventoryServiceImpl()
+}
+```
+
+### Method Injection
+
+```kotlin
+class ReportGenerator {
+    fun generateReport(
+        data: List<Data>,
+        formatter: ReportFormatter,
+        exporter: ReportExporter
+    ) {
+        val formatted = formatter.format(data)
+        exporter.export(formatted)
+    }
+}
+```
+
+## Using DI Frameworks
+
+### Koin Example
+
+```kotlin
+// Module definition
+val appModule = module {
+    single { UserRepositoryImpl() }
+    single { EmailServiceImpl() }
+    single { UserService(get(), get()) }
+}
+
+// Usage
+class MyApplication : Application() {
+    override fun onCreate() {
+        super.onCreate()
+        startKoin {
+            modules(appModule)
+        }
+    }
+}
+
+// In your activity or fragment
+class MainActivity : AppCompatActivity() {
+    private val userService: UserService by inject()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        userService.notifyUser(1)
+    }
+}
+```
+
+### Dagger Hilt Example
+
+```kotlin
+@HiltAndroidApp
+class MyApplication : Application()
+
+@Module
+@InstallIn(SingletonComponent::class)
+object AppModule {
+    @Provides
+    @Singleton
+    fun provideUserRepository(): UserRepository {
+        return UserRepositoryImpl()
+    }
+
+    @Provides
+    @Singleton
+    fun provideEmailService(): EmailService {
+        return EmailServiceImpl()
+    }
+}
+
+@AndroidEntryPoint
+class MainActivity : AppCompatActivity() {
+    @Inject
+    lateinit var userService: UserService
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        userService.notifyUser(1)
+    }
+}
+```
+
+## Best Practices
+
+1. Use constructor injection by default
+2. Keep dependencies minimal
+3. Program to interfaces
+4. Use scoping appropriately
+5. Consider testing requirements
+
+## Common Patterns
+
+### Service Locator
+
+```kotlin
+object ServiceLocator {
+    private val services = mutableMapOf<String, Any>()
+
+    fun <T> register(service: T) {
+        services[service::class.java.name] = service
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    fun <T> get(serviceClass: Class<T>): T {
+        return services[serviceClass.name] as T
+    }
+}
+
+// Usage
+ServiceLocator.register(UserRepositoryImpl())
+ServiceLocator.register(EmailServiceImpl())
+
+val userService = UserService(
+    ServiceLocator.get(UserRepository::class.java),
+    ServiceLocator.get(EmailService::class.java)
+)
+```
+
+### Factory Pattern
+
+```kotlin
+class ServiceFactory {
+    fun createUserService(): UserService {
+        return UserService(
+            UserRepositoryImpl(),
+            EmailServiceImpl()
+        )
+    }
+
+    fun createOrderService(): OrderService {
+        return OrderService(
+            OrderRepositoryImpl(),
+            PaymentProcessorImpl(),
+            NotificationServiceImpl()
+        )
+    }
+}
+```
+
+## Performance Considerations
+
+- DI frameworks add startup overhead
+- Consider lazy initialization
+- Use appropriate scoping
+- Monitor memory usage
+- Profile DI container
+
+## Common Mistakes
+
+1. Over-engineering DI
+2. Circular dependencies
+3. Too many dependencies
+4. Improper scoping
+5. Not considering testing
+
+## Conclusion
+
+Dependency Injection is a powerful pattern for creating maintainable and testable code. Choose the right DI approach based on your project's needs and complexity.

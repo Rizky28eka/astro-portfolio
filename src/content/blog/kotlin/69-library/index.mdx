@@ -1,0 +1,243 @@
+---
+title: "Create Your Kotlin Library"
+summary: "Package and distribute code"
+date: "2025-10-06"
+category: "kotlin"
+tags: ["kotlin", "library", "publishing"]
+---
+
+## Create Your Kotlin Library
+
+Learn how to create, package, and publish your own Kotlin library for others to use.
+
+## Basic Library Structure
+
+### Project Setup
+
+```kotlin
+// build.gradle.kts
+plugins {
+    kotlin("jvm") version "1.8.0"
+    `maven-publish`
+}
+
+group = "com.example"
+version = "1.0.0"
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation(kotlin("stdlib"))
+    testImplementation(kotlin("test"))
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            from(components["java"])
+        }
+    }
+}
+```
+
+### Library Code
+
+```kotlin
+// src/main/kotlin/com/example/mylib/MyLibrary.kt
+package com.example.mylib
+
+class MyLibrary {
+    fun greet(name: String): String {
+        return "Hello, $name!"
+    }
+
+    fun calculate(a: Int, b: Int): Int {
+        return a + b
+    }
+}
+```
+
+## Advanced Library Features
+
+### Public API
+
+```kotlin
+// Public API
+package com.example.mylib
+
+interface DataProcessor {
+    fun process(data: String): String
+}
+
+class DefaultDataProcessor : DataProcessor {
+    override fun process(data: String): String {
+        return data.uppercase()
+    }
+}
+
+// Factory
+object DataProcessorFactory {
+    fun create(): DataProcessor {
+        return DefaultDataProcessor()
+    }
+}
+```
+
+### Extension Functions
+
+```kotlin
+package com.example.mylib
+
+fun String.toTitleCase(): String {
+    return split(" ").joinToString(" ") { word ->
+        word.lowercase().replaceFirstChar { it.uppercase() }
+    }
+}
+
+fun Int.isEven(): Boolean {
+    return this % 2 == 0
+}
+```
+
+## Publishing to Maven Central
+
+### Sonatype Setup
+
+```kotlin
+// build.gradle.kts
+plugins {
+    kotlin("jvm") version "1.8.0"
+    `maven-publish`
+    signing
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            from(components["java"])
+
+            pom {
+                name.set("My Library")
+                description.set("A useful Kotlin library")
+                url.set("https://github.com/username/mylib")
+
+                licenses {
+                    license {
+                        name.set("Apache License 2.0")
+                        url.set("https://www.apache.org/licenses/LICENSE-2.0")
+                    }
+                }
+
+                developers {
+                    developer {
+                        id.set("username")
+                        name.set("Your Name")
+                        email.set("your.email@example.com")
+                    }
+                }
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            name = "OSSRH"
+            url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
+            credentials {
+                username = System.getenv("OSSRH_USERNAME")
+                password = System.getenv("OSSRH_PASSWORD")
+            }
+        }
+    }
+}
+```
+
+## Best Practices
+
+1. Clear API design
+2. Comprehensive documentation
+3. Version management
+4. Dependency management
+5. Testing coverage
+
+## Common Patterns
+
+### Builder Pattern
+
+```kotlin
+class ConfigBuilder {
+    private var timeout: Int = 30
+    private var retries: Int = 3
+    private var debug: Boolean = false
+
+    fun timeout(value: Int) = apply { timeout = value }
+    fun retries(value: Int) = apply { retries = value }
+    fun debug(value: Boolean) = apply { debug = value }
+
+    fun build() = Config(timeout, retries, debug)
+}
+
+data class Config(
+    val timeout: Int,
+    val retries: Int,
+    val debug: Boolean
+)
+
+// Usage
+val config = ConfigBuilder()
+    .timeout(60)
+    .retries(5)
+    .debug(true)
+    .build()
+```
+
+### Factory Pattern
+
+```kotlin
+interface Connection {
+    fun connect()
+    fun disconnect()
+}
+
+class DatabaseConnection : Connection {
+    override fun connect() { /* ... */ }
+    override fun disconnect() { /* ... */ }
+}
+
+class NetworkConnection : Connection {
+    override fun connect() { /* ... */ }
+    override fun disconnect() { /* ... */ }
+}
+
+object ConnectionFactory {
+    fun create(type: String): Connection {
+        return when (type) {
+            "database" -> DatabaseConnection()
+            "network" -> NetworkConnection()
+            else -> throw IllegalArgumentException("Unknown connection type")
+        }
+    }
+}
+```
+
+## Performance Considerations
+
+- API design impact
+- Memory usage
+- Thread safety
+- Resource management
+- Error handling
+
+## Common Mistakes
+
+1. Poor API design
+2. Missing documentation
+3. Version conflicts
+4. Dependency issues
+5. Testing gaps
+
+## Conclusion
+
+Creating a Kotlin library requires careful planning and attention to detail. Focus on creating a clean, well-documented API that others can easily use and maintain.

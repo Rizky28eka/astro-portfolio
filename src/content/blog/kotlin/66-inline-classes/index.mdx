@@ -1,0 +1,191 @@
+---
+title: "Inline Classes and Performance"
+summary: "Lightweight types, zero overhead"
+date: "2025-09-15"
+category: "kotlin"
+tags: ["kotlin", "inline", "performance"]
+---
+
+## Inline Classes and Performance
+
+Inline classes in Kotlin provide a way to create lightweight wrapper types with zero runtime overhead.
+
+## Basic Usage
+
+### Simple Inline Class
+
+```kotlin
+@JvmInline
+value class Password(val value: String) {
+    init {
+        require(value.length >= 8) { "Password must be at least 8 characters" }
+    }
+}
+
+// Usage
+val password = Password("secure123")
+println(password.value) // secure123
+```
+
+### Type Safety with Inline Classes
+
+```kotlin
+@JvmInline
+value class UserId(val id: Int)
+
+@JvmInline
+value class ProductId(val id: Int)
+
+class User(val id: UserId, val name: String)
+class Product(val id: ProductId, val name: String)
+
+// Usage
+val userId = UserId(1)
+val productId = ProductId(1)
+
+// Type safety prevents mixing IDs
+val user = User(userId, "John") // OK
+val product = Product(userId, "Laptop") // Compilation error
+```
+
+## Advanced Usage
+
+### Inline Classes with Methods
+
+```kotlin
+@JvmInline
+value class Email(val value: String) {
+    fun isValid(): Boolean {
+        return value.matches(Regex("^[A-Za-z0-9+_.-]+@(.+)\$"))
+    }
+
+    fun domain(): String {
+        return value.substringAfter("@")
+    }
+}
+
+// Usage
+val email = Email("user@example.com")
+println(email.isValid()) // true
+println(email.domain()) // example.com
+```
+
+### Inline Classes with Interfaces
+
+```kotlin
+interface Printable {
+    fun print()
+}
+
+@JvmInline
+value class Document(val content: String) : Printable {
+    override fun print() {
+        println("Printing: $content")
+    }
+}
+
+// Usage
+val doc = Document("Hello, World!")
+doc.print() // Printing: Hello, World!
+```
+
+## Performance Benefits
+
+### Memory Efficiency
+
+```kotlin
+@JvmInline
+value class Point(val x: Int, val y: Int)
+
+// No additional memory overhead
+val points = List(1000) { Point(it, it) }
+```
+
+### Runtime Performance
+
+```kotlin
+@JvmInline
+value class Counter(val count: Int) {
+    operator fun plus(other: Counter): Counter {
+        return Counter(count + other.count)
+    }
+}
+
+// Zero overhead operations
+val a = Counter(5)
+val b = Counter(3)
+val sum = a + b // No boxing/unboxing
+```
+
+## Best Practices
+
+1. Use for type safety
+2. Keep inline classes simple
+3. Avoid complex inheritance
+4. Consider JVM compatibility
+5. Use for performance-critical code
+
+## Common Patterns
+
+### Type-Safe IDs
+
+```kotlin
+@JvmInline
+value class UserId(val id: Int)
+@JvmInline
+value class OrderId(val id: Int)
+@JvmInline
+value class ProductId(val id: Int)
+
+class User(val id: UserId, val name: String)
+class Order(val id: OrderId, val userId: UserId)
+class Product(val id: ProductId, val name: String)
+
+// Usage
+val user = User(UserId(1), "John")
+val order = Order(OrderId(1), user.id)
+val product = Product(ProductId(1), "Laptop")
+```
+
+### Domain-Specific Types
+
+```kotlin
+@JvmInline
+value class Percentage(val value: Double) {
+    init {
+        require(value in 0.0..100.0) { "Percentage must be between 0 and 100" }
+    }
+}
+
+@JvmInline
+value class Currency(val amount: Double) {
+    operator fun plus(other: Currency): Currency {
+        return Currency(amount + other.amount)
+    }
+}
+
+// Usage
+val discount = Percentage(20.0)
+val price = Currency(100.0)
+val finalPrice = price * (1 - discount.value / 100)
+```
+
+## Performance Considerations
+
+- Zero runtime overhead
+- No additional memory allocation
+- Direct value access
+- JVM optimization friendly
+- Boxing only when needed
+
+## Common Mistakes
+
+1. Using complex inheritance
+2. Creating too many inline classes
+3. Ignoring JVM compatibility
+4. Overusing inline classes
+5. Not considering boxing scenarios
+
+## Conclusion
+
+Inline classes are a powerful feature for creating type-safe, performant code. Use them to add type safety without runtime overhead, especially in performance-critical applications.

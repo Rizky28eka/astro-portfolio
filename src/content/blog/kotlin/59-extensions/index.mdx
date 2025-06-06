@@ -1,0 +1,168 @@
+---
+title: "Writing Kotlin Extensions Effectively"
+summary: "Extend classes with elegance"
+date: "2025-07-28"
+category: "kotlin"
+tags: ["kotlin", "extensions", "reusability"]
+---
+
+## Writing Kotlin Extensions Effectively
+
+Kotlin extensions allow you to add new functionality to existing classes without inheritance or design patterns like Decorator.
+
+## Basic Extensions
+
+### Function Extensions
+
+```kotlin
+fun String.addExclamation(): String {
+    return "$this!"
+}
+
+fun Int.isEven(): Boolean {
+    return this % 2 == 0
+}
+
+// Usage
+val greeting = "Hello".addExclamation()
+val isEven = 42.isEven()
+```
+
+### Property Extensions
+
+```kotlin
+val String.lastChar: Char
+    get() = this[length - 1]
+
+val Int.isPositive: Boolean
+    get() = this > 0
+
+// Usage
+val lastChar = "Hello".lastChar
+val isPositive = 42.isPositive
+```
+
+## Advanced Extensions
+
+### Nullable Extensions
+
+```kotlin
+fun String?.orEmpty(): String {
+    return this ?: ""
+}
+
+fun Int?.orZero(): Int {
+    return this ?: 0
+}
+
+// Usage
+val name: String? = null
+val safeName = name.orEmpty()
+```
+
+### Generic Extensions
+
+```kotlin
+fun <T> List<T>.secondOrNull(): T? {
+    return if (size >= 2) get(1) else null
+}
+
+fun <T> T?.letIf(condition: Boolean, block: (T) -> Unit) {
+    if (condition) {
+        this?.let(block)
+    }
+}
+
+// Usage
+val second = listOf(1, 2, 3).secondOrNull()
+```
+
+## Best Practices
+
+1. Keep extensions focused and single-purpose
+2. Use clear, descriptive names
+3. Consider package organization
+4. Document public extensions
+5. Avoid shadowing existing methods
+
+## Common Patterns
+
+### View Extensions
+
+```kotlin
+fun View.show() {
+    visibility = View.VISIBLE
+}
+
+fun View.hide() {
+    visibility = View.GONE
+}
+
+fun View.isVisible(): Boolean {
+    return visibility == View.VISIBLE
+}
+
+// Usage
+button.show()
+textView.hide()
+if (imageView.isVisible()) {
+    // ...
+}
+```
+
+### Date Extensions
+
+```kotlin
+fun Date.format(pattern: String): String {
+    return SimpleDateFormat(pattern, Locale.getDefault()).format(this)
+}
+
+fun Date.addDays(days: Int): Date {
+    val calendar = Calendar.getInstance()
+    calendar.time = this
+    calendar.add(Calendar.DAY_OF_MONTH, days)
+    return calendar.time
+}
+
+// Usage
+val formatted = Date().format("yyyy-MM-dd")
+val tomorrow = Date().addDays(1)
+```
+
+### Collection Extensions
+
+```kotlin
+fun <T> List<T>.swap(index1: Int, index2: Int): List<T> {
+    val result = toMutableList()
+    val temp = result[index1]
+    result[index1] = result[index2]
+    result[index2] = temp
+    return result
+}
+
+fun <T> List<T>.randomOrNull(): T? {
+    return if (isEmpty()) null else this[Random.nextInt(size)]
+}
+
+// Usage
+val swapped = listOf(1, 2, 3).swap(0, 2)
+val random = listOf(1, 2, 3).randomOrNull()
+```
+
+## Performance Considerations
+
+- Extensions are resolved statically
+- No runtime overhead
+- Consider using inline functions for performance
+- Be mindful of extension shadowing
+
+## Common Mistakes
+
+1. Creating extensions that shadow existing methods
+2. Using extensions for complex logic
+3. Creating too many extensions
+4. Not considering package organization
+
+## Conclusion
+
+Kotlin extensions are a powerful feature that can make your code more readable and maintainable. Use them to add functionality to existing classes without modifying their source code.

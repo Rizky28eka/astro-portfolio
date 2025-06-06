@@ -1,0 +1,162 @@
+---
+title: "Understanding Kotlin's Inline Functions"
+summary: "Optimize performance with inline"
+date: "2025-08-04"
+category: "kotlin"
+tags: ["kotlin", "inline", "lambda"]
+---
+
+## Understanding Kotlin's Inline Functions
+
+Inline functions in Kotlin are a powerful feature that can improve performance by eliminating the overhead of function calls and lambda expressions.
+
+## Basic Inline Functions
+
+### Simple Inline Function
+
+```kotlin
+inline fun measureTime(block: () -> Unit): Long {
+    val startTime = System.currentTimeMillis()
+    block()
+    return System.currentTimeMillis() - startTime
+}
+
+// Usage
+val time = measureTime {
+    // Code to measure
+    Thread.sleep(1000)
+}
+```
+
+### Inline Function with Parameters
+
+```kotlin
+inline fun <T> T.applyIf(condition: Boolean, block: T.() -> Unit): T {
+    if (condition) {
+        block()
+    }
+    return this
+}
+
+// Usage
+val result = "Hello".applyIf(true) {
+    println(this)
+}
+```
+
+## Advanced Usage
+
+### Inline Functions with Reified Type Parameters
+
+```kotlin
+inline fun <reified T> createInstance(): T {
+    return T::class.java.getDeclaredConstructor().newInstance()
+}
+
+// Usage
+val string = createInstance<String>()
+val list = createInstance<ArrayList<String>>()
+```
+
+### Crossinline and Noinline
+
+```kotlin
+inline fun processItems(
+    items: List<String>,
+    crossinline onItem: (String) -> Unit,
+    noinline onComplete: () -> Unit
+) {
+    items.forEach { item ->
+        onItem(item)
+    }
+    onComplete()
+}
+
+// Usage
+processItems(
+    listOf("A", "B", "C"),
+    onItem = { println(it) },
+    onComplete = { println("Done") }
+)
+```
+
+## Best Practices
+
+1. Use inline for higher-order functions
+2. Use reified for type-safe operations
+3. Use crossinline when needed
+4. Use noinline for non-inline parameters
+5. Consider performance implications
+
+## Common Patterns
+
+### Inline Utility Functions
+
+```kotlin
+inline fun <T> T.alsoPrint(prefix: String = ""): T {
+    println("$prefix$this")
+    return this
+}
+
+inline fun <T> T.letIf(condition: Boolean, block: (T) -> Unit): T {
+    if (condition) {
+        block(this)
+    }
+    return this
+}
+
+// Usage
+val result = "Hello"
+    .alsoPrint("Prefix: ")
+    .letIf(true) { println("Condition met") }
+```
+
+### Inline Builders
+
+```kotlin
+inline fun buildString(builder: StringBuilder.() -> Unit): String {
+    return StringBuilder().apply(builder).toString()
+}
+
+// Usage
+val text = buildString {
+    append("Hello")
+    append(" ")
+    append("World")
+}
+```
+
+### Inline Logging
+
+```kotlin
+inline fun logTime(tag: String, block: () -> Unit) {
+    val startTime = System.currentTimeMillis()
+    block()
+    val endTime = System.currentTimeMillis()
+    println("$tag took ${endTime - startTime}ms")
+}
+
+// Usage
+logTime("Operation") {
+    // Code to measure
+    Thread.sleep(1000)
+}
+```
+
+## Performance Considerations
+
+- Inline functions eliminate function call overhead
+- Lambda expressions are inlined
+- Reified type parameters are resolved at compile time
+- Consider code size vs performance
+
+## Common Mistakes
+
+1. Overusing inline functions
+2. Not using reified when appropriate
+3. Forgetting crossinline when needed
+4. Ignoring code size implications
+
+## Conclusion
+
+Inline functions are a powerful feature in Kotlin that can improve performance and enable type-safe operations. Use them wisely to optimize your code while maintaining readability.

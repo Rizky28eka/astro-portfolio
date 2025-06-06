@@ -1,0 +1,159 @@
+---
+title: "Type Aliases in Kotlin Explained"
+summary: "Simplify types with aliasing"
+date: "2025-07-14"
+category: "kotlin"
+tags: ["kotlin", "type-alias", "clean-code"]
+---
+
+## Type Aliases in Kotlin Explained
+
+Type aliases in Kotlin provide a way to create alternative names for existing types, making your code more readable and maintainable.
+
+## Basic Usage
+
+### Simple Type Aliases
+
+```kotlin
+typealias Name = String
+typealias Age = Int
+typealias UserId = String
+
+data class User(
+    val id: UserId,
+    val name: Name,
+    val age: Age
+)
+```
+
+### Function Type Aliases
+
+```kotlin
+typealias ClickHandler = (View) -> Unit
+typealias StringFilter = (String) -> Boolean
+typealias DataCallback = (Result<Data>) -> Unit
+
+class Button {
+    private var onClick: ClickHandler? = null
+
+    fun setOnClickListener(listener: ClickHandler) {
+        onClick = listener
+    }
+}
+```
+
+## Advanced Usage
+
+### Generic Type Aliases
+
+```kotlin
+typealias StringMap = Map<String, String>
+typealias NumberList = List<Number>
+typealias ResultCallback<T> = (Result<T>) -> Unit
+
+fun processData(data: StringMap, callback: ResultCallback<String>) {
+    // Implementation
+}
+```
+
+### Complex Type Aliases
+
+```kotlin
+typealias UserMap = Map<UserId, User>
+typealias UserList = List<User>
+typealias UserCallback = (User) -> Unit
+typealias UserFilter = (User) -> Boolean
+
+class UserRepository {
+    private val users: UserMap = mutableMapOf()
+
+    fun findUsers(filter: UserFilter): UserList {
+        return users.values.filter(filter)
+    }
+}
+```
+
+## Best Practices
+
+1. Use descriptive names for type aliases
+2. Keep aliases close to their usage
+3. Use aliases for complex types
+4. Consider package-level aliases for common types
+5. Document complex type aliases
+
+## Common Patterns
+
+### API Response Types
+
+```kotlin
+typealias ApiResponse<T> = Result<T>
+typealias ApiCallback<T> = (ApiResponse<T>) -> Unit
+typealias ApiError = String
+
+interface ApiClient {
+    fun <T> get(url: String, callback: ApiCallback<T>)
+    fun <T> post(url: String, data: T, callback: ApiCallback<T>)
+}
+```
+
+### Database Types
+
+```kotlin
+typealias DbId = Long
+typealias DbTimestamp = Long
+typealias DbQuery = String
+typealias DbResult<T> = Result<T>
+
+class Database {
+    fun <T> query(query: DbQuery): DbResult<T> {
+        // Implementation
+    }
+}
+```
+
+## Use Cases
+
+### UI Components
+
+```kotlin
+typealias ViewId = Int
+typealias Color = Int
+typealias Dimension = Float
+typealias ResourceId = Int
+
+class CustomView {
+    fun setBackgroundColor(@ColorRes color: Color) {
+        // Implementation
+    }
+}
+```
+
+### Network Types
+
+```kotlin
+typealias HttpMethod = String
+typealias HttpHeaders = Map<String, String>
+typealias HttpBody = String
+typealias HttpStatusCode = Int
+
+class HttpClient {
+    fun request(
+        method: HttpMethod,
+        headers: HttpHeaders,
+        body: HttpBody?
+    ): HttpStatusCode {
+        // Implementation
+    }
+}
+```
+
+## Performance Considerations
+
+- Type aliases are resolved at compile time
+- No runtime overhead
+- Helps with code organization
+- Improves code readability
+
+## Conclusion
+
+Type aliases are a powerful feature in Kotlin that helps make your code more readable and maintainable. Use them to simplify complex types and create more meaningful names for your types.

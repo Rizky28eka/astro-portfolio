@@ -1,0 +1,271 @@
+---
+title: "All About Kotlin DSLs"
+summary: "Create readable domain syntax"
+date: "2025-09-08"
+category: "kotlin"
+tags: ["kotlin", "dsl", "clean-code"]
+---
+
+## All About Kotlin DSLs
+
+Domain Specific Languages (DSLs) in Kotlin allow you to create readable and expressive code for specific domains.
+
+## Basic DSL Concepts
+
+### Simple DSL
+
+```kotlin
+class HtmlBuilder {
+    private val content = StringBuilder()
+
+    fun html(block: HtmlBuilder.() -> Unit): String {
+        content.append("<html>")
+        block()
+        content.append("</html>")
+        return content.toString()
+    }
+
+    fun body(block: HtmlBuilder.() -> Unit) {
+        content.append("<body>")
+        block()
+        content.append("</body>")
+    }
+
+    fun p(text: String) {
+        content.append("<p>$text</p>")
+    }
+}
+
+// Usage
+val html = HtmlBuilder().html {
+    body {
+        p("Hello, World!")
+    }
+}
+```
+
+### Type-Safe Builders
+
+```kotlin
+class TableBuilder {
+    private val rows = mutableListOf<Row>()
+
+    fun tr(block: Row.() -> Unit) {
+        val row = Row()
+        row.block()
+        rows.add(row)
+    }
+
+    class Row {
+        private val cells = mutableListOf<String>()
+
+        fun td(text: String) {
+            cells.add("<td>$text</td>")
+        }
+
+        override fun toString(): String {
+            return "<tr>${cells.joinToString("")}</tr>"
+        }
+    }
+
+    override fun toString(): String {
+        return "<table>${rows.joinToString("")}</table>"
+    }
+}
+
+// Usage
+val table = TableBuilder().apply {
+    tr {
+        td("Name")
+        td("Age")
+    }
+    tr {
+        td("John")
+        td("30")
+    }
+}
+```
+
+## Advanced DSL Features
+
+### Nested DSLs
+
+```kotlin
+class FormBuilder {
+    private val fields = mutableListOf<Field>()
+
+    fun input(block: InputField.() -> Unit) {
+        val field = InputField()
+        field.block()
+        fields.add(field)
+    }
+
+    fun select(block: SelectField.() -> Unit) {
+        val field = SelectField()
+        field.block()
+        fields.add(field)
+    }
+
+    class Field {
+        var name: String = ""
+        var label: String = ""
+    }
+
+    class InputField : Field() {
+        var type: String = "text"
+        var value: String = ""
+
+        override fun toString(): String {
+            return """
+                <div>
+                    <label for="$name">$label</label>
+                    <input type="$type" name="$name" value="$value">
+                </div>
+            """.trimIndent()
+        }
+    }
+
+    class SelectField : Field() {
+        private val options = mutableListOf<Option>()
+
+        fun option(text: String, value: String) {
+            options.add(Option(text, value))
+        }
+
+        class Option(val text: String, val value: String)
+
+        override fun toString(): String {
+            return """
+                <div>
+                    <label for="$name">$label</label>
+                    <select name="$name">
+                        ${options.joinToString("") { "<option value=\"${it.value}\">${it.text}</option>" }}
+                    </select>
+                </div>
+            """.trimIndent()
+        }
+    }
+
+    override fun toString(): String {
+        return "<form>${fields.joinToString("")}</form>"
+    }
+}
+
+// Usage
+val form = FormBuilder().apply {
+    input {
+        name = "username"
+        label = "Username"
+        type = "text"
+    }
+    select {
+        name = "country"
+        label = "Country"
+        option("USA", "us")
+        option("Canada", "ca")
+    }
+}
+```
+
+## Best Practices
+
+1. Keep DSLs focused and specific
+2. Use meaningful names
+3. Provide type safety
+4. Document DSL usage
+5. Consider error handling
+
+## Common Patterns
+
+### Configuration DSL
+
+```kotlin
+class ConfigBuilder {
+    private val config = mutableMapOf<String, Any>()
+
+    fun server(block: ServerConfig.() -> Unit) {
+        val server = ServerConfig()
+        server.block()
+        config["server"] = server
+    }
+
+    class ServerConfig {
+        var host: String = "localhost"
+        var port: Int = 8080
+        var ssl: Boolean = false
+    }
+
+    fun database(block: DatabaseConfig.() -> Unit) {
+        val db = DatabaseConfig()
+        db.block()
+        config["database"] = db
+    }
+
+    class DatabaseConfig {
+        var url: String = ""
+        var username: String = ""
+        var password: String = ""
+    }
+}
+
+// Usage
+val config = ConfigBuilder().apply {
+    server {
+        host = "example.com"
+        port = 443
+        ssl = true
+    }
+    database {
+        url = "jdbc:postgresql://localhost:5432/mydb"
+        username = "admin"
+        password = "secret"
+    }
+}
+```
+
+### Routing DSL
+
+```kotlin
+class RouterBuilder {
+    private val routes = mutableListOf<Route>()
+
+    fun get(path: String, handler: () -> String) {
+        routes.add(Route("GET", path, handler))
+    }
+
+    fun post(path: String, handler: () -> String) {
+        routes.add(Route("POST", path, handler))
+    }
+
+    class Route(val method: String, val path: String, val handler: () -> String)
+
+    fun findRoute(method: String, path: String): Route? {
+        return routes.find { it.method == method && it.path == path }
+    }
+}
+
+// Usage
+val router = RouterBuilder().apply {
+    get("/users") { "List users" }
+    post("/users") { "Create user" }
+    get("/users/{id}") { "Get user" }
+}
+```
+
+## Performance Considerations
+
+- DSLs have minimal runtime overhead
+- Consider using inline functions
+- Be mindful of object creation
+- Use appropriate data structures
+
+## Common Mistakes
+
+1. Creating overly complex DSLs
+2. Not providing type safety
+3. Ignoring error handling
+4. Making DSLs too generic
+
+## Conclusion
+
+Kotlin DSLs are a powerful feature that can make your code more readable and maintainable. Use them to create domain-specific syntax that is both expressive and type-safe.

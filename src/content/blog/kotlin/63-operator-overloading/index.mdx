@@ -1,0 +1,164 @@
+---
+title: "Operator Overloading in Kotlin"
+summary: "Custom behavior for operators"
+date: "2025-08-25"
+category: "kotlin"
+tags: ["kotlin", "operator", "syntax"]
+---
+
+## Operator Overloading in Kotlin
+
+Kotlin allows you to define custom behavior for operators, making your code more expressive and intuitive.
+
+## Basic Operators
+
+### Arithmetic Operators
+
+```kotlin
+data class Point(val x: Int, val y: Int) {
+    operator fun plus(other: Point): Point {
+        return Point(x + other.x, y + other.y)
+    }
+
+    operator fun minus(other: Point): Point {
+        return Point(x - other.x, y - other.y)
+    }
+
+    operator fun times(factor: Int): Point {
+        return Point(x * factor, y * factor)
+    }
+}
+
+// Usage
+val p1 = Point(1, 2)
+val p2 = Point(3, 4)
+val sum = p1 + p2
+val diff = p2 - p1
+val scaled = p1 * 2
+```
+
+### Comparison Operators
+
+```kotlin
+data class Money(val amount: Double) {
+    operator fun compareTo(other: Money): Int {
+        return amount.compareTo(other.amount)
+    }
+}
+
+// Usage
+val m1 = Money(10.0)
+val m2 = Money(20.0)
+val isGreater = m2 > m1
+val isLess = m1 < m2
+```
+
+## Advanced Operators
+
+### Index Access
+
+```kotlin
+class Matrix(val rows: Int, val cols: Int) {
+    private val data = Array(rows) { DoubleArray(cols) }
+
+    operator fun get(row: Int, col: Int): Double {
+        return data[row][col]
+    }
+
+    operator fun set(row: Int, col: Int, value: Double) {
+        data[row][col] = value
+    }
+}
+
+// Usage
+val matrix = Matrix(2, 2)
+matrix[0, 0] = 1.0
+val value = matrix[0, 0]
+```
+
+### Function Invocation
+
+```kotlin
+class Calculator {
+    operator fun invoke(x: Int, y: Int): Int {
+        return x + y
+    }
+}
+
+// Usage
+val calc = Calculator()
+val result = calc(5, 3)
+```
+
+## Best Practices
+
+1. Use operator overloading sparingly
+2. Follow mathematical conventions
+3. Maintain consistency
+4. Document operator behavior
+5. Consider readability
+
+## Common Patterns
+
+### Range Operators
+
+```kotlin
+class Date(val year: Int, val month: Int, val day: Int) {
+    operator fun rangeTo(other: Date): List<Date> {
+        val dates = mutableListOf<Date>()
+        var current = this
+        while (current <= other) {
+            dates.add(current)
+            current = current.nextDay()
+        }
+        return dates
+    }
+
+    private fun nextDay(): Date {
+        // Implementation
+        return this
+    }
+}
+
+// Usage
+val start = Date(2025, 1, 1)
+val end = Date(2025, 1, 5)
+val dates = start..end
+```
+
+### Unary Operators
+
+```kotlin
+data class Complex(val real: Double, val imag: Double) {
+    operator fun unaryMinus(): Complex {
+        return Complex(-real, -imag)
+    }
+
+    operator fun unaryPlus(): Complex {
+        return this
+    }
+}
+
+// Usage
+val c = Complex(1.0, 2.0)
+val negated = -c
+val same = +c
+```
+
+## Performance Considerations
+
+- Operator overloading has minimal overhead
+- Consider using inline functions
+- Be mindful of object creation
+- Use primitive types when possible
+
+## Common Mistakes
+
+1. Overusing operator overloading
+2. Violating mathematical conventions
+3. Creating confusing operator behavior
+4. Ignoring performance implications
+
+## Conclusion
+
+Operator overloading is a powerful feature in Kotlin that can make your code more expressive and intuitive. Use it wisely to create clear and maintainable code.

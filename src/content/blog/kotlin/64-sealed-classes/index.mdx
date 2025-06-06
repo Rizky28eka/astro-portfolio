@@ -1,0 +1,168 @@
+---
+title: "Sealed Classes and Their Magic"
+summary: "Smarter inheritance with restrictions"
+date: "2025-09-01"
+category: "kotlin"
+tags: ["kotlin", "sealed-class", "polymorphism"]
+---
+
+## Sealed Classes and Their Magic
+
+Sealed classes in Kotlin provide a way to represent restricted class hierarchies, where all possible subclasses are known at compile time.
+
+## Basic Usage
+
+### Simple Sealed Class
+
+```kotlin
+sealed class Result<out T> {
+    data class Success<T>(val data: T) : Result<T>()
+    data class Error(val message: String) : Result<Nothing>()
+    object Loading : Result<Nothing>()
+}
+
+// Usage
+fun handleResult(result: Result<User>) {
+    when (result) {
+        is Result.Success -> println("User: ${result.data}")
+        is Result.Error -> println("Error: ${result.message}")
+        Result.Loading -> println("Loading...")
+    }
+}
+```
+
+### Sealed Class with Properties
+
+```kotlin
+sealed class Shape {
+    abstract val area: Double
+
+    data class Circle(val radius: Double) : Shape() {
+        override val area: Double
+            get() = Math.PI * radius * radius
+    }
+
+    data class Rectangle(val width: Double, val height: Double) : Shape() {
+        override val area: Double
+            get() = width * height
+    }
+}
+
+// Usage
+fun calculateArea(shape: Shape): Double {
+    return shape.area
+}
+```
+
+## Advanced Usage
+
+### Sealed Class with Functions
+
+```kotlin
+sealed class NetworkResponse<out T> {
+    data class Success<T>(val data: T) : NetworkResponse<T>()
+    data class Error(val code: Int, val message: String) : NetworkResponse<Nothing>()
+
+    fun <R> map(transform: (T) -> R): NetworkResponse<R> {
+        return when (this) {
+            is Success -> Success(transform(data))
+            is Error -> Error(code, message)
+        }
+    }
+}
+
+// Usage
+val response: NetworkResponse<User> = // ...
+val mapped = response.map { it.name }
+```
+
+### Nested Sealed Classes
+
+```kotlin
+sealed class ViewState {
+    sealed class Data : ViewState() {
+        data class Success(val items: List<Item>) : Data()
+        data class Error(val message: String) : Data()
+    }
+
+    object Loading : ViewState()
+    object Empty : ViewState()
+}
+
+// Usage
+fun handleViewState(state: ViewState) {
+    when (state) {
+        is ViewState.Data.Success -> showItems(state.items)
+        is ViewState.Data.Error -> showError(state.message)
+        ViewState.Loading -> showLoading()
+        ViewState.Empty -> showEmpty()
+    }
+}
+```
+
+## Best Practices
+
+1. Use sealed classes for restricted hierarchies
+2. Keep subclasses in the same file
+3. Use data classes for subclasses when appropriate
+4. Consider using objects for singleton states
+5. Document the purpose of each subclass
+
+## Common Patterns
+
+### State Management
+
+```kotlin
+sealed class ScreenState {
+    data class Content(val data: List<Item>) : ScreenState()
+    data class Error(val message: String) : ScreenState()
+    object Loading : ScreenState()
+    object Empty : ScreenState()
+}
+
+class ViewModel {
+    private val _state = MutableStateFlow<ScreenState>(ScreenState.Loading)
+    val state: StateFlow<ScreenState> = _state.asStateFlow()
+
+    fun loadData() {
+        _state.value = ScreenState.Loading
+        // Load data
+    }
+}
+```
+
+### API Responses
+
+```kotlin
+sealed class ApiResponse<out T> {
+    data class Success<T>(val data: T) : ApiResponse<T>()
+    data class Error(val code: Int, val message: String) : ApiResponse<Nothing>()
+    object Loading : ApiResponse<Nothing>()
+
+    fun <R> map(transform: (T) -> R): ApiResponse<R> {
+        return when (this) {
+            is Success -> Success(transform(data))
+            is Error -> Error(code, message)
+            Loading -> Loading
+        }
+    }
+}
+```
+
+## Performance Considerations
+
+- Sealed classes have minimal runtime overhead
+- Compile-time type checking
+- No reflection needed
+- Efficient when expressions
+
+## Common Mistakes
+
+1. Not using sealed classes for restricted hierarchies
+2. Putting subclasses in different files
+3. Using sealed classes when enums would suffice
+4. Not handling all cases in when expressions
+
+## Conclusion
+
+Sealed classes are a powerful feature in Kotlin that helps create type-safe hierarchies and exhaustive when expressions. Use them to represent restricted class hierarchies and make your code more maintainable.
