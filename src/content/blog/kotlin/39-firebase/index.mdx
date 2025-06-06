@@ -1,0 +1,331 @@
+---
+title: "Integrate Firebase in Kotlin App"
+summary: "Learn how to add Firebase authentication and realtime database to your Android app"
+date: "2025-05-22"
+category: "kotlin"
+tags: ["kotlin", "firebase", "authentication", "realtime-db"]
+---
+
+## Integrate Firebase in Kotlin App
+
+Firebase provides powerful backend services for Android apps. Let's learn how to integrate Firebase Authentication and Realtime Database.
+
+## Project Setup
+
+### Add Dependencies
+
+```kotlin
+// build.gradle.kts
+plugins {
+    id("com.google.gms.google-services")
+}
+
+dependencies {
+    // Firebase BoM
+    implementation(platform("com.google.firebase:firebase-bom:32.7.1"))
+
+    // Firebase Auth
+    implementation("com.google.firebase:firebase-auth-ktx")
+
+    // Firebase Realtime Database
+    implementation("com.google.firebase:firebase-database-ktx")
+
+    // Firebase Storage
+    implementation("com.google.firebase:firebase-storage-ktx")
+
+    // Firebase Analytics
+    implementation("com.google.firebase:firebase-analytics-ktx")
+}
+```
+
+## Firebase Authentication
+
+### Auth Manager
+
+```kotlin
+class FirebaseAuthManager {
+    private val auth: FirebaseAuth = Firebase.auth
+
+    fun getCurrentUser(): FirebaseUser? = auth.currentUser
+
+    suspend fun signIn(email: String, password: String): Result<FirebaseUser> {
+        return try {
+            val result = auth.signInWithEmailAndPassword(email, password).await()
+            Result.success(result.user!!)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun signUp(email: String, password: String): Result<FirebaseUser> {
+        return try {
+            val result = auth.createUserWithEmailAndPassword(email, password).await()
+            Result.success(result.user!!)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun signOut() {
+        auth.signOut()
+    }
+
+    suspend fun resetPassword(email: String): Result<Unit> {
+        return try {
+            auth.sendPasswordResetEmail(email).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+}
+```
+
+### Auth ViewModel
+
+```kotlin
+class AuthViewModel : ViewModel() {
+    private val authManager = FirebaseAuthManager()
+
+    private val _authState = MutableStateFlow<AuthState>(AuthState.Initial)
+    val authState: StateFlow<AuthState> = _authState.asStateFlow()
+
+    fun signIn(email: String, password: String) {
+        viewModelScope.launch {
+            _authState.value = AuthState.Loading
+            try {
+                val result = authManager.signIn(email, password)
+                result.fold(
+                    onSuccess = { _authState.value = AuthState.Success(it) },
+                    onFailure = { _authState.value = AuthState.Error(it.message ?: "Sign in failed") }
+                )
+            } catch (e: Exception) {
+                _authState.value = AuthState.Error(e.message ?: "Sign in failed")
+            }
+        }
+    }
+
+    fun signUp(email: String, password: String) {
+        viewModelScope.launch {
+            _authState.value = AuthState.Loading
+            try {
+                val result = authManager.signUp(email, password)
+                result.fold(
+                    onSuccess = { _authState.value = AuthState.Success(it) },
+                    onFailure = { _authState.value = AuthState.Error(it.message ?: "Sign up failed") }
+                )
+            } catch (e: Exception) {
+                _authState.value = AuthState.Error(e.message ?: "Sign up failed")
+            }
+        }
+    }
+}
+
+sealed class AuthState {
+    object Initial : AuthState()
+    object Loading : AuthState()
+    data class Success(val user: FirebaseUser) : AuthState()
+    data class Error(val message: String) : AuthState()
+}
+```
+
+## Realtime Database
+
+### Data Models
+
+```kotlin
+data class User(
+    val id: String = "",
+    val name: String = "",
+    val email: String = "",
+    val profilePicture: String = ""
+)
+
+data class Message(
+    val id: String = "",
+    val senderId: String = "",
+    val content: String = "",
+    val timestamp: Long = 0
+)
+```
+
+### Database Manager
+
+```kotlin
+class FirebaseDatabaseManager {
+    private val database: FirebaseDatabase = Firebase.database
+    private val usersRef = database.getReference("users")
+    private val messagesRef = database.getReference("messages")
+
+    suspend fun saveUser(user: User): Result<Unit> {
+        return try {
+            usersRef.child(user.id).setValue(user).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    fun observeUser(userId: String): Flow<User?> {
+        return callbackFlow {
+            val listener = usersRef.child(userId)
+                .addValueEventListener(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        val user = snapshot.getValue(User::class.java)
+                        trySend(user)
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {
+                        close(error.toException())
+                    }
+                })
+
+            awaitClose { usersRef.child(userId).removeEventListener(listener) }
+        }
+    }
+
+    suspend fun sendMessage(message: Message): Result<Unit> {
+        return try {
+            val messageRef = messagesRef.push()
+            messageRef.setValue(message.copy(id = messageRef.key!!)).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    fun observeMessages(): Flow<List<Message>> {
+        return callbackFlow {
+            val listener = messagesRef
+                .orderByChild("timestamp")
+                .addValueEventListener(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        val messages = snapshot.children.mapNotNull {
+                            it.getValue(Message::class.java)
+                        }
+                        trySend(messages)
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {
+                        close(error.toException())
+                    }
+                })
+
+            awaitClose { messagesRef.removeEventListener(listener) }
+        }
+    }
+}
+```
+
+## Storage
+
+### Storage Manager
+
+```kotlin
+class FirebaseStorageManager {
+    private val storage: FirebaseStorage = Firebase.storage
+    private val storageRef = storage.reference
+
+    suspend fun uploadImage(
+        imageUri: Uri,
+        path: String
+    ): Result<String> {
+        return try {
+            val imageRef = storageRef.child(path)
+            val uploadTask = imageRef.putFile(imageUri).await()
+            val downloadUrl = imageRef.downloadUrl.await()
+            Result.success(downloadUrl.toString())
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun deleteImage(path: String): Result<Unit> {
+        return try {
+            storageRef.child(path).delete().await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+}
+```
+
+## Best Practices
+
+### Error Handling
+
+```kotlin
+sealed class FirebaseError : Exception() {
+    data class AuthError(override val message: String) : FirebaseError()
+    data class DatabaseError(override val message: String) : FirebaseError()
+    data class StorageError(override val message: String) : FirebaseError()
+}
+
+fun FirebaseException.toFirebaseError(): FirebaseError {
+    return when (this) {
+        is FirebaseAuthException -> FirebaseError.AuthError(message ?: "Authentication failed")
+        is FirebaseDatabaseException -> FirebaseError.DatabaseError(message ?: "Database operation failed")
+        is FirebaseStorageException -> FirebaseError.StorageError(message ?: "Storage operation failed")
+        else -> FirebaseError.AuthError(message ?: "Unknown error occurred")
+    }
+}
+```
+
+## Common Patterns
+
+### Repository Pattern
+
+```kotlin
+class FirebaseRepository(
+    private val authManager: FirebaseAuthManager,
+    private val databaseManager: FirebaseDatabaseManager,
+    private val storageManager: FirebaseStorageManager
+) {
+    suspend fun signIn(email: String, password: String): Result<FirebaseUser> {
+        return authManager.signIn(email, password)
+    }
+
+    suspend fun updateUserProfile(
+        userId: String,
+        name: String,
+        imageUri: Uri?
+    ): Result<Unit> {
+        return try {
+            val imageUrl = imageUri?.let {
+                storageManager.uploadImage(it, "profile_images/$userId").getOrThrow()
+            }
+
+            val user = User(
+                id = userId,
+                name = name,
+                profilePicture = imageUrl ?: ""
+            )
+
+            databaseManager.saveUser(user).getOrThrow()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+}
+```
+
+## Conclusion
+
+Firebase provides:
+
+- Easy authentication
+- Real-time data synchronization
+- Cloud storage
+- Analytics and crash reporting
+
+Remember to:
+
+- Handle offline scenarios
+- Implement proper security rules
+- Monitor usage and costs
+- Follow Firebase best practices
+- Test thoroughly
+
+Stay tuned for more Kotlin tips and tricks!

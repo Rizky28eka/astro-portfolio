@@ -1,0 +1,169 @@
+---
+title: "Integrate Lottie Animations"
+summary: "Learn how to add smooth animations to your Kotlin apps using Lottie"
+date: "2025-06-04"
+category: "kotlin"
+tags: ["kotlin", "lottie", "animation", "ui-ux"]
+---
+
+## Integrate Lottie Animations
+
+Let's explore how to add beautiful animations to your Kotlin apps using Lottie.
+
+## Project Setup
+
+### Dependencies
+
+```kotlin
+// build.gradle.kts
+dependencies {
+    implementation("com.airbnb.android:lottie:6.3.0")
+}
+```
+
+## Basic Usage
+
+### XML Integration
+
+```xml
+<!-- activity_main.xml -->
+<com.airbnb.lottie.LottieAnimationView
+    android:id="@+id/animationView"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    app:lottie_rawRes="@raw/animation"
+    app:lottie_autoPlay="true"
+    app:lottie_loop="true" />
+```
+
+### Programmatic Control
+
+```kotlin
+class MainActivity : AppCompatActivity() {
+    private lateinit var animationView: LottieAnimationView
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        animationView = findViewById(R.id.animationView)
+
+        // Load animation from assets
+        animationView.setAnimation("animation.json")
+
+        // Control animation
+        animationView.playAnimation()
+        animationView.pauseAnimation()
+        animationView.resumeAnimation()
+
+        // Set animation speed
+        animationView.speed = 2f
+
+        // Set animation progress
+        animationView.progress = 0.5f
+    }
+}
+```
+
+## Animation States
+
+### State Management
+
+```kotlin
+// Animation state handling
+animationView.addAnimatorListener(object : Animator.AnimatorListener {
+    override fun onAnimationStart(animation: Animator) {
+        // Animation started
+    }
+
+    override fun onAnimationEnd(animation: Animator) {
+        // Animation ended
+    }
+
+    override fun onAnimationCancel(animation: Animator) {
+        // Animation cancelled
+    }
+
+    override fun onAnimationRepeat(animation: Animator) {
+        // Animation repeated
+    }
+})
+
+// Progress tracking
+animationView.addAnimatorUpdateListener { animation ->
+    val progress = animation.animatedValue as Float
+    // Handle progress updates
+}
+```
+
+## Dynamic Animations
+
+### Runtime Control
+
+```kotlin
+// Dynamic animation loading
+fun loadAnimationFromUrl(url: String) {
+    val cacheKey = "animation_${url.hashCode()}"
+    val cacheFile = File(cacheDir, cacheKey)
+
+    if (cacheFile.exists()) {
+        animationView.setAnimation(cacheFile.absolutePath)
+    } else {
+        // Download and cache animation
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val response = URL(url).openStream()
+                cacheFile.outputStream().use { output ->
+                    response.copyTo(output)
+                }
+                withContext(Dispatchers.Main) {
+                    animationView.setAnimation(cacheFile.absolutePath)
+                }
+            } catch (e: Exception) {
+                // Handle error
+            }
+        }
+    }
+}
+```
+
+## Custom Animations
+
+### Animation Composition
+
+```kotlin
+// Custom animation composition
+class CustomAnimationView @JvmOverloads constructor(
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0
+) : LottieAnimationView(context, attrs, defStyleAttr) {
+
+    private var currentAnimation: LottieAnimationView? = null
+    private val animationQueue = mutableListOf<String>()
+
+    fun queueAnimation(animationName: String) {
+        animationQueue.add(animationName)
+        if (currentAnimation == null) {
+            playNextAnimation()
+        }
+    }
+
+    private fun playNextAnimation() {
+        if (animationQueue.isEmpty()) {
+            currentAnimation = null
+            return
+        }
+
+        val nextAnimation = animationQueue.removeAt(0)
+        setAnimation(nextAnimation)
+        addAnimatorListener(object : Animator.AnimatorListener {
+            override fun onAnimationEnd(animation: Animator) {
+                playNextAnimation()
+            }
+            // Other required methods...
+        })
+        playAnimation()
+    }
+}
+```

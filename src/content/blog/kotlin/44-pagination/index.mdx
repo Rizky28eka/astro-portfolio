@@ -1,0 +1,421 @@
+---
+title: "Pagination in Kotlin with Paging 3"
+summary: "Learn how to implement efficient pagination in your Android applications using Paging 3"
+date: "2025-05-14"
+category: "kotlin"
+tags: ["kotlin", "paging", "android", "jetpack", "pagination"]
+---
+
+## Pagination in Kotlin with Paging 3
+
+Let's explore how to implement efficient pagination in Android applications using the Paging 3 library.
+
+## Project Setup
+
+### Dependencies
+
+```kotlin
+dependencies {
+    implementation("androidx.paging:paging-runtime-ktx:3.1.1")
+    implementation("androidx.paging:paging-compose:3.1.1")
+    implementation("androidx.room:room-paging:2.5.2")
+}
+```
+
+## Data Layer
+
+### Entity and DAO
+
+```kotlin
+@Entity(tableName = "repos")
+data class Repo(
+    @PrimaryKey
+    val id: Int,
+    val name: String,
+    val description: String?,
+    val stars: Int,
+    val language: String?
+)
+
+@Dao
+interface RepoDao {
+    @Query("SELECT * FROM repos ORDER BY stars DESC")
+    fun getRepos(): PagingSource<Int, Repo>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(repos: List<Repo>)
+
+    @Query("DELETE FROM repos")
+    suspend fun deleteAll()
+}
+```
+
+## Repository Layer
+
+### Repository Implementation
+
+```kotlin
+class RepoRepository @Inject constructor(
+    private val repoDao: RepoDao,
+    private val githubService: GithubService
+) {
+    fun getRepos(): Flow<PagingData<Repo>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = NETWORK_PAGE_SIZE,
+                enablePlaceholders = false,
+                prefetchDistance = 2
+            ),
+            pagingSourceFactory = { repoDao.getRepos() }
+        ).flow
+    }
+
+    suspend fun refreshRepos() {
+        withContext(Dispatchers.IO) {
+            try {
+                val repos = githubService.getRepos(1)
+                repoDao.deleteAll()
+                repoDao.insertAll(repos)
+            } catch (e: Exception) {
+                // Handle error
+            }
+        }
+    }
+
+    companion object {
+        const val NETWORK_PAGE_SIZE = 30
+    }
+}
+```
+
+## Remote Mediator
+
+### Repo Remote Mediator
+
+```kotlin
+class RepoRemoteMediator(
+    private val repoDao: RepoDao,
+    private val githubService: GithubService
+) : RemoteMediator<Int, Repo>() {
+
+    override suspend fun load(
+        loadType: LoadType,
+        state: PagingState<Int, Repo>
+    ): MediatorResult {
+        return try {
+            val page = when (loadType) {
+                LoadType.REFRESH -> {
+                    val remoteKeys = getRemoteKeyClosestToCurrentPosition(state)
+                    remoteKeys?.nextKey?.minus(1) ?: STARTING_PAGE_INDEX
+                }
+                LoadType.PREPEND -> {
+                    val remoteKeys = getRemoteKeyForFirstItem(state)
+                    val prevKey = remoteKeys?.prevKey
+                    if (prevKey == null) {
+                        return MediatorResult.Success(
+                            endOfPaginationReached = remoteKeys != null
+                        )
+                    }
+                    prevKey
+                }
+                LoadType.APPEND -> {
+                    val remoteKeys = getRemoteKeyForLastItem(state)
+                    val nextKey = remoteKeys?.nextKey
+                    if (nextKey == null) {
+                        return MediatorResult.Success(
+                            endOfPaginationReached = remoteKeys != null
+                        )
+                    }
+                    nextKey
+                }
+            }
+
+            val response = githubService.getRepos(page)
+
+            repoDao.insertAll(response.repos)
+
+            MediatorResult.Success(
+                endOfPaginationReached = response.isLastPage
+            )
+        } catch (e: Exception) {
+            MediatorResult.Error(e)
+        }
+    }
+
+    private suspend fun getRemoteKeyForLastItem(
+        state: PagingState<Int, Repo>
+    ): RemoteKey? {
+        return state.pages.lastOrNull { it.data.isNotEmpty() }?.data?.lastOrNull()
+            ?.let { repo ->
+                RemoteKey(
+                    repoId = repo.id,
+                    prevKey = null,
+                    nextKey = null
+                )
+            }
+    }
+
+    private suspend fun getRemoteKeyForFirstItem(
+        state: PagingState<Int, Repo>
+    ): RemoteKey? {
+        return state.pages.firstOrNull { it.data.isNotEmpty() }?.data?.firstOrNull()
+            ?.let { repo ->
+                RemoteKey(
+                    repoId = repo.id,
+                    prevKey = null,
+                    nextKey = null
+                )
+            }
+    }
+
+    private suspend fun getRemoteKeyClosestToCurrentPosition(
+        state: PagingState<Int, Repo>
+    ): RemoteKey? {
+        return state.anchorPosition?.let { position ->
+            state.closestItemToPosition(position)?.id?.let { repoId ->
+                RemoteKey(
+                    repoId = repoId,
+                    prevKey = null,
+                    nextKey = null
+                )
+            }
+        }
+    }
+
+    companion object {
+        const val STARTING_PAGE_INDEX = 1
+    }
+}
+```
+
+## ViewModel Layer
+
+### Repo ViewModel
+
+```kotlin
+class RepoViewModel @Inject constructor(
+    private val repoRepository: RepoRepository
+) : ViewModel() {
+
+    val repos: Flow<PagingData<Repo>> = repoRepository.getRepos()
+        .cachedIn(viewModelScope)
+
+    fun refreshRepos() {
+        viewModelScope.launch {
+            repoRepository.refreshRepos()
+        }
+    }
+}
+```
+
+## UI Layer
+
+### Repo List Screen
+
+```kotlin
+@Composable
+fun RepoListScreen(
+    viewModel: RepoViewModel = viewModel()
+) {
+    val repos = viewModel.repos.collectAsLazyPagingItems()
+
+    LazyColumn {
+        items(repos) { repo ->
+            repo?.let {
+                RepoItem(repo = it)
+            }
+        }
+
+        repos.apply {
+            when {
+                loadState.refresh is LoadState.Loading -> {
+                    item { LoadingItem() }
+                }
+                loadState.append is LoadState.Loading -> {
+                    item { LoadingItem() }
+                }
+                loadState.refresh is LoadState.Error -> {
+                    item {
+                        ErrorItem(
+                            message = (loadState.refresh as LoadState.Error).error.localizedMessage
+                                ?: "Error loading repos",
+                            onRetry = { retry() }
+                        )
+                    }
+                }
+                loadState.append is LoadState.Error -> {
+                    item {
+                        ErrorItem(
+                            message = (loadState.append as LoadState.Error).error.localizedMessage
+                                ?: "Error loading more repos",
+                            onRetry = { retry() }
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun RepoItem(repo: Repo) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text(
+                text = repo.name,
+                style = MaterialTheme.typography.h6
+            )
+
+            repo.description?.let {
+                Text(
+                    text = it,
+                    style = MaterialTheme.typography.body2,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "⭐ ${repo.stars}",
+                    style = MaterialTheme.typography.body2
+                )
+
+                repo.language?.let {
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.body2
+                    )
+                }
+            }
+        }
+    }
+}
+```
+
+## Best Practices
+
+### Pagination Guidelines
+
+```kotlin
+// 1. Configure PagingConfig appropriately
+val pagingConfig = PagingConfig(
+    pageSize = 30,
+    prefetchDistance = 2,
+    enablePlaceholders = false,
+    initialLoadSize = 60
+)
+
+// 2. Handle loading states
+@Composable
+fun LoadingItem() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator()
+    }
+}
+
+// 3. Handle error states
+@Composable
+fun ErrorItem(
+    message: String,
+    onRetry: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = message,
+            style = MaterialTheme.typography.body2,
+            color = MaterialTheme.colorScheme.error
+        )
+
+        Button(
+            onClick = onRetry,
+            modifier = Modifier.padding(top = 8.dp)
+        ) {
+            Text("Retry")
+        }
+    }
+}
+
+// 4. Implement refresh functionality
+@Composable
+fun RepoListScreen(
+    viewModel: RepoViewModel = viewModel()
+) {
+    val repos = viewModel.repos.collectAsLazyPagingItems()
+
+    SwipeRefresh(
+        state = rememberSwipeRefreshState(repos.loadState.refresh is LoadState.Loading),
+        onRefresh = { repos.refresh() }
+    ) {
+        LazyColumn {
+            // ... existing items
+        }
+    }
+}
+```
+
+## Common Patterns
+
+### Pagination Extensions
+
+```kotlin
+fun <T> Flow<PagingData<T>>.cachedIn(
+    scope: CoroutineScope,
+    bufferSize: Int = 64
+): Flow<PagingData<T>> {
+    return this.buffer(bufferSize)
+        .shareIn(
+            scope = scope,
+            started = SharingStarted.WhileSubscribed(5000),
+            replay = 1
+        )
+}
+
+fun <T> PagingData<T>.map(transform: (T) -> T): PagingData<T> {
+    return this.map { transform(it) }
+}
+
+fun <T> PagingData<T>.filter(predicate: (T) -> Boolean): PagingData<T> {
+    return this.filter { predicate(it) }
+}
+```
+
+## Conclusion
+
+Effective pagination requires:
+
+- Proper configuration
+- Efficient data loading
+- Smooth user experience
+- Error handling
+- State management
+
+Remember to:
+
+- Choose appropriate page size
+- Implement prefetching
+- Handle loading states
+- Handle error states
+- Consider network conditions
+- Test pagination behavior
+
+Stay tuned for more Kotlin tips and tricks!

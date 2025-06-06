@@ -1,0 +1,390 @@
+---
+title: "Create a Login UI in Kotlin"
+summary: "Learn how to create a beautiful and user-friendly login screen using Material Design"
+date: "2025-06-05"
+category: "kotlin"
+tags: ["kotlin", "ui", "material-design", "login"]
+---
+
+## Create a Login UI in Kotlin
+
+Let's create a modern and user-friendly login screen using Material Design components and Kotlin.
+
+## Layout Design
+
+### Login Layout
+
+```xml
+<!-- res/layout/activity_login.xml -->
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            app:title="@string/login"
+            app:titleTextColor="@color/white"/>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/emailLayout"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:hint="@string/email">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/emailEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textEmailAddress"/>
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/passwordLayout"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:hint="@string/password"
+                app:endIconMode="password_toggle">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/passwordEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPassword"/>
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/loginButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:padding="12dp"
+                android:text="@string/login"
+                android:textAllCaps="false"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/forgotPasswordButton"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="8dp"
+                android:text="@string/forgot_password"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/no_account"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/signUpButton"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/sign_up"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
+```
+
+## Activity Implementation
+
+### Login Activity
+
+```kotlin
+class LoginActivity : AppCompatActivity() {
+    private lateinit var binding: ActivityLoginBinding
+    private val viewModel: LoginViewModel by viewModels()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivityLoginBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        setupViews()
+        observeViewModel()
+    }
+
+    private fun setupViews() {
+        binding.loginButton.setOnClickListener {
+            val email = binding.emailEditText.text.toString()
+            val password = binding.passwordEditText.text.toString()
+
+            if (validateInput(email, password)) {
+                viewModel.login(email, password)
+            }
+        }
+
+        binding.forgotPasswordButton.setOnClickListener {
+            showForgotPasswordDialog()
+        }
+
+        binding.signUpButton.setOnClickListener {
+            startActivity(Intent(this, SignUpActivity::class.java))
+        }
+    }
+
+    private fun validateInput(email: String, password: String): Boolean {
+        var isValid = true
+
+        if (email.isEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            binding.emailLayout.error = "Please enter a valid email"
+            isValid = false
+        } else {
+            binding.emailLayout.error = null
+        }
+
+        if (password.isEmpty() || password.length < 6) {
+            binding.passwordLayout.error = "Password must be at least 6 characters"
+            isValid = false
+        } else {
+            binding.passwordLayout.error = null
+        }
+
+        return isValid
+    }
+
+    private fun observeViewModel() {
+        lifecycleScope.launch {
+            viewModel.loginState.collect { state ->
+                when (state) {
+                    is LoginState.Loading -> showLoading()
+                    is LoginState.Success -> handleLoginSuccess()
+                    is LoginState.Error -> showError(state.message)
+                }
+            }
+        }
+    }
+}
+```
+
+## ViewModel
+
+### Login ViewModel
+
+```kotlin
+class LoginViewModel : ViewModel() {
+    private val _loginState = MutableStateFlow<LoginState>(LoginState.Initial)
+    val loginState: StateFlow<LoginState> = _loginState.asStateFlow()
+
+    fun login(email: String, password: String) {
+        viewModelScope.launch {
+            _loginState.value = LoginState.Loading
+            try {
+                // Perform login operation
+                val result = loginRepository.login(email, password)
+                _loginState.value = LoginState.Success(result)
+            } catch (e: Exception) {
+                _loginState.value = LoginState.Error(e.message ?: "Login failed")
+            }
+        }
+    }
+}
+
+sealed class LoginState {
+    object Initial : LoginState()
+    object Loading : LoginState()
+    data class Success(val user: User) : LoginState()
+    data class Error(val message: String) : LoginState()
+}
+```
+
+## Custom Views
+
+### Custom TextInputLayout
+
+```kotlin
+class CustomTextInputLayout @JvmOverloads constructor(
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = R.style.Widget_MaterialComponents_TextInputLayout_OutlinedBox
+) : TextInputLayout(context, attrs, defStyleAttr) {
+
+    init {
+        boxStrokeColor = ContextCompat.getColor(context, R.color.primary)
+        hintTextColor = ColorStateList.valueOf(
+            ContextCompat.getColor(context, R.color.primary)
+        )
+    }
+
+    fun showError(message: String) {
+        error = message
+        errorIconDrawable = ContextCompat.getDrawable(
+            context,
+            R.drawable.ic_error
+        )
+    }
+
+    fun clearError() {
+        error = null
+        errorIconDrawable = null
+    }
+}
+```
+
+## Animations
+
+### Login Animations
+
+```kotlin
+class LoginAnimator(private val view: View) {
+    fun animateLoginButton() {
+        view.alpha = 0f
+        view.translationY = 100f
+
+        view.animate()
+            .alpha(1f)
+            .translationY(0f)
+            .setDuration(500)
+            .setInterpolator(DecelerateInterpolator())
+            .start()
+    }
+
+    fun animateError() {
+        view.animate()
+            .translationX(-10f)
+            .setDuration(50)
+            .setInterpolator(LinearInterpolator())
+            .withEndAction {
+                view.animate()
+                    .translationX(10f)
+                    .setDuration(50)
+                    .setInterpolator(LinearInterpolator())
+                    .withEndAction {
+                        view.animate()
+                            .translationX(0f)
+                            .setDuration(50)
+                            .setInterpolator(LinearInterpolator())
+                            .start()
+                    }
+                    .start()
+            }
+            .start()
+    }
+}
+```
+
+## Best Practices
+
+### Input Validation
+
+```kotlin
+object InputValidator {
+    fun validateEmail(email: String): Boolean {
+        return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
+    }
+
+    fun validatePassword(password: String): Boolean {
+        return password.length >= 6 &&
+            password.any { it.isDigit() } &&
+            password.any { it.isUpperCase() }
+    }
+
+    fun validateInput(email: String, password: String): ValidationResult {
+        return when {
+            email.isEmpty() -> ValidationResult.EmptyEmail
+            !validateEmail(email) -> ValidationResult.InvalidEmail
+            password.isEmpty() -> ValidationResult.EmptyPassword
+            !validatePassword(password) -> ValidationResult.InvalidPassword
+            else -> ValidationResult.Valid
+        }
+    }
+}
+
+sealed class ValidationResult {
+    object Valid : ValidationResult()
+    object EmptyEmail : ValidationResult()
+    object InvalidEmail : ValidationResult()
+    object EmptyPassword : ValidationResult()
+    object InvalidPassword : ValidationResult()
+}
+```
+
+## Common Patterns
+
+### Login Extensions
+
+```kotlin
+fun TextInputLayout.showError(message: String) {
+    error = message
+    errorIconDrawable = ContextCompat.getDrawable(
+        context,
+        R.drawable.ic_error
+    )
+}
+
+fun TextInputLayout.clearError() {
+    error = null
+    errorIconDrawable = null
+}
+
+fun MaterialButton.disable() {
+    isEnabled = false
+    alpha = 0.5f
+}
+
+fun MaterialButton.enable() {
+    isEnabled = true
+    alpha = 1f
+}
+```
+
+## Conclusion
+
+A good login UI should:
+
+- Be visually appealing
+- Provide clear feedback
+- Handle errors gracefully
+- Support accessibility
+- Follow Material Design guidelines
+
+Remember to:
+
+- Validate input properly
+- Show loading states
+- Handle configuration changes
+- Test on different devices
+- Consider dark mode support
+
+Stay tuned for more Kotlin tips and tricks!

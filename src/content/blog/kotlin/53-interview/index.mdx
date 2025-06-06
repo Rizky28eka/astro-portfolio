@@ -1,0 +1,298 @@
+---
+title: "Top 10 Kotlin Interview Questions"
+summary: "Prepare for your next Kotlin interview with these common questions and answers"
+date: "2025-06-25"
+category: "kotlin"
+tags: ["kotlin", "kotlin-interview", "career-tips", "dev-life"]
+---
+
+## Top 10 Kotlin Interview Questions
+
+Let's explore common Kotlin interview questions and their answers.
+
+## 1. Null Safety
+
+### Question: Explain Kotlin's null safety features
+
+```kotlin
+// Null safety in Kotlin
+class NullSafetyExample {
+    // 1. Nullable types
+    var nullableString: String? = null
+
+    // 2. Safe call operator
+    fun getLength(): Int? {
+        return nullableString?.length
+    }
+
+    // 3. Elvis operator
+    fun getLengthOrDefault(): Int {
+        return nullableString?.length ?: 0
+    }
+
+    // 4. Not-null assertion
+    fun getLengthForce(): Int {
+        return nullableString!!.length
+    }
+
+    // 5. Safe cast
+    fun safeCast(value: Any): String? {
+        return value as? String
+    }
+}
+```
+
+## 2. Coroutines
+
+### Question: Explain Kotlin coroutines and their benefits
+
+```kotlin
+// Coroutines example
+class CoroutinesExample {
+    // 1. Basic coroutine
+    suspend fun fetchData(): String {
+        return withContext(Dispatchers.IO) {
+            // Simulate network call
+            delay(1000)
+            "Data"
+        }
+    }
+
+    // 2. Coroutine scope
+    fun launchCoroutine() {
+        CoroutineScope(Dispatchers.Main).launch {
+            val result = fetchData()
+            // Update UI
+        }
+    }
+
+    // 3. Exception handling
+    fun handleExceptions() {
+        CoroutineScope(Dispatchers.Main).launch {
+            try {
+                val result = fetchData()
+            } catch (e: Exception) {
+                // Handle error
+            }
+        }
+    }
+}
+```
+
+## 3. Extension Functions
+
+### Question: What are extension functions and when to use them?
+
+```kotlin
+// Extension functions
+fun String.addExclamation(): String {
+    return "$this!"
+}
+
+fun Int.isEven(): Boolean {
+    return this % 2 == 0
+}
+
+// Usage
+val message = "Hello".addExclamation()
+val isEven = 4.isEven()
+```
+
+## 4. Data Classes
+
+### Question: Explain data classes and their benefits
+
+```kotlin
+// Data class
+data class User(
+    val name: String,
+    val age: Int,
+    val email: String
+)
+
+// Generated methods
+val user = User("John", 30, "john@example.com")
+val copy = user.copy(age = 31)
+val (name, age, email) = user // Destructuring
+```
+
+## 5. Higher-Order Functions
+
+### Question: What are higher-order functions and how to use them?
+
+```kotlin
+// Higher-order functions
+fun <T> List<T>.customFilter(predicate: (T) -> Boolean): List<T> {
+    val result = mutableListOf<T>()
+    for (item in this) {
+        if (predicate(item)) {
+            result.add(item)
+        }
+    }
+    return result
+}
+
+// Usage
+val numbers = listOf(1, 2, 3, 4, 5)
+val evenNumbers = numbers.customFilter { it % 2 == 0 }
+```
+
+## 6. Sealed Classes
+
+### Question: Explain sealed classes and their use cases
+
+```kotlin
+// Sealed class
+sealed class Result<out T> {
+    data class Success<T>(val data: T) : Result<T>()
+    data class Error(val message: String) : Result<Nothing>()
+    object Loading : Result<Nothing>()
+}
+
+// Usage
+fun handleResult(result: Result<String>) {
+    when (result) {
+        is Result.Success -> println(result.data)
+        is Result.Error -> println(result.message)
+        Result.Loading -> println("Loading...")
+    }
+}
+```
+
+## 7. Delegation
+
+### Question: Explain property delegation in Kotlin
+
+```kotlin
+// Property delegation
+class DelegateExample {
+    var value: String by Delegates.observable("") {
+        property, oldValue, newValue ->
+        println("$oldValue -> $newValue")
+    }
+
+    var lazyValue: String by lazy {
+        // Expensive computation
+        "Computed value"
+    }
+}
+```
+
+## 8. Scope Functions
+
+### Question: Explain Kotlin scope functions and their differences
+
+```kotlin
+// Scope functions
+class ScopeFunctionsExample {
+    fun demonstrate() {
+        // let
+        val result1 = "Hello".let {
+            it.length
+        }
+
+        // with
+        val result2 = with("Hello") {
+            length
+        }
+
+        // run
+        val result3 = "Hello".run {
+            length
+        }
+
+        // apply
+        val result4 = StringBuilder().apply {
+            append("Hello")
+            append(" World")
+        }
+
+        // also
+        val result5 = "Hello".also {
+            println(it)
+        }
+    }
+}
+```
+
+## 9. Flow
+
+### Question: Explain Kotlin Flow and its benefits
+
+```kotlin
+// Flow example
+class FlowExample {
+    fun getData(): Flow<String> = flow {
+        for (i in 1..5) {
+            delay(1000)
+            emit("Data $i")
+        }
+    }
+
+    fun collectData() {
+        CoroutineScope(Dispatchers.Main).launch {
+            getData()
+                .map { it.uppercase() }
+                .collect { println(it) }
+        }
+    }
+}
+```
+
+## 10. Best Practices
+
+### Question: What are some Kotlin best practices?
+
+```kotlin
+// Best practices
+class BestPracticesExample {
+    // 1. Use val instead of var when possible
+    val immutableValue = "Constant"
+
+    // 2. Use data classes for models
+    data class User(val name: String, val age: Int)
+
+    // 3. Use extension functions
+    fun String.addPrefix(prefix: String) = "$prefix$this"
+
+    // 4. Use scope functions
+    fun processUser(user: User) {
+        user.apply {
+            // Process user
+        }
+    }
+
+    // 5. Use sealed classes for state
+    sealed class State {
+        object Loading : State()
+        data class Success(val data: String) : State()
+        data class Error(val message: String) : State()
+    }
+}
+```
+
+## Conclusion
+
+Kotlin interview preparation requires understanding:
+
+- Null safety
+- Coroutines
+- Extension functions
+- Data classes
+- Higher-order functions
+- Sealed classes
+- Delegation
+- Scope functions
+- Flow
+- Best practices
+
+Remember to:
+
+- Practice coding examples
+- Understand concepts deeply
+- Prepare real-world scenarios
+- Know common pitfalls
+- Follow best practices
+- Stay updated with Kotlin
+
+Stay tuned for more Kotlin tips and tricks!

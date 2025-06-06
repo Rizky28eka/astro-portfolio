@@ -1,0 +1,311 @@
+---
+title: "Build a Weather App in Kotlin"
+summary: "Learn how to create a weather app using Kotlin and weather APIs"
+date: "2025-06-18"
+category: "kotlin"
+tags: ["kotlin", "weather-app", "api", "mini-project"]
+---
+
+## Build a Weather App in Kotlin
+
+Let's explore how to build a weather app using Kotlin and weather APIs.
+
+## Project Setup
+
+### Dependencies
+
+```kotlin
+// build.gradle.kts
+dependencies {
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+}
+```
+
+## API Integration
+
+### Weather API Service
+
+```kotlin
+interface WeatherApiService {
+    @GET("weather")
+    suspend fun getCurrentWeather(
+        @Query("q") city: String,
+        @Query("appid") apiKey: String,
+        @Query("units") units: String = "metric"
+    ): WeatherResponse
+
+    @GET("forecast")
+    suspend fun getForecast(
+        @Query("q") city: String,
+        @Query("appid") apiKey: String,
+        @Query("units") units: String = "metric"
+    ): ForecastResponse
+}
+
+// API client setup
+object WeatherApiClient {
+    private const val BASE_URL = "https://api.openweathermap.org/data/2.5/"
+    private const val API_KEY = "YOUR_API_KEY"
+
+    private val retrofit = Retrofit.Builder()
+        .baseUrl(BASE_URL)
+        .addConverterFactory(GsonConverterFactory.create())
+        .client(
+            OkHttpClient.Builder()
+                .addInterceptor(HttpLoggingInterceptor().apply {
+                    level = HttpLoggingInterceptor.Level.BODY
+                })
+                .build()
+        )
+        .build()
+
+    val service: WeatherApiService = retrofit.create(WeatherApiService::class.java)
+}
+```
+
+## Data Models
+
+### Weather Models
+
+```kotlin
+data class WeatherResponse(
+    val weather: List<Weather>,
+    val main: Main,
+    val wind: Wind,
+    val name: String
+)
+
+data class Weather(
+    val id: Int,
+    val main: String,
+    val description: String,
+    val icon: String
+)
+
+data class Main(
+    val temp: Double,
+    val feels_like: Double,
+    val temp_min: Double,
+    val temp_max: Double,
+    val humidity: Int
+)
+
+data class Wind(
+    val speed: Double,
+    val deg: Int
+)
+
+data class ForecastResponse(
+    val list: List<ForecastItem>
+)
+
+data class ForecastItem(
+    val dt: Long,
+    val main: Main,
+    val weather: List<Weather>
+)
+```
+
+## Repository Layer
+
+### Weather Repository
+
+```kotlin
+class WeatherRepository(private val apiService: WeatherApiService) {
+    suspend fun getCurrentWeather(city: String): Result<WeatherResponse> {
+        return try {
+            val response = apiService.getCurrentWeather(city, WeatherApiClient.API_KEY)
+            Result.success(response)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getForecast(city: String): Result<ForecastResponse> {
+        return try {
+            val response = apiService.getForecast(city, WeatherApiClient.API_KEY)
+            Result.success(response)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+}
+```
+
+## ViewModel Layer
+
+### Weather ViewModel
+
+```kotlin
+class WeatherViewModel(
+    private val repository: WeatherRepository
+) : ViewModel() {
+    private val _weatherState = MutableStateFlow<WeatherState>(WeatherState.Loading)
+    val weatherState: StateFlow<WeatherState> = _weatherState.asStateFlow()
+
+    fun fetchWeather(city: String) {
+        viewModelScope.launch {
+            _weatherState.value = WeatherState.Loading
+            try {
+                val weatherResult = repository.getCurrentWeather(city)
+                val forecastResult = repository.getForecast(city)
+
+                weatherResult.fold(
+                    onSuccess = { weather ->
+                        forecastResult.fold(
+                            onSuccess = { forecast ->
+                                _weatherState.value = WeatherState.Success(weather, forecast)
+                            },
+                            onFailure = { error ->
+                                _weatherState.value = WeatherState.Error(error.message ?: "Unknown error")
+                            }
+                        )
+                    },
+                    onFailure = { error ->
+                        _weatherState.value = WeatherState.Error(error.message ?: "Unknown error")
+                    }
+                )
+            } catch (e: Exception) {
+                _weatherState.value = WeatherState.Error(e.message ?: "Unknown error")
+            }
+        }
+    }
+}
+
+sealed class WeatherState {
+    object Loading : WeatherState()
+    data class Success(
+        val weather: WeatherResponse,
+        val forecast: ForecastResponse
+    ) : WeatherState()
+    data class Error(val message: String) : WeatherState()
+}
+```
+
+## UI Layer
+
+### Main Activity
+
+```kotlin
+class MainActivity : AppCompatActivity() {
+    private lateinit var binding: ActivityMainBinding
+    private val viewModel: WeatherViewModel by viewModels()
+    private val weatherAdapter = WeatherAdapter()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        setupRecyclerView()
+        setupSearchView()
+        observeWeatherState()
+    }
+
+    private fun setupRecyclerView() {
+        binding.recyclerView.apply {
+            adapter = weatherAdapter
+            layoutManager = LinearLayoutManager(this@MainActivity)
+        }
+    }
+
+    private fun setupSearchView() {
+        binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                query?.let { viewModel.fetchWeather(it) }
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean = false
+        })
+    }
+
+    private fun observeWeatherState() {
+        lifecycleScope.launch {
+            viewModel.weatherState.collect { state ->
+                when (state) {
+                    is WeatherState.Loading -> showLoading()
+                    is WeatherState.Success -> showWeather(state.weather, state.forecast)
+                    is WeatherState.Error -> showError(state.message)
+                }
+            }
+        }
+    }
+}
+```
+
+## Best Practices
+
+### Error Handling
+
+```kotlin
+// Error handling utilities
+sealed class NetworkResult<T> {
+    data class Success<T>(val data: T) : NetworkResult<T>()
+    data class Error<T>(val message: String) : NetworkResult<T>()
+    class Loading<T> : NetworkResult<T>()
+}
+
+// Error handling extension
+fun <T> Result<T>.toNetworkResult(): NetworkResult<T> {
+    return fold(
+        onSuccess = { NetworkResult.Success(it) },
+        onFailure = { NetworkResult.Error(it.message ?: "Unknown error") }
+    )
+}
+```
+
+## Common Patterns
+
+### Weather Utilities
+
+```kotlin
+// 1. Weather icon helper
+object WeatherIconHelper {
+    fun getWeatherIconUrl(iconCode: String): String {
+        return "https://openweathermap.org/img/wn/$iconCode@2x.png"
+    }
+}
+
+// 2. Temperature formatter
+object TemperatureFormatter {
+    fun formatTemperature(temp: Double): String {
+        return "${temp.toInt()}°C"
+    }
+}
+
+// 3. Date formatter
+object DateFormatter {
+    fun formatDate(timestamp: Long): String {
+        return SimpleDateFormat("EEE, MMM d", Locale.getDefault())
+            .format(Date(timestamp * 1000))
+    }
+}
+```
+
+## Conclusion
+
+Building a weather app in Kotlin requires:
+
+- Proper API integration
+- Clean architecture
+- Error handling
+- UI responsiveness
+- Following best practices
+- Using common patterns
+
+Remember to:
+
+- Handle API errors
+- Cache weather data
+- Update UI efficiently
+- Test on different devices
+- Consider offline support
+- Follow Material Design
+
+Stay tuned for more Kotlin tips and tricks!

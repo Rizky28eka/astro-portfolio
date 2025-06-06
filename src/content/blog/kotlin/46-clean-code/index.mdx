@@ -1,0 +1,287 @@
+---
+title: "Best Kotlin Practices for Clean Code"
+summary: "Learn how to write readable and scalable Kotlin applications following clean code principles"
+date: "2025-05-21"
+category: "kotlin"
+tags: ["kotlin", "clean-code", "best-practices", "refactoring"]
+---
+
+## Best Kotlin Practices for Clean Code
+
+Let's explore the best practices for writing clean, maintainable, and scalable Kotlin code.
+
+## Naming Conventions
+
+### Clear and Descriptive Names
+
+```kotlin
+// Bad
+val d = 5 // days
+val s = "John" // student name
+fun calc(x: Int, y: Int) = x + y
+
+// Good
+val daysUntilExpiration = 5
+val studentName = "John"
+fun calculateTotal(price: Int, quantity: Int) = price * quantity
+
+// Bad
+class Data { }
+class Info { }
+class Manager { }
+
+// Good
+class UserProfile { }
+class OrderDetails { }
+class PaymentProcessor { }
+```
+
+## Function Design
+
+### Single Responsibility
+
+```kotlin
+// Bad
+fun processUserData(user: User) {
+    validateUser(user)
+    saveToDatabase(user)
+    sendWelcomeEmail(user)
+    updateUserStats(user)
+}
+
+// Good
+fun processUserData(user: User) {
+    userValidator.validate(user)
+    userRepository.save(user)
+    emailService.sendWelcomeEmail(user)
+    userStatsTracker.update(user)
+}
+
+// Bad
+fun calculateTotal(items: List<Item>): Double {
+    var total = 0.0
+    for (item in items) {
+        total += item.price * item.quantity
+        if (item.isOnSale) {
+            total *= 0.9
+        }
+    }
+    return total
+}
+
+// Good
+fun calculateTotal(items: List<Item>): Double {
+    return items.sumOf { item ->
+        calculateItemTotal(item)
+    }
+}
+
+private fun calculateItemTotal(item: Item): Double {
+    val baseTotal = item.price * item.quantity
+    return if (item.isOnSale) baseTotal * 0.9 else baseTotal
+}
+```
+
+## Class Design
+
+### Encapsulation
+
+```kotlin
+// Bad
+class User {
+    var name: String = ""
+    var age: Int = 0
+    var email: String = ""
+}
+
+// Good
+class User(
+    private val name: String,
+    private val age: Int,
+    private val email: String
+) {
+    fun getName(): String = name
+    fun getAge(): Int = age
+    fun getEmail(): String = email
+
+    fun isAdult(): Boolean = age >= 18
+    fun hasValidEmail(): Boolean = email.contains("@")
+}
+```
+
+## Error Handling
+
+### Proper Exception Handling
+
+```kotlin
+// Bad
+fun getUserData(id: String): User {
+    try {
+        return userRepository.findById(id)
+    } catch (e: Exception) {
+        return null
+    }
+}
+
+// Good
+sealed class Result<out T> {
+    data class Success<T>(val data: T) : Result<T>()
+    data class Error(val exception: Exception) : Result<Nothing>()
+}
+
+fun getUserData(id: String): Result<User> {
+    return try {
+        val user = userRepository.findById(id)
+        Result.Success(user)
+    } catch (e: Exception) {
+        Result.Error(e)
+    }
+}
+```
+
+## Code Organization
+
+### Package Structure
+
+```kotlin
+// Good package structure
+com.example.app
+    ├── data
+    │   ├── local
+    │   ├── remote
+    │   └── repository
+    ├── domain
+    │   ├── model
+    │   ├── usecase
+    │   └── repository
+    ├── presentation
+    │   ├── ui
+    │   ├── viewmodel
+    │   └── state
+    └── di
+```
+
+## Best Practices
+
+### Code Guidelines
+
+```kotlin
+// 1. Use extension functions
+fun String.isValidEmail(): Boolean {
+    return matches(Regex("[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+"))
+}
+
+// 2. Use data classes for models
+data class User(
+    val id: String,
+    val name: String,
+    val email: String
+)
+
+// 3. Use sealed classes for state
+sealed class UiState<out T> {
+    object Loading : UiState<Nothing>()
+    data class Success<T>(val data: T) : UiState<T>()
+    data class Error(val message: String) : UiState<Nothing>()
+}
+
+// 4. Use builder pattern
+class UserBuilder {
+    private var name: String = ""
+    private var age: Int = 0
+    private var email: String = ""
+
+    fun name(name: String) = apply { this.name = name }
+    fun age(age: Int) = apply { this.age = age }
+    fun email(email: String) = apply { this.email = email }
+
+    fun build() = User(name, age, email)
+}
+```
+
+## Common Patterns
+
+### Clean Code Extensions
+
+```kotlin
+// 1. Null safety
+fun <T> T?.orDefault(default: T): T {
+    return this ?: default
+}
+
+// 2. Collection operations
+fun <T> List<T>.secondOrNull(): T? {
+    return if (size >= 2) get(1) else null
+}
+
+// 3. String operations
+fun String.capitalizeWords(): String {
+    return split(" ").joinToString(" ") { word ->
+        word.replaceFirstChar { it.uppercase() }
+    }
+}
+
+// 4. Date operations
+fun Long.toFormattedDate(): String {
+    return SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+        .format(Date(this))
+}
+```
+
+## Testing
+
+### Clean Test Code
+
+```kotlin
+// 1. Use descriptive test names
+@Test
+fun `should return success when user data is valid`() {
+    // Test implementation
+}
+
+// 2. Follow AAA pattern
+@Test
+fun testUserValidation() {
+    // Arrange
+    val user = User("John", 25, "john@example.com")
+
+    // Act
+    val result = userValidator.validate(user)
+
+    // Assert
+    assertTrue(result.isValid)
+}
+
+// 3. Use test fixtures
+@Before
+fun setup() {
+    // Setup test environment
+}
+
+@After
+fun tearDown() {
+    // Clean up test environment
+}
+```
+
+## Conclusion
+
+Clean code in Kotlin requires:
+
+- Clear naming conventions
+- Single responsibility principle
+- Proper encapsulation
+- Effective error handling
+- Organized code structure
+- Comprehensive testing
+
+Remember to:
+
+- Write self-documenting code
+- Keep functions small and focused
+- Use appropriate design patterns
+- Follow Kotlin idioms
+- Write meaningful tests
+- Review and refactor regularly
+
+Stay tuned for more Kotlin tips and tricks!

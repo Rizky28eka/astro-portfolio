@@ -1,0 +1,397 @@
+---
+title: "Jetpack Compose State Management"
+summary: "Learn how to manage state effectively in Jetpack Compose applications"
+date: "2025-02-12"
+category: "kotlin"
+tags: ["kotlin", "jetpack-compose", "state-management", "android"]
+---
+
+## Jetpack Compose State Management
+
+Let's explore different ways to manage state in Jetpack Compose applications.
+
+## Basic State Management
+
+### Remember and MutableState
+
+```kotlin
+@Composable
+fun Counter() {
+    var count by remember { mutableStateOf(0) }
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "Count: $count",
+            style = MaterialTheme.typography.h4
+        )
+
+        Button(
+            onClick = { count++ },
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text("Increment")
+        }
+    }
+}
+```
+
+### RememberSaveable
+
+```kotlin
+@Composable
+fun CounterWithSaveable() {
+    var count by rememberSaveable { mutableStateOf(0) }
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "Count: $count",
+            style = MaterialTheme.typography.h4
+        )
+
+        Button(
+            onClick = { count++ },
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text("Increment")
+        }
+    }
+}
+```
+
+## State Hoisting
+
+### Counter with State Hoisting
+
+```kotlin
+@Composable
+fun CounterWithHoisting(
+    count: Int,
+    onCountChange: (Int) -> Unit
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "Count: $count",
+            style = MaterialTheme.typography.h4
+        )
+
+        Button(
+            onClick = { onCountChange(count + 1) },
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text("Increment")
+        }
+    }
+}
+
+@Composable
+fun CounterScreen() {
+    var count by remember { mutableStateOf(0) }
+
+    CounterWithHoisting(
+        count = count,
+        onCountChange = { count = it }
+    )
+}
+```
+
+## ViewModel Integration
+
+### Counter ViewModel
+
+```kotlin
+class CounterViewModel : ViewModel() {
+    private val _count = MutableStateFlow(0)
+    val count: StateFlow<Int> = _count.asStateFlow()
+
+    fun increment() {
+        _count.value++
+    }
+
+    fun decrement() {
+        _count.value--
+    }
+}
+
+@Composable
+fun CounterWithViewModel(
+    viewModel: CounterViewModel = viewModel()
+) {
+    val count by viewModel.count.collectAsState()
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "Count: $count",
+            style = MaterialTheme.typography.h4
+        )
+
+        Row(
+            modifier = Modifier.padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Button(onClick = { viewModel.decrement() }) {
+                Text("Decrement")
+            }
+
+            Button(onClick = { viewModel.increment() }) {
+                Text("Increment")
+            }
+        }
+    }
+}
+```
+
+## State Restoration
+
+### State Restoration with ViewModel
+
+```kotlin
+class CounterViewModel(
+    savedStateHandle: SavedStateHandle
+) : ViewModel() {
+    private val _count = savedStateHandle.saveable {
+        mutableStateOf(0)
+    }
+    val count: State<Int> = _count
+
+    fun increment() {
+        _count.value++
+    }
+
+    fun decrement() {
+        _count.value--
+    }
+}
+
+@Composable
+fun CounterWithStateRestoration(
+    viewModel: CounterViewModel = viewModel()
+) {
+    val count by viewModel.count
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "Count: $count",
+            style = MaterialTheme.typography.h4
+        )
+
+        Row(
+            modifier = Modifier.padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Button(onClick = { viewModel.decrement() }) {
+                Text("Decrement")
+            }
+
+            Button(onClick = { viewModel.increment() }) {
+                Text("Increment")
+            }
+        }
+    }
+}
+```
+
+## Derived State
+
+### Derived State Example
+
+```kotlin
+@Composable
+fun CounterWithDerivedState() {
+    var count by remember { mutableStateOf(0) }
+    val isEven by remember(count) {
+        derivedStateOf { count % 2 == 0 }
+    }
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "Count: $count",
+            style = MaterialTheme.typography.h4
+        )
+
+        Text(
+            text = if (isEven) "Even" else "Odd",
+            style = MaterialTheme.typography.h6,
+            color = if (isEven) Color.Green else Color.Red
+        )
+
+        Button(
+            onClick = { count++ },
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text("Increment")
+        }
+    }
+}
+```
+
+## State Management Patterns
+
+### State Holder Pattern
+
+```kotlin
+class CounterStateHolder(
+    private val scope: CoroutineScope
+) {
+    private val _count = MutableStateFlow(0)
+    val count: StateFlow<Int> = _count.asStateFlow()
+
+    fun increment() {
+        _count.value++
+    }
+
+    fun decrement() {
+        _count.value--
+    }
+
+    fun reset() {
+        _count.value = 0
+    }
+}
+
+@Composable
+fun CounterWithStateHolder(
+    stateHolder: CounterStateHolder = remember {
+        CounterStateHolder(LocalCoroutineScope.current)
+    }
+) {
+    val count by stateHolder.count.collectAsState()
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "Count: $count",
+            style = MaterialTheme.typography.h4
+        )
+
+        Row(
+            modifier = Modifier.padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Button(onClick = { stateHolder.decrement() }) {
+                Text("Decrement")
+            }
+
+            Button(onClick = { stateHolder.increment() }) {
+                Text("Increment")
+            }
+
+            Button(onClick = { stateHolder.reset() }) {
+                Text("Reset")
+            }
+        }
+    }
+}
+```
+
+## Best Practices
+
+### State Management Guidelines
+
+```kotlin
+// 1. Use remember for UI-only state
+@Composable
+fun RememberExample() {
+    var isExpanded by remember { mutableStateOf(false) }
+    // ...
+}
+
+// 2. Use rememberSaveable for configuration changes
+@Composable
+fun RememberSaveableExample() {
+    var selectedItem by rememberSaveable { mutableStateOf(0) }
+    // ...
+}
+
+// 3. Use ViewModel for business logic
+@Composable
+fun ViewModelExample(
+    viewModel: MyViewModel = viewModel()
+) {
+    val state by viewModel.state.collectAsState()
+    // ...
+}
+
+// 4. Use derivedStateOf for computed values
+@Composable
+fun DerivedStateExample(items: List<Item>) {
+    val filteredItems by remember(items) {
+        derivedStateOf { items.filter { it.isActive } }
+    }
+    // ...
+}
+```
+
+## Common Patterns
+
+### State Management Extensions
+
+```kotlin
+fun <T> StateFlow<T>.collectAsState(
+    lifecycle: Lifecycle = LocalLifecycleOwner.current.lifecycle,
+    state: Lifecycle.State = Lifecycle.State.STARTED
+): State<T> {
+    val lifecycleOwner = LocalLifecycleOwner.current
+    return remember(this, lifecycleOwner) {
+        this.collectAsState(
+            initialValue = value,
+            lifecycle = lifecycle,
+            state = state
+        )
+    }
+}
+
+fun <T> Flow<T>.collectAsState(
+    initial: T,
+    lifecycle: Lifecycle = LocalLifecycleOwner.current.lifecycle,
+    state: Lifecycle.State = Lifecycle.State.STARTED
+): State<T> {
+    val lifecycleOwner = LocalLifecycleOwner.current
+    return remember(this, lifecycleOwner) {
+        this.collectAsState(
+            initial = initial,
+            lifecycle = lifecycle,
+            state = state
+        )
+    }
+}
+```
+
+## Conclusion
+
+Effective state management in Jetpack Compose requires:
+
+- Understanding different state types
+- Choosing the right state management approach
+- Following best practices
+- Using appropriate patterns
+
+Remember to:
+
+- Use remember for UI-only state
+- Use rememberSaveable for configuration changes
+- Use ViewModel for business logic
+- Use derivedStateOf for computed values
+- Consider state restoration
+- Follow state hoisting principles
+
+Stay tuned for more Kotlin tips and tricks!

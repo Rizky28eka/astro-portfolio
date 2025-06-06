@@ -1,0 +1,360 @@
+---
+title: "Build a ToDo App in Kotlin"
+summary: "Learn how to build a complete ToDo app from scratch using Kotlin"
+date: "2025-05-15"
+category: "kotlin"
+tags: ["kotlin", "todo-app", "android", "mvvm"]
+---
+
+## Build a ToDo App in Kotlin
+
+Let's build a complete ToDo app using Kotlin, following MVVM architecture and modern Android development practices.
+
+## Project Setup
+
+### Dependencies
+
+```kotlin
+// build.gradle.kts
+dependencies {
+    implementation("androidx.core:core-ktx:1.12.0")
+    implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation("com.google.android.material:material:1.11.0")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+
+    // Room
+    implementation("androidx.room:room-runtime:2.6.1")
+    implementation("androidx.room:room-ktx:2.6.1")
+    kapt("androidx.room:room-compiler:2.6.1")
+
+    // ViewModel
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.7.0")
+
+    // Coroutines
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+}
+```
+
+## Data Layer
+
+### Todo Entity
+
+```kotlin
+@Entity(tableName = "todos")
+data class Todo(
+    @PrimaryKey(autoGenerate = true)
+    val id: Long = 0,
+    val title: String,
+    val description: String,
+    val isCompleted: Boolean = false,
+    val createdAt: Long = System.currentTimeMillis()
+)
+```
+
+### TodoDao
+
+```kotlin
+@Dao
+interface TodoDao {
+    @Query("SELECT * FROM todos ORDER BY createdAt DESC")
+    fun getAllTodos(): Flow<List<Todo>>
+
+    @Query("SELECT * FROM todos WHERE id = :id")
+    suspend fun getTodoById(id: Long): Todo?
+
+    @Insert
+    suspend fun insertTodo(todo: Todo): Long
+
+    @Update
+    suspend fun updateTodo(todo: Todo)
+
+    @Delete
+    suspend fun deleteTodo(todo: Todo)
+
+    @Query("DELETE FROM todos WHERE isCompleted = 1")
+    suspend fun deleteCompletedTodos()
+}
+```
+
+### Database
+
+```kotlin
+@Database(entities = [Todo::class], version = 1)
+abstract class TodoDatabase : RoomDatabase() {
+    abstract fun todoDao(): TodoDao
+
+    companion object {
+        @Volatile
+        private var INSTANCE: TodoDatabase? = null
+
+        fun getDatabase(context: Context): TodoDatabase {
+            return INSTANCE ?: synchronized(this) {
+                val instance = Room.databaseBuilder(
+                    context.applicationContext,
+                    TodoDatabase::class.java,
+                    "todo_database"
+                ).build()
+                INSTANCE = instance
+                instance
+            }
+        }
+    }
+}
+```
+
+## Repository Layer
+
+### TodoRepository
+
+```kotlin
+class TodoRepository(private val todoDao: TodoDao) {
+    val allTodos: Flow<List<Todo>> = todoDao.getAllTodos()
+
+    suspend fun insertTodo(todo: Todo) = todoDao.insertTodo(todo)
+
+    suspend fun updateTodo(todo: Todo) = todoDao.updateTodo(todo)
+
+    suspend fun deleteTodo(todo: Todo) = todoDao.deleteTodo(todo)
+
+    suspend fun deleteCompletedTodos() = todoDao.deleteCompletedTodos()
+}
+```
+
+## ViewModel Layer
+
+### TodoViewModel
+
+```kotlin
+class TodoViewModel(private val repository: TodoRepository) : ViewModel() {
+    val allTodos: StateFlow<List<Todo>> = repository.allTodos
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            emptyList()
+        )
+
+    fun addTodo(title: String, description: String) {
+        viewModelScope.launch {
+            val todo = Todo(
+                title = title,
+                description = description
+            )
+            repository.insertTodo(todo)
+        }
+    }
+
+    fun updateTodo(todo: Todo) {
+        viewModelScope.launch {
+            repository.updateTodo(todo)
+        }
+    }
+
+    fun deleteTodo(todo: Todo) {
+        viewModelScope.launch {
+            repository.deleteTodo(todo)
+        }
+    }
+
+    fun deleteCompletedTodos() {
+        viewModelScope.launch {
+            repository.deleteCompletedTodos()
+        }
+    }
+}
+```
+
+## UI Layer
+
+### MainActivity
+
+```kotlin
+class MainActivity : AppCompatActivity() {
+    private lateinit var binding: ActivityMainBinding
+    private val viewModel: TodoViewModel by viewModels {
+        TodoViewModelFactory((application as TodoApplication).repository)
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        setupRecyclerView()
+        setupFab()
+        observeTodos()
+    }
+
+    private fun setupRecyclerView() {
+        val adapter = TodoAdapter(
+            onItemClick = { todo ->
+                showEditDialog(todo)
+            },
+            onCheckChanged = { todo, isChecked ->
+                viewModel.updateTodo(todo.copy(isCompleted = isChecked))
+            }
+        )
+
+        binding.recyclerView.apply {
+            this.adapter = adapter
+            layoutManager = LinearLayoutManager(this@MainActivity)
+        }
+    }
+
+    private fun setupFab() {
+        binding.fab.setOnClickListener {
+            showAddDialog()
+        }
+    }
+
+    private fun observeTodos() {
+        lifecycleScope.launch {
+            viewModel.allTodos.collect { todos ->
+                (binding.recyclerView.adapter as TodoAdapter).submitList(todos)
+            }
+        }
+    }
+}
+```
+
+### TodoAdapter
+
+```kotlin
+class TodoAdapter(
+    private val onItemClick: (Todo) -> Unit,
+    private val onCheckChanged: (Todo, Boolean) -> Unit
+) : ListAdapter<Todo, TodoAdapter.TodoViewHolder>(TodoDiffCallback()) {
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TodoViewHolder {
+        val binding = ItemTodoBinding.inflate(
+            LayoutInflater.from(parent.context),
+            parent,
+            false
+        )
+        return TodoViewHolder(binding)
+    }
+
+    override fun onBindViewHolder(holder: TodoViewHolder, position: Int) {
+        holder.bind(getItem(position))
+    }
+
+    inner class TodoViewHolder(
+        private val binding: ItemTodoBinding
+    ) : RecyclerView.ViewHolder(binding.root) {
+
+        fun bind(todo: Todo) {
+            binding.apply {
+                titleTextView.text = todo.title
+                descriptionTextView.text = todo.description
+                completedCheckBox.isChecked = todo.isCompleted
+
+                root.setOnClickListener { onItemClick(todo) }
+                completedCheckBox.setOnCheckedChangeListener { _, isChecked ->
+                    onCheckChanged(todo, isChecked)
+                }
+            }
+        }
+    }
+}
+```
+
+## Dialog Fragments
+
+### AddTodoDialog
+
+```kotlin
+class AddTodoDialog : DialogFragment() {
+    private var _binding: DialogAddTodoBinding? = null
+    private val binding get() = _binding!!
+
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        _binding = DialogAddTodoBinding.inflate(layoutInflater)
+
+        return MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Add Todo")
+            .setView(binding.root)
+            .setPositiveButton("Add") { _, _ ->
+                val title = binding.titleEditText.text.toString()
+                val description = binding.descriptionEditText.text.toString()
+                if (title.isNotEmpty()) {
+                    (activity as? MainActivity)?.viewModel?.addTodo(title, description)
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .create()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+}
+```
+
+## Best Practices
+
+### Error Handling
+
+```kotlin
+sealed class Result<out T> {
+    data class Success<T>(val data: T) : Result<T>()
+    data class Error(val exception: Exception) : Result<Nothing>()
+    object Loading : Result<Nothing>()
+}
+
+class TodoViewModel(private val repository: TodoRepository) : ViewModel() {
+    private val _uiState = MutableStateFlow<Result<List<Todo>>>(Result.Loading)
+    val uiState: StateFlow<Result<List<Todo>>> = _uiState.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            try {
+                repository.allTodos.collect { todos ->
+                    _uiState.value = Result.Success(todos)
+                }
+            } catch (e: Exception) {
+                _uiState.value = Result.Error(e)
+            }
+        }
+    }
+}
+```
+
+## Common Patterns
+
+### ViewBinding Extensions
+
+```kotlin
+fun <T : ViewBinding> AppCompatActivity.viewBinding(
+    bindingInflater: (LayoutInflater) -> T
+) = lazy(LazyThreadSafetyMode.NONE) {
+    bindingInflater.invoke(layoutInflater)
+}
+
+fun <T : ViewBinding> Fragment.viewBinding(
+    bindingInflater: (LayoutInflater) -> T
+) = lazy(LazyThreadSafetyMode.NONE) {
+    bindingInflater.invoke(layoutInflater)
+}
+```
+
+## Conclusion
+
+This ToDo app demonstrates:
+
+- MVVM architecture
+- Room database integration
+- Coroutines and Flow
+- ViewBinding
+- Material Design components
+- Clean code practices
+
+Remember to:
+
+- Handle configuration changes
+- Implement proper error handling
+- Add unit tests
+- Follow Material Design guidelines
+- Consider accessibility
+
+Stay tuned for more Kotlin tips and tricks!

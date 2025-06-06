@@ -1,0 +1,247 @@
+---
+title: "Dark Mode Support in Kotlin"
+summary: "Learn how to implement and manage dark mode in your Android app"
+date: "2025-05-08"
+category: "kotlin"
+tags: ["kotlin", "dark-mode", "ui", "theming"]
+---
+
+## Dark Mode Support in Kotlin
+
+Dark mode reduces eye strain and saves battery life. Let's learn how to implement dark mode support in your Android app.
+
+## Basic Theme Setup
+
+### Define Themes
+
+```kotlin
+// res/values/themes.xml
+<resources>
+    <style name="Theme.App" parent="Theme.MaterialComponents.DayNight">
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryVariant">@color/primary_dark</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSecondary">@color/secondary</item>
+        <item name="colorOnSecondary">@color/black</item>
+        <item name="android:colorBackground">@color/background</item>
+        <item name="colorOnBackground">@color/on_background</item>
+    </style>
+</resources>
+
+// res/values-night/themes.xml
+<resources>
+    <style name="Theme.App" parent="Theme.MaterialComponents.DayNight">
+        <item name="colorPrimary">@color/primary_dark</item>
+        <item name="colorPrimaryVariant">@color/primary_light</item>
+        <item name="colorOnPrimary">@color/black</item>
+        <item name="colorSecondary">@color/secondary_dark</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="android:colorBackground">@color/background_dark</item>
+        <item name="colorOnBackground">@color/on_background_dark</item>
+    </style>
+</resources>
+```
+
+## Theme Management
+
+### Theme Manager
+
+```kotlin
+class ThemeManager(private val context: Context) {
+    private val sharedPreferences = context.getSharedPreferences(
+        "theme_prefs",
+        Context.MODE_PRIVATE
+    )
+
+    fun setThemeMode(mode: ThemeMode) {
+        AppCompatDelegate.setDefaultNightMode(mode.value)
+        sharedPreferences.edit().putInt("theme_mode", mode.value).apply()
+    }
+
+    fun getCurrentThemeMode(): ThemeMode {
+        val mode = sharedPreferences.getInt("theme_mode", ThemeMode.SYSTEM.value)
+        return ThemeMode.values().find { it.value == mode } ?: ThemeMode.SYSTEM
+    }
+}
+
+enum class ThemeMode(val value: Int) {
+    LIGHT(AppCompatDelegate.MODE_NIGHT_NO),
+    DARK(AppCompatDelegate.MODE_NIGHT_YES),
+    SYSTEM(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+}
+```
+
+## Dynamic Theme Switching
+
+### Theme Switcher
+
+```kotlin
+class MainActivity : AppCompatActivity() {
+    private lateinit var themeManager: ThemeManager
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        themeManager = ThemeManager(this)
+
+        setContentView(R.layout.activity_main)
+        setupThemeSwitch()
+    }
+
+    private fun setupThemeSwitch() {
+        binding.themeSwitch.setOnCheckedChangeListener { _, isChecked ->
+            val newMode = if (isChecked) ThemeMode.DARK else ThemeMode.LIGHT
+            themeManager.setThemeMode(newMode)
+            recreate()
+        }
+    }
+}
+```
+
+## Custom Views
+
+### Themed Custom View
+
+```kotlin
+class ThemedCardView @JvmOverloads constructor(
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0
+) : MaterialCardView(context, attrs, defStyleAttr) {
+
+    private val textColor: Int
+    private val backgroundColor: Int
+
+    init {
+        val typedArray = context.obtainStyledAttributes(
+            attrs,
+            R.styleable.ThemedCardView
+        )
+
+        textColor = typedArray.getColor(
+            R.styleable.ThemedCardView_textColor,
+            ContextCompat.getColor(context, R.color.text_primary)
+        )
+
+        backgroundColor = typedArray.getColor(
+            R.styleable.ThemedCardView_backgroundColor,
+            ContextCompat.getColor(context, R.color.background)
+        )
+
+        typedArray.recycle()
+
+        setCardBackgroundColor(backgroundColor)
+    }
+
+    fun updateTheme(isDarkMode: Boolean) {
+        val newTextColor = if (isDarkMode) {
+            ContextCompat.getColor(context, R.color.text_primary_dark)
+        } else {
+            ContextCompat.getColor(context, R.color.text_primary_light)
+        }
+
+        val newBackgroundColor = if (isDarkMode) {
+            ContextCompat.getColor(context, R.color.background_dark)
+        } else {
+            ContextCompat.getColor(context, R.color.background_light)
+        }
+
+        setCardBackgroundColor(newBackgroundColor)
+        setTextColor(newTextColor)
+    }
+}
+```
+
+## Image Handling
+
+### Image Theming
+
+```kotlin
+class ThemedImageView @JvmOverloads constructor(
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0
+) : AppCompatImageView(context, attrs, defStyleAttr) {
+
+    private var lightModeImage: Drawable? = null
+    private var darkModeImage: Drawable? = null
+
+    fun setThemedImages(light: Drawable, dark: Drawable) {
+        lightModeImage = light
+        darkModeImage = dark
+        updateImage()
+    }
+
+    private fun updateImage() {
+        val isDarkMode = resources.configuration.uiMode and
+            Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
+
+        setImageDrawable(if (isDarkMode) darkModeImage else lightModeImage)
+    }
+}
+```
+
+## Best Practices
+
+### Theme Observer
+
+```kotlin
+class ThemeObserver(
+    private val activity: AppCompatActivity,
+    private val onThemeChanged: (Boolean) -> Unit
+) : LifecycleObserver {
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
+    fun onCreate() {
+        val currentNightMode = activity.resources.configuration.uiMode and
+            Configuration.UI_MODE_NIGHT_MASK
+
+        onThemeChanged(currentNightMode == Configuration.UI_MODE_NIGHT_YES)
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_CONFIGURATION_CHANGED)
+    fun onConfigurationChanged(newConfig: Configuration) {
+        val currentNightMode = newConfig.uiMode and Configuration.UI_MODE_NIGHT_MASK
+        onThemeChanged(currentNightMode == Configuration.UI_MODE_NIGHT_YES)
+    }
+}
+```
+
+## Common Patterns
+
+### Theme Extensions
+
+```kotlin
+fun Context.isDarkMode(): Boolean {
+    return resources.configuration.uiMode and
+        Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
+}
+
+fun Context.getThemedColor(@ColorRes lightColor: Int, @ColorRes darkColor: Int): Int {
+    return ContextCompat.getColor(
+        this,
+        if (isDarkMode()) darkColor else lightColor
+    )
+}
+
+fun Context.getThemedDrawable(
+    @DrawableRes lightDrawable: Int,
+    @DrawableRes darkDrawable: Int
+): Drawable? {
+    return ContextCompat.getDrawable(
+        this,
+        if (isDarkMode()) darkDrawable else lightDrawable
+    )
+}
+```
+
+## Conclusion
+
+Remember to:
+
+- Use Material Design components
+- Test both light and dark themes
+- Handle theme changes gracefully
+- Consider user preferences
+- Follow platform guidelines
+
+Stay tuned for more Kotlin tips and tricks!

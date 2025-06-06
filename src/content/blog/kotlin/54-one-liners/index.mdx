@@ -1,0 +1,214 @@
+---
+title: "Kotlin One-Liners to Save Time"
+summary: "Learn powerful one-liners to write smarter and shorter Kotlin code"
+date: "2025-06-30"
+category: "kotlin"
+tags: ["kotlin", "kotlin-tips", "one-liner", "dev-speed"]
+---
+
+## Kotlin One-Liners to Save Time
+
+Let's explore powerful one-liners to write smarter and shorter Kotlin code.
+
+## Collection Operations
+
+### List Operations
+
+```kotlin
+// 1. Filter and transform
+val evenSquares = numbers.filter { it % 2 == 0 }.map { it * it }
+
+// 2. Group by
+val groupedByLength = strings.groupBy { it.length }
+
+// 3. Partition
+val (evens, odds) = numbers.partition { it % 2 == 0 }
+
+// 4. Chunked
+val chunks = numbers.chunked(3)
+
+// 5. Windowed
+val windows = numbers.windowed(3)
+```
+
+### Map Operations
+
+```kotlin
+// 1. Transform values
+val doubledValues = map.mapValues { it.value * 2 }
+
+// 2. Filter entries
+val filteredMap = map.filter { (key, value) -> value > 0 }
+
+// 3. Merge maps
+val merged = map1 + map2
+
+// 4. Get or default
+val value = map.getOrElse("key") { "default" }
+
+// 5. Map to list
+val pairs = map.toList()
+```
+
+## String Operations
+
+### String Manipulation
+
+```kotlin
+// 1. Split and join
+val result = text.split(" ").joinToString("-")
+
+// 2. Take and drop
+val firstThree = text.take(3)
+val withoutFirst = text.drop(1)
+
+// 3. Replace with regex
+val cleaned = text.replace(Regex("[^a-zA-Z]"), "")
+
+// 4. Capitalize
+val capitalized = text.replaceFirstChar { it.uppercase() }
+
+// 5. Pad
+val padded = text.padStart(10, '*')
+```
+
+## Null Safety
+
+### Null Handling
+
+```kotlin
+// 1. Elvis with return
+val length = text?.length ?: return
+
+// 2. Safe call chain
+val result = user?.address?.street?.length
+
+// 3. Let with null check
+val result = nullableValue?.let { it * 2 }
+
+// 4. Take if
+val positive = number.takeIf { it > 0 }
+
+// 5. Take unless
+val nonEmpty = text.takeUnless { it.isEmpty() }
+```
+
+## Function Operations
+
+### Function Composition
+
+```kotlin
+// 1. Function composition
+val addAndMultiply = { x: Int -> x + 1 } compose { x: Int -> x * 2 }
+
+// 2. Pipeline
+val result = value.pipe(
+    { it * 2 },
+    { it.toString() },
+    { it.uppercase() }
+)
+
+// 3. Currying
+val add = { a: Int, b: Int -> a + b }.curry()
+
+// 4. Partial application
+val addFive = { a: Int, b: Int -> a + b }.partial(5)
+
+// 5. Memoization
+val memoized = { x: Int -> x * x }.memoize()
+```
+
+## Scope Functions
+
+### Scope Operations
+
+```kotlin
+// 1. Let with null check
+val result = nullableValue?.let { it * 2 }
+
+// 2. Apply with initialization
+val list = mutableListOf<String>().apply {
+    add("A")
+    add("B")
+    add("C")
+}
+
+// 3. Run with computation
+val result = value.run { this * 2 }
+
+// 4. With for configuration
+with(config) {
+    timeout = 1000
+    retries = 3
+}
+
+// 5. Also for side effects
+val result = value.also { println(it) }
+```
+
+## Best Practices
+
+### Code Optimization
+
+```kotlin
+// 1. Use sequence for large collections
+val result = numbers.asSequence()
+    .filter { it % 2 == 0 }
+    .map { it * it }
+    .toList()
+
+// 2. Use lazy initialization
+val expensive by lazy { computeExpensiveValue() }
+
+// 3. Use scope functions
+val result = value.let { it * 2 }.also { println(it) }
+
+// 4. Use extension functions
+fun String.addPrefix(prefix: String) = "$prefix$this"
+
+// 5. Use infix functions
+infix fun Int.times(str: String) = str.repeat(this)
+```
+
+## Common Patterns
+
+### Utility Functions
+
+```kotlin
+// 1. Measure time
+val time = measureTimeMillis { expensiveOperation() }
+
+// 2. Retry operation
+val result = retry(times = 3) { riskyOperation() }
+
+// 3. Cache computation
+val cached = cache.getOrPut(key) { computeValue() }
+
+// 4. Log and return
+val result = value.also { logger.info("Value: $it") }
+
+// 5. Execute if condition
+val result = value.takeIf { condition }?.let { process(it) }
+```
+
+## Conclusion
+
+Kotlin one-liners require understanding:
+
+- Collection operations
+- String manipulation
+- Null safety
+- Function composition
+- Scope functions
+- Best practices
+
+Remember to:
+
+- Keep code readable
+- Use appropriate operations
+- Consider performance
+- Follow best practices
+- Document complex one-liners
+- Test thoroughly
+
+Stay tuned for more Kotlin tips and tricks!

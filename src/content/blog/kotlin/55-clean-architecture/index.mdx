@@ -1,0 +1,301 @@
+---
+title: "Building Kotlin Apps with Clean Architecture"
+summary: "Learn how to implement Clean Architecture in your Kotlin applications"
+date: "2025-06-30"
+category: "kotlin"
+tags: ["kotlin", "clean-architecture", "kotlin-project", "best-practices"]
+---
+
+## Building Kotlin Apps with Clean Architecture
+
+Let's explore how to implement Clean Architecture in your Kotlin applications.
+
+## Project Structure
+
+### Module Organization
+
+```kotlin
+// Project structure
+project/
+├── app/
+├── domain/
+├── data/
+└── presentation/
+
+// build.gradle.kts
+dependencies {
+    implementation(project(":domain"))
+    implementation(project(":data"))
+    implementation(project(":presentation"))
+}
+```
+
+## Domain Layer
+
+### Entities
+
+```kotlin
+// Domain entities
+data class User(
+    val id: String,
+    val name: String,
+    val email: String
+)
+
+data class Product(
+    val id: String,
+    val name: String,
+    val price: Double
+)
+
+// Use cases
+class GetUserUseCase(
+    private val userRepository: UserRepository
+) {
+    suspend operator fun invoke(id: String): Result<User> {
+        return userRepository.getUser(id)
+    }
+}
+
+class GetProductsUseCase(
+    private val productRepository: ProductRepository
+) {
+    suspend operator fun invoke(): Result<List<Product>> {
+        return productRepository.getProducts()
+    }
+}
+```
+
+## Data Layer
+
+### Repository Implementation
+
+```kotlin
+// Repository interfaces
+interface UserRepository {
+    suspend fun getUser(id: String): Result<User>
+    suspend fun saveUser(user: User): Result<Unit>
+}
+
+interface ProductRepository {
+    suspend fun getProducts(): Result<List<Product>>
+    suspend fun getProduct(id: String): Result<Product>
+}
+
+// Repository implementations
+class UserRepositoryImpl(
+    private val userApi: UserApi,
+    private val userDao: UserDao
+) : UserRepository {
+    override suspend fun getUser(id: String): Result<User> {
+        return try {
+            val user = userApi.getUser(id)
+            userDao.insertUser(user)
+            Result.success(user)
+        } catch (e: Exception) {
+            val cachedUser = userDao.getUser(id)
+            if (cachedUser != null) {
+                Result.success(cachedUser)
+            } else {
+                Result.failure(e)
+            }
+        }
+    }
+}
+```
+
+## Presentation Layer
+
+### ViewModel
+
+```kotlin
+class UserViewModel(
+    private val getUserUseCase: GetUserUseCase
+) : ViewModel() {
+    private val _userState = MutableStateFlow<UserState>(UserState.Loading)
+    val userState: StateFlow<UserState> = _userState.asStateFlow()
+
+    fun loadUser(id: String) {
+        viewModelScope.launch {
+            _userState.value = UserState.Loading
+            getUserUseCase(id)
+                .onSuccess { user ->
+                    _userState.value = UserState.Success(user)
+                }
+                .onFailure { error ->
+                    _userState.value = UserState.Error(error.message ?: "Unknown error")
+                }
+        }
+    }
+}
+
+sealed class UserState {
+    object Loading : UserState()
+    data class Success(val user: User) : UserState()
+    data class Error(val message: String) : UserState()
+}
+```
+
+## Dependency Injection
+
+### DI Setup
+
+```kotlin
+// Hilt modules
+@Module
+@InstallIn(SingletonComponent::class)
+object AppModule {
+    @Provides
+    @Singleton
+    fun provideUserRepository(
+        userApi: UserApi,
+        userDao: UserDao
+    ): UserRepository {
+        return UserRepositoryImpl(userApi, userDao)
+    }
+
+    @Provides
+    @Singleton
+    fun provideGetUserUseCase(
+        userRepository: UserRepository
+    ): GetUserUseCase {
+        return GetUserUseCase(userRepository)
+    }
+}
+
+// ViewModel factory
+@HiltViewModel
+class UserViewModel @Inject constructor(
+    private val getUserUseCase: GetUserUseCase
+) : ViewModel()
+```
+
+## Best Practices
+
+### Error Handling
+
+```kotlin
+// Domain errors
+sealed class DomainError : Exception() {
+    data class NetworkError(override val message: String) : DomainError()
+    data class DatabaseError(override val message: String) : DomainError()
+    data class ValidationError(override val message: String) : DomainError()
+}
+
+// Error handling in repository
+class UserRepositoryImpl(
+    private val userApi: UserApi,
+    private val userDao: UserDao
+) : UserRepository {
+    override suspend fun getUser(id: String): Result<User> {
+        return try {
+            val user = userApi.getUser(id)
+            userDao.insertUser(user)
+            Result.success(user)
+        } catch (e: IOException) {
+            Result.failure(DomainError.NetworkError(e.message ?: "Network error"))
+        } catch (e: SQLException) {
+            Result.failure(DomainError.DatabaseError(e.message ?: "Database error"))
+        }
+    }
+}
+```
+
+## Common Patterns
+
+### Repository Pattern
+
+```kotlin
+// Base repository
+interface BaseRepository<T> {
+    suspend fun get(id: String): Result<T>
+    suspend fun getAll(): Result<List<T>>
+    suspend fun save(item: T): Result<Unit>
+    suspend fun delete(id: String): Result<Unit>
+}
+
+// Generic repository implementation
+class BaseRepositoryImpl<T>(
+    private val api: Api<T>,
+    private val dao: Dao<T>
+) : BaseRepository<T> {
+    override suspend fun get(id: String): Result<T> {
+        return try {
+            val item = api.get(id)
+            dao.insert(item)
+            Result.success(item)
+        } catch (e: Exception) {
+            val cachedItem = dao.get(id)
+            if (cachedItem != null) {
+                Result.success(cachedItem)
+            } else {
+                Result.failure(e)
+            }
+        }
+    }
+}
+```
+
+## Testing
+
+### Unit Tests
+
+```kotlin
+// Use case test
+class GetUserUseCaseTest {
+    private val repository = mockk<UserRepository>()
+    private val useCase = GetUserUseCase(repository)
+
+    @Test
+    fun `when repository returns success, use case returns success`() = runTest {
+        val user = User("1", "John", "john@example.com")
+        coEvery { repository.getUser("1") } returns Result.success(user)
+
+        val result = useCase("1")
+
+        assertTrue(result.isSuccess)
+        assertEquals(user, result.getOrNull())
+    }
+}
+
+// Repository test
+class UserRepositoryImplTest {
+    private val api = mockk<UserApi>()
+    private val dao = mockk<UserDao>()
+    private val repository = UserRepositoryImpl(api, dao)
+
+    @Test
+    fun `when api fails, return cached data`() = runTest {
+        val user = User("1", "John", "john@example.com")
+        coEvery { api.getUser("1") } throws IOException()
+        coEvery { dao.getUser("1") } returns user
+
+        val result = repository.getUser("1")
+
+        assertTrue(result.isSuccess)
+        assertEquals(user, result.getOrNull())
+    }
+}
+```
+
+## Conclusion
+
+Clean Architecture in Kotlin requires:
+
+- Proper layer separation
+- Clear dependencies
+- Domain-driven design
+- Repository pattern
+- Dependency injection
+- Error handling
+
+Remember to:
+
+- Keep layers independent
+- Follow SOLID principles
+- Handle errors properly
+- Write comprehensive tests
+- Use dependency injection
+- Follow best practices
+
+Stay tuned for more Kotlin tips and tricks!

@@ -1,0 +1,307 @@
+---
+title: "Push Notifications with FCM"
+summary: "Learn how to implement Firebase Cloud Messaging for push notifications in your Android app"
+date: "2025-05-29"
+category: "kotlin"
+tags: ["kotlin", "fcm", "notifications", "firebase"]
+---
+
+## Push Notifications with FCM
+
+Firebase Cloud Messaging (FCM) provides a reliable way to send notifications to Android devices. Let's learn how to implement FCM in your app.
+
+## Project Setup
+
+### Add Dependencies
+
+```kotlin
+// build.gradle.kts
+dependencies {
+    // Firebase BoM
+    implementation(platform("com.google.firebase:firebase-bom:32.7.1"))
+
+    // Firebase Cloud Messaging
+    implementation("com.google.firebase:firebase-messaging-ktx")
+
+    // Firebase Analytics
+    implementation("com.google.firebase:firebase-analytics-ktx")
+}
+```
+
+## FCM Service
+
+### Custom FCM Service
+
+```kotlin
+class MyFirebaseMessagingService : FirebaseMessagingService() {
+    override fun onNewToken(token: String) {
+        super.onNewToken(token)
+        // Send token to your server
+        sendTokenToServer(token)
+    }
+
+    override fun onMessageReceived(message: RemoteMessage) {
+        super.onMessageReceived(message)
+
+        // Handle notification payload
+        message.notification?.let { notification ->
+            showNotification(
+                title = notification.title ?: "New Message",
+                body = notification.body ?: ""
+            )
+        }
+
+        // Handle data payload
+        message.data.isNotEmpty().let {
+            handleDataPayload(message.data)
+        }
+    }
+
+    private fun showNotification(title: String, body: String) {
+        val channelId = "default_channel"
+        val channelName = "Default Channel"
+
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        // Create notification channel for Android O and above
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                channelId,
+                channelName,
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = "Default notification channel"
+                enableLights(true)
+                lightColor = Color.RED
+                enableVibration(true)
+            }
+            notificationManager.createNotificationChannel(channel)
+        }
+
+        val intent = Intent(this, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+
+        val pendingIntent = PendingIntent.getActivity(
+            this,
+            0,
+            intent,
+            PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val notification = NotificationCompat.Builder(this, channelId)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setContentTitle(title)
+            .setContentText(body)
+            .setAutoCancel(true)
+            .setContentIntent(pendingIntent)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .build()
+
+        notificationManager.notify(System.currentTimeMillis().toInt(), notification)
+    }
+
+    private fun handleDataPayload(data: Map<String, String>) {
+        // Handle custom data payload
+        data["type"]?.let { type ->
+            when (type) {
+                "chat" -> handleChatNotification(data)
+                "update" -> handleUpdateNotification(data)
+                else -> handleDefaultNotification(data)
+            }
+        }
+    }
+}
+```
+
+## Token Management
+
+### FCM Token Manager
+
+```kotlin
+class FCMTokenManager(private val context: Context) {
+    private val firebaseMessaging: FirebaseMessaging = Firebase.messaging
+
+    suspend fun getToken(): Result<String> {
+        return try {
+            val token = firebaseMessaging.token.await()
+            Result.success(token)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun deleteToken(): Result<Unit> {
+        return try {
+            firebaseMessaging.deleteToken().await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun subscribeToTopic(topic: String): Result<Unit> {
+        return try {
+            firebaseMessaging.subscribeToTopic(topic).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun unsubscribeFromTopic(topic: String): Result<Unit> {
+        return try {
+            firebaseMessaging.unsubscribeFromTopic(topic).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+}
+```
+
+## Notification Handling
+
+### Notification Manager
+
+```kotlin
+class NotificationManager(private val context: Context) {
+    private val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+    fun createNotificationChannel(
+        channelId: String,
+        channelName: String,
+        importance: Int = NotificationManager.IMPORTANCE_DEFAULT
+    ) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                channelId,
+                channelName,
+                importance
+            ).apply {
+                description = "Notification channel for $channelName"
+                enableLights(true)
+                lightColor = Color.BLUE
+                enableVibration(true)
+            }
+            notificationManager.createNotificationChannel(channel)
+        }
+    }
+
+    fun showNotification(
+        channelId: String,
+        title: String,
+        content: String,
+        intent: Intent? = null
+    ) {
+        val pendingIntent = intent?.let {
+            PendingIntent.getActivity(
+                context,
+                0,
+                it,
+                PendingIntent.FLAG_IMMUTABLE
+            )
+        }
+
+        val notification = NotificationCompat.Builder(context, channelId)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setContentTitle(title)
+            .setContentText(content)
+            .setAutoCancel(true)
+            .setContentIntent(pendingIntent)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .build()
+
+        notificationManager.notify(System.currentTimeMillis().toInt(), notification)
+    }
+}
+```
+
+## Best Practices
+
+### Notification Extensions
+
+```kotlin
+fun Context.showNotification(
+    channelId: String,
+    title: String,
+    content: String,
+    intent: Intent? = null
+) {
+    val notificationManager = NotificationManager(this)
+    notificationManager.showNotification(channelId, title, content, intent)
+}
+
+fun Context.createNotificationChannel(
+    channelId: String,
+    channelName: String,
+    importance: Int = NotificationManager.IMPORTANCE_DEFAULT
+) {
+    val notificationManager = NotificationManager(this)
+    notificationManager.createNotificationChannel(channelId, channelName, importance)
+}
+```
+
+## Common Patterns
+
+### Notification Builder
+
+```kotlin
+class NotificationBuilder(private val context: Context) {
+    private var channelId: String = "default_channel"
+    private var title: String = ""
+    private var content: String = ""
+    private var smallIcon: Int = R.drawable.ic_notification
+    private var priority: Int = NotificationCompat.PRIORITY_DEFAULT
+    private var intent: Intent? = null
+    private var autoCancel: Boolean = true
+
+    fun setChannelId(channelId: String) = apply { this.channelId = channelId }
+    fun setTitle(title: String) = apply { this.title = title }
+    fun setContent(content: String) = apply { this.content = content }
+    fun setSmallIcon(icon: Int) = apply { this.smallIcon = icon }
+    fun setPriority(priority: Int) = apply { this.priority = priority }
+    fun setIntent(intent: Intent) = apply { this.intent = intent }
+    fun setAutoCancel(autoCancel: Boolean) = apply { this.autoCancel = autoCancel }
+
+    fun build(): Notification {
+        val pendingIntent = intent?.let {
+            PendingIntent.getActivity(
+                context,
+                0,
+                it,
+                PendingIntent.FLAG_IMMUTABLE
+            )
+        }
+
+        return NotificationCompat.Builder(context, channelId)
+            .setSmallIcon(smallIcon)
+            .setContentTitle(title)
+            .setContentText(content)
+            .setAutoCancel(autoCancel)
+            .setContentIntent(pendingIntent)
+            .setPriority(priority)
+            .build()
+    }
+}
+```
+
+## Conclusion
+
+FCM provides:
+
+- Reliable message delivery
+- Topic-based messaging
+- Rich notification support
+- Analytics integration
+- Cross-platform support
+
+Remember to:
+
+- Handle notification permissions
+- Create appropriate channels
+- Test on different Android versions
+- Follow notification best practices
+- Monitor delivery rates
+
+Stay tuned for more Kotlin tips and tricks!

@@ -1,0 +1,277 @@
+---
+title: "Offline Caching in Kotlin Apps"
+summary: "Learn how to implement offline caching and serve data without internet in your Kotlin applications"
+date: "2025-05-07"
+category: "kotlin"
+tags: ["kotlin", "cache", "room-db", "kotlin-tips"]
+---
+
+## Offline Caching in Kotlin Apps
+
+Let's explore how to implement offline caching in your Kotlin applications using Room database.
+
+## Project Setup
+
+### Dependencies
+
+```kotlin
+// build.gradle.kts
+dependencies {
+    val roomVersion = "2.6.1"
+    implementation("androidx.room:room-runtime:$roomVersion")
+    implementation("androidx.room:room-ktx:$roomVersion")
+    kapt("androidx.room:room-compiler:$roomVersion")
+
+    // Retrofit for network calls
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+
+    // Coroutines
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+}
+```
+
+## Database Setup
+
+### Entity
+
+```kotlin
+@Entity(tableName = "posts")
+data class PostEntity(
+    @PrimaryKey
+    val id: Int,
+    val title: String,
+    val body: String,
+    val userId: Int,
+    val timestamp: Long = System.currentTimeMillis()
+)
+
+@Dao
+interface PostDao {
+    @Query("SELECT * FROM posts")
+    suspend fun getAllPosts(): List<PostEntity>
+
+    @Query("SELECT * FROM posts WHERE id = :postId")
+    suspend fun getPost(postId: Int): PostEntity?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertPost(post: PostEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertPosts(posts: List<PostEntity>)
+
+    @Query("DELETE FROM posts")
+    suspend fun deleteAllPosts()
+}
+
+@Database(entities = [PostEntity::class], version = 1)
+abstract class AppDatabase : RoomDatabase() {
+    abstract fun postDao(): PostDao
+}
+```
+
+## Repository Layer
+
+### Repository Implementation
+
+```kotlin
+class PostRepository(
+    private val api: PostApi,
+    private val db: AppDatabase
+) {
+    suspend fun getPosts(forceRefresh: Boolean = false): Flow<Result<List<Post>>> {
+        return flow {
+            // Emit cached data first
+            if (!forceRefresh) {
+                val cachedPosts = db.postDao().getAllPosts()
+                if (cachedPosts.isNotEmpty()) {
+                    emit(Result.success(cachedPosts.map { it.toPost() }))
+                }
+            }
+
+            try {
+                // Fetch fresh data
+                val posts = api.getPosts()
+                // Cache the new data
+                db.postDao().insertPosts(posts.map { it.toEntity() })
+                emit(Result.success(posts))
+            } catch (e: Exception) {
+                if (forceRefresh) {
+                    emit(Result.failure(e))
+                }
+            }
+        }
+    }
+
+    suspend fun getPost(id: Int, forceRefresh: Boolean = false): Flow<Result<Post>> {
+        return flow {
+            // Emit cached data first
+            if (!forceRefresh) {
+                val cachedPost = db.postDao().getPost(id)
+                if (cachedPost != null) {
+                    emit(Result.success(cachedPost.toPost()))
+                }
+            }
+
+            try {
+                // Fetch fresh data
+                val post = api.getPost(id)
+                // Cache the new data
+                db.postDao().insertPost(post.toEntity())
+                emit(Result.success(post))
+            } catch (e: Exception) {
+                if (forceRefresh) {
+                    emit(Result.failure(e))
+                }
+            }
+        }
+    }
+}
+```
+
+## ViewModel Layer
+
+### ViewModel Implementation
+
+```kotlin
+class PostViewModel(
+    private val repository: PostRepository
+) : ViewModel() {
+    private val _postsState = MutableStateFlow<PostsState>(PostsState.Loading)
+    val postsState: StateFlow<PostsState> = _postsState.asStateFlow()
+
+    fun loadPosts(forceRefresh: Boolean = false) {
+        viewModelScope.launch {
+            _postsState.value = PostsState.Loading
+            repository.getPosts(forceRefresh)
+                .catch { e ->
+                    _postsState.value = PostsState.Error(e.message ?: "Unknown error")
+                }
+                .collect { result ->
+                    result.fold(
+                        onSuccess = { posts ->
+                            _postsState.value = PostsState.Success(posts)
+                        },
+                        onFailure = { error ->
+                            _postsState.value = PostsState.Error(error.message ?: "Unknown error")
+                        }
+                    )
+                }
+        }
+    }
+}
+
+sealed class PostsState {
+    object Loading : PostsState()
+    data class Success(val posts: List<Post>) : PostsState()
+    data class Error(val message: String) : PostsState()
+}
+```
+
+## Best Practices
+
+### Cache Management
+
+```kotlin
+// Cache manager
+class CacheManager(
+    private val db: AppDatabase
+) {
+    suspend fun clearOldCache(maxAge: Long = 24 * 60 * 60 * 1000) { // 24 hours
+        val currentTime = System.currentTimeMillis()
+        db.postDao().deleteOldPosts(currentTime - maxAge)
+    }
+
+    suspend fun clearAllCache() {
+        db.postDao().deleteAllPosts()
+    }
+}
+
+// Cache policy
+enum class CachePolicy {
+    CACHE_FIRST,    // Try cache first, then network
+    NETWORK_FIRST,  // Try network first, then cache
+    CACHE_ONLY,     // Only use cache
+    NETWORK_ONLY    // Only use network
+}
+```
+
+## Common Patterns
+
+### Cache Utilities
+
+```kotlin
+// Cache utilities
+object CacheUtils {
+    fun isCacheValid(timestamp: Long, maxAge: Long): Boolean {
+        return System.currentTimeMillis() - timestamp < maxAge
+    }
+
+    fun getCacheKey(url: String, params: Map<String, String>): String {
+        return "$url?${params.entries.joinToString("&") { "${it.key}=${it.value}" }}"
+    }
+}
+
+// Cache interceptor
+class CacheInterceptor : Interceptor {
+    override fun intercept(chain: Interceptor.Chain): Response {
+        val request = chain.request()
+        val response = chain.proceed(request)
+
+        return response.newBuilder()
+            .header("Cache-Control", "public, max-age=3600")
+            .build()
+    }
+}
+```
+
+## Testing
+
+### Repository Tests
+
+```kotlin
+class PostRepositoryTest {
+    private val api = mockk<PostApi>()
+    private val db = mockk<AppDatabase>()
+    private val postDao = mockk<PostDao>()
+    private val repository = PostRepository(api, db)
+
+    @Test
+    fun `when network fails, return cached data`() = runTest {
+        val cachedPosts = listOf(
+            PostEntity(1, "Title 1", "Body 1", 1),
+            PostEntity(2, "Title 2", "Body 2", 1)
+        )
+
+        coEvery { db.postDao() } returns postDao
+        coEvery { postDao.getAllPosts() } returns cachedPosts
+        coEvery { api.getPosts() } throws IOException()
+
+        val result = repository.getPosts().first()
+
+        assertTrue(result.isSuccess)
+        assertEquals(2, result.getOrNull()?.size)
+    }
+}
+```
+
+## Conclusion
+
+Offline caching in Kotlin requires:
+
+- Room database setup
+- Repository pattern
+- Cache management
+- Error handling
+- Network state handling
+
+Remember to:
+
+- Implement proper cache invalidation
+- Handle network errors gracefully
+- Use appropriate cache policies
+- Test offline scenarios
+- Monitor cache size
+- Follow best practices
+
+Stay tuned for more Kotlin tips and tricks!

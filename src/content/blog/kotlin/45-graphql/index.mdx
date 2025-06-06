@@ -1,0 +1,592 @@
+---
+title: "Kotlin with GraphQL APIs"
+summary: "Learn how to integrate and work with GraphQL APIs in your Kotlin applications"
+date: "2025-03-05"
+category: "kotlin"
+tags: ["kotlin", "graphql", "api", "networking", "android"]
+---
+
+## Kotlin with GraphQL APIs
+
+Let's explore how to work with GraphQL APIs in Kotlin applications using Apollo Client.
+
+## Project Setup
+
+### Dependencies
+
+```kotlin
+dependencies {
+    implementation("com.apollographql.apollo3:apollo-runtime:3.8.2")
+    implementation("com.apollographql.apollo3:apollo-normalized-cache:3.8.2")
+    implementation("com.apollographql.apollo3:apollo-normalized-cache-sqlite:3.8.2")
+    implementation("com.apollographql.apollo3:apollo-http-cache:3.8.2")
+}
+```
+
+## GraphQL Schema
+
+### Schema Definition
+
+```graphql
+type Query {
+  characters(page: Int): Characters
+  character(id: ID!): Character
+}
+
+type Mutation {
+  createCharacter(input: CharacterInput!): Character
+  updateCharacter(id: ID!, input: CharacterInput!): Character
+  deleteCharacter(id: ID!): Boolean
+}
+
+type Characters {
+  info: Info
+  results: [Character]
+}
+
+type Info {
+  count: Int
+  pages: Int
+  next: Int
+  prev: Int
+}
+
+type Character {
+  id: ID!
+  name: String!
+  status: String
+  species: String
+  type: String
+  gender: String
+  origin: Location
+  location: Location
+  image: String
+  episode: [Episode]
+  created: String
+}
+
+type Location {
+  id: ID!
+  name: String!
+  type: String
+  dimension: String
+}
+
+type Episode {
+  id: ID!
+  name: String!
+  air_date: String
+  episode: String
+}
+
+input CharacterInput {
+  name: String!
+  status: String
+  species: String
+  type: String
+  gender: String
+  originId: ID
+  locationId: ID
+  image: String
+}
+```
+
+## Apollo Client Setup
+
+### Client Configuration
+
+```kotlin
+class ApolloClientProvider @Inject constructor(
+    private val context: Context
+) {
+    private val cache = SqlNormalizedCacheFactory(context, "apollo_cache.db")
+        .create(NormalizedCacheFactory())
+
+    private val httpCache = HttpCache(
+        directory = File(context.cacheDir, "apollo_http_cache"),
+        maxSize = 10 * 1024 * 1024 // 10MB
+    )
+
+    val apolloClient = ApolloClient.Builder()
+        .serverUrl("https://rickandmortyapi.com/graphql")
+        .normalizedCache(cache)
+        .httpCache(httpCache)
+        .build()
+}
+```
+
+## GraphQL Operations
+
+### Queries
+
+```kotlin
+class GetCharactersQuery(
+    val page: Int
+) : Query<GetCharactersQuery.Data> {
+    override fun document(): String = """
+        query GetCharacters($page: Int) {
+            characters(page: $page) {
+                info {
+                    count
+                    pages
+                    next
+                    prev
+                }
+                results {
+                    id
+                    name
+                    status
+                    species
+                    type
+                    gender
+                    image
+                    origin {
+                        id
+                        name
+                    }
+                    location {
+                        id
+                        name
+                    }
+                }
+            }
+        }
+    """.trimIndent()
+
+    override fun variables(): Map<String, Any> = mapOf(
+        "page" to page
+    )
+}
+
+class GetCharacterQuery(
+    val id: String
+) : Query<GetCharacterQuery.Data> {
+    override fun document(): String = """
+        query GetCharacter($id: ID!) {
+            character(id: $id) {
+                id
+                name
+                status
+                species
+                type
+                gender
+                image
+                origin {
+                    id
+                    name
+                }
+                location {
+                    id
+                    name
+                }
+                episode {
+                    id
+                    name
+                    air_date
+                    episode
+                }
+            }
+        }
+    """.trimIndent()
+
+    override fun variables(): Map<String, Any> = mapOf(
+        "id" to id
+    )
+}
+```
+
+### Mutations
+
+```kotlin
+class CreateCharacterMutation(
+    val input: CharacterInput
+) : Mutation<CreateCharacterMutation.Data> {
+    override fun document(): String = """
+        mutation CreateCharacter($input: CharacterInput!) {
+            createCharacter(input: $input) {
+                id
+                name
+                status
+                species
+                type
+                gender
+                image
+                origin {
+                    id
+                    name
+                }
+                location {
+                    id
+                    name
+                }
+            }
+        }
+    """.trimIndent()
+
+    override fun variables(): Map<String, Any> = mapOf(
+        "input" to input
+    )
+}
+
+class UpdateCharacterMutation(
+    val id: String,
+    val input: CharacterInput
+) : Mutation<UpdateCharacterMutation.Data> {
+    override fun document(): String = """
+        mutation UpdateCharacter($id: ID!, $input: CharacterInput!) {
+            updateCharacter(id: $id, input: $input) {
+                id
+                name
+                status
+                species
+                type
+                gender
+                image
+                origin {
+                    id
+                    name
+                }
+                location {
+                    id
+                    name
+                }
+            }
+        }
+    """.trimIndent()
+
+    override fun variables(): Map<String, Any> = mapOf(
+        "id" to id,
+        "input" to input
+    )
+}
+```
+
+## Repository Layer
+
+### Character Repository
+
+```kotlin
+class CharacterRepository @Inject constructor(
+    private val apolloClient: ApolloClient
+) {
+    suspend fun getCharacters(page: Int): Result<Characters> {
+        return try {
+            val response = apolloClient.query(GetCharactersQuery(page))
+                .execute()
+
+            response.data?.characters?.let {
+                Result.success(it)
+            } ?: Result.failure(Exception("No data received"))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getCharacter(id: String): Result<Character> {
+        return try {
+            val response = apolloClient.query(GetCharacterQuery(id))
+                .execute()
+
+            response.data?.character?.let {
+                Result.success(it)
+            } ?: Result.failure(Exception("Character not found"))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun createCharacter(input: CharacterInput): Result<Character> {
+        return try {
+            val response = apolloClient.mutation(CreateCharacterMutation(input))
+                .execute()
+
+            response.data?.createCharacter?.let {
+                Result.success(it)
+            } ?: Result.failure(Exception("Failed to create character"))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun updateCharacter(
+        id: String,
+        input: CharacterInput
+    ): Result<Character> {
+        return try {
+            val response = apolloClient.mutation(
+                UpdateCharacterMutation(id, input)
+            ).execute()
+
+            response.data?.updateCharacter?.let {
+                Result.success(it)
+            } ?: Result.failure(Exception("Failed to update character"))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+}
+```
+
+## ViewModel Layer
+
+### Character ViewModel
+
+```kotlin
+class CharacterViewModel @Inject constructor(
+    private val characterRepository: CharacterRepository
+) : ViewModel() {
+
+    private val _characters = MutableStateFlow<List<Character>>(emptyList())
+    val characters: StateFlow<List<Character>> = _characters.asStateFlow()
+
+    private val _paginationInfo = MutableStateFlow<Info?>(null)
+    val paginationInfo: StateFlow<Info?> = _paginationInfo.asStateFlow()
+
+    private val _selectedCharacter = MutableStateFlow<Character?>(null)
+    val selectedCharacter: StateFlow<Character?> = _selectedCharacter.asStateFlow()
+
+    fun loadCharacters(page: Int) {
+        viewModelScope.launch {
+            characterRepository.getCharacters(page)
+                .onSuccess { characters ->
+                    _characters.value = characters.results
+                    _paginationInfo.value = characters.info
+                }
+                .onFailure { error ->
+                    // Handle error
+                }
+        }
+    }
+
+    fun loadCharacter(id: String) {
+        viewModelScope.launch {
+            characterRepository.getCharacter(id)
+                .onSuccess { character ->
+                    _selectedCharacter.value = character
+                }
+                .onFailure { error ->
+                    // Handle error
+                }
+        }
+    }
+
+    fun createCharacter(input: CharacterInput) {
+        viewModelScope.launch {
+            characterRepository.createCharacter(input)
+                .onSuccess { character ->
+                    _characters.value = _characters.value + character
+                }
+                .onFailure { error ->
+                    // Handle error
+                }
+        }
+    }
+
+    fun updateCharacter(id: String, input: CharacterInput) {
+        viewModelScope.launch {
+            characterRepository.updateCharacter(id, input)
+                .onSuccess { character ->
+                    _characters.value = _characters.value.map {
+                        if (it.id == character.id) character else it
+                    }
+                }
+                .onFailure { error ->
+                    // Handle error
+                }
+        }
+    }
+}
+```
+
+## UI Layer
+
+### Character List Screen
+
+```kotlin
+@Composable
+fun CharacterListScreen(
+    viewModel: CharacterViewModel = viewModel()
+) {
+    val characters by viewModel.characters.collectAsState()
+    val paginationInfo by viewModel.paginationInfo.collectAsState()
+
+    LazyColumn {
+        items(characters) { character ->
+            CharacterItem(
+                character = character,
+                onClick = { viewModel.loadCharacter(character.id) }
+            )
+        }
+
+        paginationInfo?.let { info ->
+            item {
+                PaginationControls(
+                    currentPage = info.next?.minus(1) ?: 1,
+                    totalPages = info.pages,
+                    onPageChange = { page ->
+                        viewModel.loadCharacters(page)
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun CharacterItem(
+    character: Character,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+            .clickable(onClick = onClick),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            AsyncImage(
+                model = character.image,
+                contentDescription = character.name,
+                modifier = Modifier
+                    .size(64.dp)
+                    .clip(CircleShape)
+            )
+
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 16.dp)
+            ) {
+                Text(
+                    text = character.name,
+                    style = MaterialTheme.typography.h6
+                )
+
+                Text(
+                    text = "${character.species} - ${character.status}",
+                    style = MaterialTheme.typography.body2
+                )
+            }
+        }
+    }
+}
+```
+
+## Best Practices
+
+### GraphQL Guidelines
+
+```kotlin
+// 1. Use fragments for reusable fields
+val characterFields = """
+    fragment CharacterFields on Character {
+        id
+        name
+        status
+        species
+        type
+        gender
+        image
+        origin {
+            id
+            name
+        }
+        location {
+            id
+            name
+        }
+    }
+""".trimIndent()
+
+// 2. Implement error handling
+sealed class GraphQLError : Exception() {
+    data class NetworkError(override val message: String) : GraphQLError()
+    data class ValidationError(override val message: String) : GraphQLError()
+    data class ServerError(override val message: String) : GraphQLError()
+}
+
+// 3. Use type-safe builders
+@DslMarker
+annotation class GraphQLDsl
+
+@GraphQLDsl
+class CharacterInputBuilder {
+    var name: String = ""
+    var status: String? = null
+    var species: String? = null
+    var type: String? = null
+    var gender: String? = null
+    var originId: String? = null
+    var locationId: String? = null
+    var image: String? = null
+
+    fun build() = CharacterInput(
+        name = name,
+        status = status,
+        species = species,
+        type = type,
+        gender = gender,
+        originId = originId,
+        locationId = locationId,
+        image = image
+    )
+}
+
+fun characterInput(block: CharacterInputBuilder.() -> Unit): CharacterInput {
+    return CharacterInputBuilder().apply(block).build()
+}
+```
+
+## Common Patterns
+
+### GraphQL Extensions
+
+```kotlin
+fun <T> ApolloResponse<T>.toResult(): Result<T> {
+    return when {
+        hasErrors() -> Result.failure(
+            GraphQLError.ServerError(errors?.firstOrNull()?.message ?: "Unknown error")
+        )
+        data == null -> Result.failure(
+            GraphQLError.ValidationError("No data received")
+        )
+        else -> Result.success(data)
+    }
+}
+
+fun ApolloClient.queryWithCache(
+    query: Query<*>,
+    cachePolicy: CachePolicy = CachePolicy.CacheFirst
+): Flow<Result<*>> = flow {
+    try {
+        emit(Result.success(query(query).execute().toResult()))
+    } catch (e: Exception) {
+        emit(Result.failure(GraphQLError.NetworkError(e.message ?: "Network error")))
+    }
+}
+```
+
+## Conclusion
+
+Working with GraphQL in Kotlin requires:
+
+- Understanding GraphQL concepts
+- Proper client setup
+- Type-safe operations
+- Error handling
+- Caching strategy
+
+Remember to:
+
+- Use fragments for reusable fields
+- Implement proper error handling
+- Consider caching strategies
+- Handle network errors
+- Test your queries
+- Monitor performance
+
+Stay tuned for more Kotlin tips and tricks!

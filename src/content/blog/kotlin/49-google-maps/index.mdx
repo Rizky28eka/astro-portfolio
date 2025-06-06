@@ -1,0 +1,276 @@
+---
+title: "Using Google Maps in Kotlin"
+summary: "Learn how to integrate Google Maps and add markers in your Kotlin apps"
+date: "2025-06-11"
+category: "kotlin"
+tags: ["kotlin", "google-maps", "location", "geo-app"]
+---
+
+## Using Google Maps in Kotlin
+
+Let's explore how to integrate Google Maps and add markers in your Kotlin apps.
+
+## Project Setup
+
+### Dependencies
+
+```kotlin
+// build.gradle.kts
+dependencies {
+    implementation("com.google.android.gms:play-services-maps:18.2.0")
+    implementation("com.google.android.gms:play-services-location:21.1.0")
+}
+```
+
+### API Key Setup
+
+```xml
+<!-- AndroidManifest.xml -->
+<application>
+    <meta-data
+        android:name="com.google.android.geo.API_KEY"
+        android:value="YOUR_API_KEY" />
+</application>
+```
+
+## Basic Map Integration
+
+### XML Layout
+
+```xml
+<!-- activity_main.xml -->
+<fragment
+    android:id="@+id/map"
+    android:name="com.google.android.gms.maps.SupportMapFragment"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" />
+```
+
+### Map Initialization
+
+```kotlin
+class MainActivity : AppCompatActivity(), OnMapReadyCallback {
+    private lateinit var map: GoogleMap
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        val mapFragment = supportFragmentManager
+            .findFragmentById(R.id.map) as SupportMapFragment
+        mapFragment.getMapAsync(this)
+    }
+
+    override fun onMapReady(googleMap: GoogleMap) {
+        map = googleMap
+
+        // Set initial camera position
+        val initialLocation = LatLng(-6.2088, 106.8456) // Jakarta
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(initialLocation, 12f))
+
+        // Enable user location
+        map.isMyLocationEnabled = true
+
+        // Enable zoom controls
+        map.uiSettings.isZoomControlsEnabled = true
+    }
+}
+```
+
+## Map Markers
+
+### Adding Markers
+
+```kotlin
+// Basic marker
+val marker = map.addMarker(
+    MarkerOptions()
+        .position(LatLng(-6.2088, 106.8456))
+        .title("Jakarta")
+        .snippet("Capital of Indonesia")
+)
+
+// Custom marker
+val customMarker = map.addMarker(
+    MarkerOptions()
+        .position(LatLng(-6.2088, 106.8456))
+        .icon(BitmapDescriptorFactory.fromResource(R.drawable.custom_marker))
+        .anchor(0.5f, 0.5f)
+)
+
+// Marker click listener
+map.setOnMarkerClickListener { marker ->
+    Toast.makeText(this, marker.title, Toast.LENGTH_SHORT).show()
+    true
+}
+```
+
+## Map Controls
+
+### Camera Controls
+
+```kotlin
+// Camera movement
+fun moveCamera(latLng: LatLng, zoom: Float = 15f) {
+    map.animateCamera(
+        CameraUpdateFactory.newLatLngZoom(latLng, zoom),
+        1000,
+        null
+    )
+}
+
+// Camera bounds
+fun fitBounds(locations: List<LatLng>) {
+    val builder = LatLngBounds.builder()
+    locations.forEach { builder.include(it) }
+    map.animateCamera(
+        CameraUpdateFactory.newLatLngBounds(builder.build(), 100),
+        1000,
+        null
+    )
+}
+```
+
+## Location Services
+
+### Location Updates
+
+```kotlin
+class LocationManager(
+    private val context: Context,
+    private val lifecycleOwner: LifecycleOwner
+) {
+    private val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
+    private val locationRequest = LocationRequest.create().apply {
+        priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        interval = 10000
+    }
+
+    fun startLocationUpdates(callback: (Location) -> Unit) {
+        if (ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            fusedLocationClient.requestLocationUpdates(
+                locationRequest,
+                object : LocationCallback() {
+                    override fun onLocationResult(locationResult: LocationResult) {
+                        locationResult.lastLocation?.let { callback(it) }
+                    }
+                },
+                Looper.getMainLooper()
+            )
+        }
+    }
+}
+```
+
+## Custom Map Features
+
+### Custom Overlays
+
+```kotlin
+// Custom ground overlay
+val groundOverlay = map.addGroundOverlay(
+    GroundOverlayOptions()
+        .position(LatLng(-6.2088, 106.8456), 1000f, 1000f)
+        .image(BitmapDescriptorFactory.fromResource(R.drawable.overlay))
+        .transparency(0.5f)
+)
+
+// Custom polyline
+val polyline = map.addPolyline(
+    PolylineOptions()
+        .add(LatLng(-6.2088, 106.8456))
+        .add(LatLng(-6.2188, 106.8556))
+        .color(Color.RED)
+        .width(5f)
+)
+```
+
+## Best Practices
+
+### Map State Management
+
+```kotlin
+// Save map state
+override fun onSaveInstanceState(outState: Bundle) {
+    super.onSaveInstanceState(outState)
+    map?.let { googleMap ->
+        outState.putParcelable("map_state", googleMap.cameraPosition)
+    }
+}
+
+// Restore map state
+override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+    super.onRestoreInstanceState(savedInstanceState)
+    savedInstanceState.getParcelable<CameraPosition>("map_state")?.let { position ->
+        map?.moveCamera(CameraUpdateFactory.newCameraPosition(position))
+    }
+}
+```
+
+## Common Patterns
+
+### Map Utilities
+
+```kotlin
+// 1. Marker manager
+class MarkerManager(private val map: GoogleMap) {
+    private val markers = mutableMapOf<String, Marker>()
+
+    fun addMarker(id: String, position: LatLng, title: String) {
+        markers[id] = map.addMarker(
+            MarkerOptions()
+                .position(position)
+                .title(title)
+        )
+    }
+
+    fun removeMarker(id: String) {
+        markers[id]?.remove()
+        markers.remove(id)
+    }
+
+    fun updateMarker(id: String, position: LatLng) {
+        markers[id]?.position = position
+    }
+}
+
+// 2. Location tracker
+class LocationTracker(
+    private val context: Context,
+    private val onLocationUpdate: (LatLng) -> Unit
+) {
+    private val locationManager = LocationManager(context, lifecycleOwner)
+
+    fun startTracking() {
+        locationManager.startLocationUpdates { location ->
+            onLocationUpdate(LatLng(location.latitude, location.longitude))
+        }
+    }
+}
+```
+
+## Conclusion
+
+Google Maps integration in Kotlin requires:
+
+- Proper project setup
+- Understanding map controls
+- Managing markers
+- Handling location updates
+- Following best practices
+- Using common patterns
+
+Remember to:
+
+- Handle permissions
+- Manage map state
+- Optimize performance
+- Handle errors
+- Test on different devices
+- Follow Google Maps guidelines
+
+Stay tuned for more Kotlin tips and tricks!

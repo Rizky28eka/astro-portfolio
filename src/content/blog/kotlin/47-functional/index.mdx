@@ -1,0 +1,245 @@
+---
+title: "Functional Programming in Kotlin"
+summary: "Learn how to use functional programming concepts and higher-order functions in Kotlin"
+date: "2025-05-28"
+category: "kotlin"
+tags: ["kotlin", "functional-programming", "higher-order-functions", "lambda"]
+---
+
+## Functional Programming in Kotlin
+
+Let's explore functional programming concepts and how to use them effectively in Kotlin.
+
+## Higher-Order Functions
+
+### Function Types
+
+```kotlin
+// Function type declarations
+typealias IntOperation = (Int) -> Int
+typealias StringPredicate = (String) -> Boolean
+typealias NumberTransformer = (Number) -> Number
+
+// Function as parameter
+fun processNumbers(numbers: List<Int>, operation: IntOperation): List<Int> {
+    return numbers.map(operation)
+}
+
+// Function as return type
+fun createMultiplier(factor: Int): IntOperation {
+    return { number -> number * factor }
+}
+
+// Function as property
+val square: IntOperation = { it * it }
+val isEven: (Int) -> Boolean = { it % 2 == 0 }
+```
+
+## Collection Operations
+
+### Map, Filter, Reduce
+
+```kotlin
+// Map transformation
+val numbers = listOf(1, 2, 3, 4, 5)
+val doubled = numbers.map { it * 2 }
+val strings = numbers.map { it.toString() }
+
+// Filter selection
+val evenNumbers = numbers.filter { it % 2 == 0 }
+val positiveNumbers = numbers.filter { it > 0 }
+
+// Reduce aggregation
+val sum = numbers.reduce { acc, num -> acc + num }
+val product = numbers.reduce { acc, num -> acc * num }
+
+// Fold with initial value
+val sumWithInitial = numbers.fold(10) { acc, num -> acc + num }
+val stringConcat = numbers.fold("") { acc, num -> acc + num.toString() }
+```
+
+## Function Composition
+
+### Combining Functions
+
+```kotlin
+// Function composition
+infix fun <A, B, C> ((A) -> B).compose(g: (B) -> C): (A) -> C {
+    return { a -> g(this(a)) }
+}
+
+// Example usage
+val addOne: (Int) -> Int = { it + 1 }
+val multiplyByTwo: (Int) -> Int = { it * 2 }
+val addOneAndMultiplyByTwo = addOne compose multiplyByTwo
+
+// Pipeline operations
+fun <T> T.pipe(vararg functions: (T) -> T): T {
+    return functions.fold(this) { acc, function -> function(acc) }
+}
+
+// Example usage
+val result = 5.pipe(
+    { it + 1 },
+    { it * 2 },
+    { it.toString() }
+)
+```
+
+## Immutability
+
+### Immutable Data Structures
+
+```kotlin
+// Immutable list
+val immutableList = listOf(1, 2, 3, 4, 5)
+val newList = immutableList + 6
+
+// Immutable map
+val immutableMap = mapOf(
+    "a" to 1,
+    "b" to 2,
+    "c" to 3
+)
+val newMap = immutableMap + ("d" to 4)
+
+// Immutable set
+val immutableSet = setOf(1, 2, 3, 4, 5)
+val newSet = immutableSet + 6
+```
+
+## Pure Functions
+
+### Function Purity
+
+```kotlin
+// Impure function
+var counter = 0
+fun incrementCounter(): Int {
+    counter++
+    return counter
+}
+
+// Pure function
+fun increment(number: Int): Int {
+    return number + 1
+}
+
+// Pure function with multiple parameters
+fun calculateTotal(price: Double, quantity: Int, discount: Double): Double {
+    return price * quantity * (1 - discount)
+}
+```
+
+## Function Currying
+
+### Partial Application
+
+```kotlin
+// Curried function
+fun curriedAdd(a: Int): (Int) -> Int {
+    return { b -> a + b }
+}
+
+// Example usage
+val addFive = curriedAdd(5)
+val result = addFive(3) // 8
+
+// Generic currying
+fun <A, B, C> ((A, B) -> C).curry(): (A) -> (B) -> C {
+    return { a -> { b -> this(a, b) } }
+}
+
+// Example usage
+val curriedMultiply = { a: Int, b: Int -> a * b }.curry()
+val multiplyByThree = curriedMultiply(3)
+val result = multiplyByThree(4) // 12
+```
+
+## Best Practices
+
+### Functional Guidelines
+
+```kotlin
+// 1. Use function composition
+val processText = { text: String ->
+    text.trim()
+        .lowercase()
+        .replace(" ", "_")
+}
+
+// 2. Use immutable data
+data class User(
+    val name: String,
+    val age: Int,
+    val email: String
+)
+
+// 3. Use pure functions
+fun calculateDiscount(price: Double, discountRate: Double): Double {
+    return price * (1 - discountRate)
+}
+
+// 4. Use higher-order functions
+fun <T> List<T>.customFilter(predicate: (T) -> Boolean): List<T> {
+    return fold(emptyList()) { acc, element ->
+        if (predicate(element)) acc + element else acc
+    }
+}
+```
+
+## Common Patterns
+
+### Functional Extensions
+
+```kotlin
+// 1. Collection extensions
+fun <T> List<T>.customMap(transform: (T) -> T): List<T> {
+    return fold(emptyList()) { acc, element ->
+        acc + transform(element)
+    }
+}
+
+// 2. Null safety
+fun <T> T?.letIfNotNull(block: (T) -> Unit) {
+    this?.let(block)
+}
+
+// 3. Function memoization
+fun <T, R> ((T) -> R).memoize(): (T) -> R {
+    val cache = mutableMapOf<T, R>()
+    return { input ->
+        cache.getOrPut(input) { this(input) }
+    }
+}
+
+// 4. Function timing
+fun <T> measureTime(block: () -> T): Pair<T, Long> {
+    val startTime = System.currentTimeMillis()
+    val result = block()
+    val endTime = System.currentTimeMillis()
+    return result to (endTime - startTime)
+}
+```
+
+## Conclusion
+
+Functional programming in Kotlin requires:
+
+- Understanding higher-order functions
+- Using immutable data structures
+- Writing pure functions
+- Composing functions effectively
+- Leveraging collection operations
+- Following functional patterns
+
+Remember to:
+
+- Keep functions pure
+- Use immutability
+- Compose functions
+- Use appropriate collection operations
+- Consider performance implications
+- Test functional code
+
+Stay tuned for more Kotlin tips and tricks!
