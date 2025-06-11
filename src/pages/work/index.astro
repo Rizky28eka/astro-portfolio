@@ -6,7 +6,7 @@ import { WORK } from "@consts";
 // Get work collection
 const rawCollection = await getCollection("work");
 // Filter out drafts
-const collection = rawCollection.filter(item => !item.data.draft);
+const collection = rawCollection.filter((item) => !item.data.draft);
 // Sort by dateStart descending
 collection.sort((a, b) => {
   const dateA = new Date(a.data.dateStart || 0).getTime();
@@ -24,14 +24,14 @@ const work = await Promise.all(
 // Format date function
 function formatWorkDate(input: Date | string | undefined) {
   if (!input) return "";
-  
+
   // Return "Present" directly if it's the string "Present"
   if (input === "Present") return "Present";
-  
+
   // Parse date if it's a string (excluding "Present")
   const date = typeof input === "string" ? new Date(input) : input;
   if (isNaN(date.getTime())) return "Invalid date";
-  
+
   const month = date.toLocaleDateString("en-US", { month: "short" });
   const year = date.getFullYear();
   return `${month} ${year}`;
@@ -39,76 +39,106 @@ function formatWorkDate(input: Date | string | undefined) {
 ---
 
 <PageLayout title={WORK.TITLE} description={WORK.DESCRIPTION}>
-  <div class="py-24 px-24 md:px-48 lg:px-72 xl:px-96 relative">
-    <!-- Background decoration -->
+  <div class="py-16 px-16 sm:px-24 md:px-32 lg:px-48 xl:px-64 relative">
     <div class="absolute inset-0 overflow-hidden pointer-events-none">
-      <div class="absolute -top-40 -right-40 w-80 h-80 rounded-full bg-gradient-to-br from-purple-400/10 to-pink-400/10 blur-3xl"></div>
-      <div class="absolute -bottom-40 -left-40 w-80 h-80 rounded-full bg-gradient-to-tr from-blue-400/10 to-cyan-400/10 blur-3xl"></div>
+      <div
+        class="absolute -top-32 -right-32 w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 rounded-full bg-gradient-to-br from-purple-400/10 to-pink-400/10 blur-3xl">
+      </div>
+      <div
+        class="absolute -bottom-32 -left-32 w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 rounded-full bg-gradient-to-tr from-blue-400/10 to-cyan-400/10 blur-3xl">
+      </div>
     </div>
 
-    <!-- Header Section -->
-    <div class="text-center mb-16 relative z-10">
-      <h1 class="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-gray-900 via-purple-900 to-gray-900 dark:from-white dark:via-purple-300 dark:to-white bg-clip-text text-transparent">
+    <div class="text-center mb-10 relative z-10">
+      <h1
+        class="text-4xl sm:text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-gray-900 via-purple-900 to-gray-900 dark:from-white dark:via-purple-300 dark:to-white bg-clip-text text-transparent">
         {WORK.TITLE}
       </h1>
-      <div class="w-24 h-1 bg-gradient-to-r from-purple-500 to-pink-500 mx-auto rounded-full"></div>
+      <div
+        class="w-16 h-1 bg-gradient-to-r from-purple-500 to-pink-500 mx-auto rounded-full">
+      </div>
     </div>
 
     <div class="timeline relative z-10">
-      {work.map((entry, index) => (
-        <div class="timeline-entry animate group relative">
-          <!-- Timeline line -->
-          {index < work.length - 1 && (
-            <div class="absolute left-[14px] top-14 bottom-0 w-0.5 bg-gradient-to-b from-purple-500/20 to-pink-500/10"></div>
-          )}
-          
-          <div class="flex gap-6 py-8 group-first:pt-0">
-            <!-- Timeline dot -->
-            <div class="relative z-10 mt-1.5">
-              <div class="timeline-dot w-7 h-7 rounded-full border-2 border-purple-500/40 bg-white dark:bg-gray-900 flex items-center justify-center shadow-md transition-all duration-300 group-hover:scale-110 group-hover:border-purple-500">
-                <span class="text-xs font-bold">{work.length - index}</span>
-              </div>
-            </div>
-            
-            <!-- Card content -->
-            <div class="flex-grow">
-              <!-- Date and Location row -->
-              <div class="flex justify-between items-center flex-wrap gap-2 mb-3">
-                <div class="text-sm font-medium px-3 py-1 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-full">
-                  {formatWorkDate(entry.data.dateStart)} – {entry.data.dateEnd ? formatWorkDate(entry.data.dateEnd) : "Present"}
+      {
+        work.map((entry, index) => (
+          <div class="timeline-entry animate group relative">
+            {index < work.length - 1 && (
+              <div class="absolute left-[11.5px] sm:left-[13.5px] top-12 bottom-0 w-0.5 bg-gradient-to-b from-purple-500/20 to-pink-500/10" />
+            )}
+
+            <div class="flex gap-4 py-6 group-first:pt-0 sm:gap-6 sm:py-8">
+              <div class="relative z-10 mt-1.5">
+                <div class="timeline-dot w-5 h-5 sm:w-7 sm:h-7 rounded-full border-2 border-purple-500/40 bg-white dark:bg-gray-900 flex items-center justify-center shadow-md transition-all duration-300 group-hover:scale-110 group-hover:border-purple-500">
+                  <span class="text-xs font-bold">{work.length - index}</span>
                 </div>
-                
-                {entry.data.location && (
-                  <div class="text-sm italic text-gray-600 dark:text-gray-400 flex items-center gap-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                      <circle cx="12" cy="10" r="3"></circle>
+              </div>
+
+              <div class="flex-grow">
+                <div class="backdrop-blur-sm bg-white/50 dark:bg-gray-800/50 rounded-2xl border border-gray-200/50 dark:border-gray-700/50 shadow-xl transition-all duration-300 group-hover:shadow-2xl overflow-hidden">
+                  <button
+                    class="accordion-header w-full text-left p-6 sm:p-8 flex items-center justify-between cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500/50"
+                    aria-expanded="false"
+                    aria-controls={`accordion-content-${index}`}>
+                    <div>
+                      <div class="text-xl sm:text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                        {entry.data.company}
+                      </div>
+                      <div class="text-base sm:text-lg font-medium mt-1 text-gray-700 dark:text-gray-300">
+                        {entry.data.role}
+                      </div>
+                    </div>
+                    <svg
+                      class="w-6 h-6 sm:w-7 sm:h-7 text-gray-600 dark:text-gray-300 transition-transform duration-300 transform accordion-arrow"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round">
+                      <polyline points="6 9 12 15 18 9" />
                     </svg>
-                    {entry.data.location}
+                  </button>
+
+                  <div class="px-6 pb-4 sm:px-8 sm:pb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                    <div class="text-xs sm:text-sm font-medium px-2 py-0.5 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-full">
+                      {formatWorkDate(entry.data.dateStart)} –{" "}
+                      {entry.data.dateEnd ?
+                        formatWorkDate(entry.data.dateEnd)
+                      : "Present"}
+                    </div>
+                    {entry.data.location && (
+                      <div class="text-xs sm:text-sm italic text-gray-600 dark:text-gray-400 flex items-center gap-1 sm:mt-0">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          class="w-3 h-3 sm:w-4 sm:h-4"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round">
+                          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                          <circle cx="12" cy="10" r="3" />
+                        </svg>
+                        {entry.data.location}
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-              
-              <!-- Company and Role -->
-              <div class="backdrop-blur-sm bg-white/50 dark:bg-gray-800/50 rounded-2xl p-8 border border-gray-200/50 dark:border-gray-700/50 shadow-xl transition-all duration-300 group-hover:shadow-2xl">
-                <div class="mb-4">
-                  <div class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                    {entry.data.company}
-                  </div>
-                  <div class="text-lg font-medium mt-1 text-gray-700 dark:text-gray-300">
-                    {entry.data.role}
+
+                  <div
+                    id={`accordion-content-${index}`}
+                    class="accordion-content max-h-0 overflow-hidden transition-[max-height] duration-500 ease-in-out">
+                    <article class="prose dark:prose-invert max-w-none text-sm sm:text-base px-6 pb-6 sm:px-8 sm:pb-8 pt-0">
+                      <entry.Content />
+                    </article>
                   </div>
                 </div>
-                
-                <!-- Content -->
-                <article class="prose dark:prose-invert max-w-none">
-                  <entry.Content />
-                </article>
               </div>
             </div>
           </div>
-        </div>
-      ))}
+        ))
+      }
     </div>
   </div>
 </PageLayout>
@@ -116,7 +146,8 @@ function formatWorkDate(input: Date | string | undefined) {
 <style>
   /* Custom animations */
   @keyframes float {
-    0%, 100% {
+    0%,
+    100% {
       transform: translateY(0px);
     }
     50% {
@@ -131,18 +162,72 @@ function formatWorkDate(input: Date | string | undefined) {
   .timeline-entry {
     transition: transform 0.3s ease;
   }
-  
+
   .timeline-entry:hover {
     transform: translateX(4px);
   }
 
-  .card-content {
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-  }
-
-  @media (prefers-color-scheme: dark) {
-    .card-content {
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  /* Accessibility improvements */
+  @media (prefers-reduced-motion: reduce) {
+    .animate-float,
+    .animate-gradient,
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
     }
   }
 </style>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const headers = document.querySelectorAll(".accordion-header");
+
+    headers.forEach((header) => {
+      header.addEventListener("click", () => {
+        const backdrop = header.closest(".backdrop-blur-sm");
+        if (!backdrop) return;
+        const content = backdrop.querySelector(
+          ".accordion-content"
+        ) as HTMLElement | null;
+        const arrow = header.querySelector(".accordion-arrow");
+
+        if (content && arrow) {
+          const isExpanded = header.getAttribute("aria-expanded") === "true";
+
+          document
+            .querySelectorAll('.accordion-header[aria-expanded="true"]')
+            .forEach((openHeader) => {
+              if (openHeader !== header) {
+                openHeader.setAttribute("aria-expanded", "false");
+                const openBackdrop = openHeader?.closest(".backdrop-blur-sm");
+                const openContent =
+                  openBackdrop ?
+                    (openBackdrop.querySelector(
+                      ".accordion-content"
+                    ) as HTMLElement | null)
+                  : null;
+                const openArrow = openHeader.querySelector(".accordion-arrow");
+                if (openContent) {
+                  openContent.style.maxHeight = "0";
+                }
+                if (openArrow) {
+                  openArrow.classList.remove("rotate-180");
+                }
+              }
+            });
+
+          if (isExpanded) {
+            header.setAttribute("aria-expanded", "false");
+            content.style.maxHeight = "0";
+            arrow.classList.remove("rotate-180");
+          } else {
+            header.setAttribute("aria-expanded", "true");
+            content.style.maxHeight = content.scrollHeight + "px";
+            arrow.classList.add("rotate-180");
+          }
+        }
+      });
+    });
+  });
+</script>

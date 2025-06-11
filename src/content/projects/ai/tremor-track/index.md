@@ -88,8 +88,8 @@ track-tremor/
 - **MSE:** 0.1730
 - **R² Score:** 0.8735
 - **Visualizations:**
-  - ![Actual vs Predicted](src/content/projects/project-3/images/actual_vs_predicted.png)
-  - ![Feature Selection](after dropping unimportant features.png)
+  - ![Actual vs Predicted](./images/actual_vs_predicted.png)
+  - ![Feature Selection](./images/after_dropping_unimportant_features.png)
 
 ## Results & Impact
 
@@ -99,8 +99,8 @@ track-tremor/
 
 ## Demo / Screenshots
 
-- ![Prediction vs Actual](src/content/projects/project-3/images/after_dropping_unimportant_features.png)
-- ![Feature Selection](after dropping unimportant features.png)
+- ![Prediction vs Actual](./images/after_dropping_unimportant_features.png)
+- ![Feature Selection](./images/after_dropping_unimportant_features.png)
 
 ## Future Improvements
 

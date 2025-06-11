@@ -1,660 +1,700 @@
 import type { CollectionEntry } from "astro:content"
-import { createEffect, createSignal, createMemo, For, Show, batch, onMount } from "solid-js"
+import { createSignal, For, createMemo, Show, onMount, onCleanup } from "solid-js"
+import { debounce } from "@solid-primitives/scheduled"
 import ArrowCard from "@components/ui/ArrowCard"
-import { cn } from "@lib/utils"
-import OtherTags from "./OtherTags"
-import DateFilter from "./DateFilter"
+import { cn } from "@lib/utils" // Pastikan utilitas `cn` benar
 
-// Types
 type Props = {
   tags: string[]
-  data: CollectionEntry<"blog">[]
+  data: CollectionEntry<"blog">[] // Sekarang menerima SEMUA data
 }
 
-type DateFilterValue = typeof DATE_FILTER_OPTIONS[number]['value'] | string
-type DifficultyLevel = typeof DIFFICULTY_LEVELS[number]
+type SortType = "date" | "name" | "popularity"
 
-// Constants
-const LANGUAGE_TAGS = new Set([
-  'python', 'javascript', 'typescript', 'java', 'c++', 'c#', 'php', 'ruby',
-  'go', 'rust', 'swift', 'kotlin', 'dart', 'scala', 'r', 'matlab', 'perl',
-  'haskell', 'elixir', 'clojure', 'lua', 'julia', 'crystal', 'nim', 'zig',
-  'cpp', 'csharp', 'golang', 'js', 'ts', 'py'
-].map(tag => tag.toLowerCase()))
-
-const CATEGORY_TAGS = new Set([
-  'flutter', 'git', 'java', 'kotlin', 'android', 'ios', 'web', 'mobile',
-  'backend', 'frontend', 'database', 'devops', 'tutorial', 'guide'
-].map(tag => tag.toLowerCase()))
-
-const DIFFICULTY_LEVELS = ['beginner', 'medium', 'advanced'] as const
-
-const POSTS_PER_PAGE = 15
-
-const DIFFICULTY_DISPLAY: Record<DifficultyLevel, string> = {
-  'beginner': 'Beginner',
-  'medium': 'Medium', 
-  'advanced': 'Advanced'
+const TAG_CATEGORIES = {
+  categories: ['flutter', 'git', 'java', 'kotlin'],
+  languages: ['javascript', 'typescript', 'python', 'java', 'go'],
+  frameworks: ['react', 'vue', 'angular', 'svelte', 'astro'],
 } as const
 
-const DATE_FILTER_OPTIONS = [
-  { value: 'last-week', label: 'Last week', days: 7 },
-  { value: 'last-month', label: 'Last month', days: 30 },
-  { value: 'last-3-months', label: 'Last 3 months', days: 90 },
-  { value: 'last-6-months', label: 'Last 6 months', days: 180 },
-  { value: 'last-year', label: 'Last year', days: 365 }
-] as const
-
-// Utility functions
-const normalizeDifficulty = (difficulty: string | undefined): DifficultyLevel | null => {
-  if (!difficulty) return null
-  const normalized = difficulty.toLowerCase()
-  return DIFFICULTY_LEVELS.includes(normalized as DifficultyLevel) ? normalized as DifficultyLevel : null
-}
-
-const getAvailableYears = (data: CollectionEntry<"blog">[]): number[] => {
-  const years = new Set<number>()
-  data.forEach(post => {
-    if (post.data.date) {
-      years.add(new Date(post.data.date).getFullYear())
-    }
-  })
-  return Array.from(years).sort((a, b) => b - a)
-}
-
-const matchesDateFilter = (postDate: string | Date | undefined, filterValue: DateFilterValue): boolean => {
-  if (!postDate || !filterValue) return true
-  
-  const now = new Date()
-  const postTime = new Date(postDate).getTime()
-  
-  if (/^\d{4}$/.test(filterValue)) {
-    return new Date(postDate).getFullYear() === parseInt(filterValue)
-  }
-  
-  const option = DATE_FILTER_OPTIONS.find(opt => opt.value === filterValue)
-  if (option) {
-    return postTime >= now.getTime() - (option.days * 24 * 60 * 60 * 1000)
-  }
-  
-  return true
-}
-
-// Custom hooks
-function useFilterSet<T extends string>(initialValue: Set<T> = new Set<T>()) {
-  const [filter, setFilter] = createSignal<Set<T>>(initialValue)
-  
-  return {
-    filter,
-    toggle: (value: T) => setFilter(prev => {
-      const newSet = new Set(prev)
-      newSet.has(value) ? newSet.delete(value) : newSet.add(value)
-      return newSet
-    }),
-    clear: () => setFilter(new Set<T>()),
-    has: (value: T) => filter().has(value),
-    size: () => filter().size
-  }
-}
-
-function useSingleFilter<T extends string>(initialValue: T | null = null) {
-  const [filter, setFilter] = createSignal<T | null>(initialValue)
-  
-  return {
-    filter,
-    set: (value: T | null) => setFilter(() => value),
-    clear: () => setFilter(null),
-    get: () => filter(),
-    hasValue: () => filter() !== null
-  }
-}
-
-// UI Components
-const PaginationButton = (props: {
-  onClick: () => void
-  disabled?: boolean
-  children: any
-  class?: string
-  active?: boolean
-}) => (
-  <button
-    onClick={props.onClick}
-    disabled={props.disabled}
-    class={cn(
-      "px-3 py-2 text-sm font-medium rounded-md",
-      "border border-black/10 dark:border-white/20",
-      "transition-all duration-200 ease-in-out",
-      "focus:outline-none focus:ring-2 focus:ring-blue-500/50",
-      props.disabled 
-        ? "opacity-50 cursor-not-allowed bg-gray-50 dark:bg-gray-800 text-gray-400"
-        : props.active
-          ? "bg-blue-500 text-white border-blue-500 hover:bg-blue-600"
-          : "bg-white dark:bg-black hover:bg-gray-50 hover:dark:bg-gray-900 text-black dark:text-white",
-      props.class
-    )}
-  >
-    {props.children}
-  </button>
-)
-
-// Main Component
 export default function Blog({ data, tags }: Props) {
-  // State management
-  const languageFilter = useFilterSet<string>()
-  const otherFilter = useFilterSet<string>()
-  const difficultyFilter = useFilterSet<DifficultyLevel>()
-  const dateFilter = useSingleFilter<DateFilterValue>()
-  
-  const [selectedCategory, setSelectedCategory] = createSignal<string | null>(null)
-  const [currentPage, setCurrentPage] = createSignal(1)
+  // Core state
+  const [searchQuery, setSearchQuery] = createSignal('')
+  const [activeFilters, setActiveFilters] = createSignal<Set<string>>(new Set())
+  const [sortBy, setSortBy] = createSignal<SortType>("date")
 
-  // Memoized values
-  const availableYears = createMemo(() => getAvailableYears(data))
+  // Paginasi state
+  const [currentPage, setCurrentPage] = createSignal(1);
+  const postsPerPage = 9; // Sesuaikan dengan pageSize di Astro sebelumnya
 
-  const categories = createMemo(() => {
-    const uniqueCategories = new Set<string>()
-    data.forEach(post => {
-      const category = post.slug.split('/')[0]
-      if (category) uniqueCategories.add(category)
+  // Desktop dropdown states
+  const [isLanguageOpen, setIsLanguageOpen] = createSignal(false)
+  const [isFrameworkOpen, setIsFrameworkOpen] = createSignal(false)
+  const [isCategoryOpen, setIsCategoryOpen] = createSignal(false)
+  const [isOtherOpen, setIsOtherOpen] = createSignal(false)
+
+  // Mobile bottom sheet states
+  const [isBottomSheetOpen, setIsBottomSheetOpen] = createSignal(false)
+  const [activeBottomSheetTab, setActiveBottomSheetTab] = createSignal<'category' | 'language' | 'framework' | 'other'>('category')
+
+  // Debounced search
+  const setSearchDebounced = debounce((value: string) => {
+    setSearchQuery(value.toLowerCase())
+    setCurrentPage(1); // Reset halaman saat pencarian berubah
+  }, 300)
+
+  // Kategorikan tag
+  const categorizedTags = createMemo(() => {
+    const normalizedTags = tags.map(tag => tag.toLowerCase())
+    const categories: { frameworks: string[]; languages: string[]; categories: string[]; others: string[] } = { frameworks: [], languages: [], categories: [], others: [] }
+
+    normalizedTags.forEach(tag => {
+      if (TAG_CATEGORIES.frameworks.includes(tag as (typeof TAG_CATEGORIES.frameworks)[number])) categories.frameworks.push(tag)
+      else if (TAG_CATEGORIES.languages.includes(tag as (typeof TAG_CATEGORIES.languages)[number])) categories.languages.push(tag)
+      else if (TAG_CATEGORIES.categories.includes(tag as (typeof TAG_CATEGORIES.categories)[number])) categories.categories.push(tag)
+      else categories.others.push(tag)
     })
-    return Array.from(uniqueCategories).sort()
+
+    return categories
   })
 
-  const categorizedTags = createMemo(() => ({
-    language: tags.filter(tag => LANGUAGE_TAGS.has(tag.toLowerCase())),
-    other: tags.filter(tag => {
-      const lowerTag = tag.toLowerCase()
-      return !LANGUAGE_TAGS.has(lowerTag) && 
-             !DIFFICULTY_LEVELS.includes(lowerTag as DifficultyLevel) &&
-             !CATEGORY_TAGS.has(lowerTag)
-    })
-  }))
+  // Filter dan urutkan posts (sebelum paginasi)
+  const filteredAndSortedPosts = createMemo(() => {
+    const search = searchQuery()
+    const filters = activeFilters()
 
-  const filteredPosts = createMemo(() => {
-    let posts = data
+    let filtered = data.filter(entry => {
+      const postTags = (entry.data.tags || []).map(tag => tag.toLowerCase())
+      const title = entry.data.title.toLowerCase()
+      const summary = (entry.data.summary || "").toLowerCase()
+      const postCategory = entry.id.split('/')[0].toLowerCase()
 
-    if (selectedCategory()) {
-      posts = posts.filter(post => post.slug.startsWith(selectedCategory()!))
-    }
-
-    const hasActiveFilters = languageFilter.size() > 0 || 
-                            otherFilter.size() > 0 || 
-                            difficultyFilter.size() > 0 ||
-                            dateFilter.hasValue()
-
-    if (!hasActiveFilters) return posts
-
-    return posts.filter(entry => {
-      const postTags = new Set(entry.data.tags?.map((tag: string) => tag.toLowerCase()) || [])
-      const normalizedPostDifficulty = normalizeDifficulty(entry.data.difficulty)
-      const postCategory = entry.slug.split('/')[0].toLowerCase()
-
-      const selectedCategoryTags = Array.from(otherFilter.filter())
-        .filter(tag => CATEGORY_TAGS.has(tag.toLowerCase()))
-
-      if (selectedCategoryTags.length > 0) {
-        if (!selectedCategoryTags.some(tag => postCategory === tag.toLowerCase())) {
-          return false
-        }
+      // Filter pencarian
+      if (search) {
+        const searchMatch =
+          title.includes(search) ||
+          summary.includes(search) ||
+          postTags.some(tag => tag.includes(search)) ||
+          postCategory.includes(search)
+        if (!searchMatch) return false
       }
 
-      const languageMatch = languageFilter.size() === 0 || 
-        Array.from(languageFilter.filter()).some(language => 
-          postTags.has(language.toLowerCase())
-        )
+      // Filter tag dan kategori
+      if (filters.size > 0) {
+        let matchesCategory = true;
+        let matchesOtherTags = true;
 
-      const otherMatch = otherFilter.size() === 0 || 
-        Array.from(otherFilter.filter()).some(other => 
-          postTags.has(other.toLowerCase())
-        )
+        const categoryFilters = Array.from(filters).filter(f => TAG_CATEGORIES.categories.includes(f as (typeof TAG_CATEGORIES.categories)[number]));
+        const otherTagFilters = Array.from(filters).filter(f => 
+          TAG_CATEGORIES.languages.includes(f as (typeof TAG_CATEGORIES.languages)[number]) || 
+          TAG_CATEGORIES.frameworks.includes(f as (typeof TAG_CATEGORIES.frameworks)[number]) || 
+          categorizedTags().others.includes(f)
+        );
 
-      const difficultyMatch = difficultyFilter.size() === 0 || 
-        (normalizedPostDifficulty && difficultyFilter.has(normalizedPostDifficulty))
+        if (categoryFilters.length > 0) {
+          matchesCategory = categoryFilters.includes(postCategory);
+        }
 
-      const dateMatch = !dateFilter.hasValue() || 
-        matchesDateFilter(entry.data.date, dateFilter.get()!)
+        if (otherTagFilters.length > 0) {
+          matchesOtherTags = otherTagFilters.some(filter => postTags.includes(filter));
+        }
 
-      return languageMatch && otherMatch && difficultyMatch && dateMatch
+        // Jika ada filter kategori DAN filter tag lain:
+        // Post harus cocok dengan kategori DAN setidaknya satu tag lain
+        if (categoryFilters.length > 0 && otherTagFilters.length > 0) {
+            return matchesCategory && matchesOtherTags;
+        } 
+        // Jika hanya ada filter kategori:
+        // Post harus cocok dengan kategori
+        else if (categoryFilters.length > 0) {
+            return matchesCategory;
+        } 
+        // Jika hanya ada filter tag lain:
+        // Post harus cocok dengan setidaknya satu tag lain
+        else if (otherTagFilters.length > 0) {
+            return matchesOtherTags;
+        }
+        // Jika filter aktif, tapi tidak ada filter kategori atau tag lainnya
+        // yang cocok dengan post, maka post ini tidak harus ditampilkan.
+        // Namun, jika filter kosong, semua post ditampilkan (sudah di awal).
+      }
+      return true
+    })
+
+    // Urutkan posts
+    return filtered.sort((a, b) => {
+      switch (sortBy()) {
+        case "date":
+          return new Date(b.data.date ?? '').getTime() - new Date(a.data.date ?? '').getTime()
+        case "name":
+          return a.data.title.localeCompare(b.data.title, undefined, { numeric: true })
+        case "popularity":
+          const viewsA = a.data.views || 0
+          const viewsB = b.data.views || 0
+          return viewsB - viewsA || new Date(b.data.date ?? 0).getTime() - new Date(a.data.date ?? 0).getTime()
+        default:
+          return 0
+      }
     })
   })
 
-  const paginationData = createMemo(() => {
-    const totalPosts = filteredPosts().length
-    const totalPages = Math.ceil(totalPosts / POSTS_PER_PAGE)
-    const startIndex = (currentPage() - 1) * POSTS_PER_PAGE
-    const endIndex = startIndex + POSTS_PER_PAGE
-    const currentPosts = filteredPosts().slice(startIndex, endIndex)
-    
-    return {
-      totalPosts,
-      totalPages,
-      currentPosts,
-      startIndex: startIndex + 1,
-      endIndex: Math.min(endIndex, totalPosts)
-    }
-  })
+  // Paginasi posts
+  const paginatedPosts = createMemo(() => {
+    const start = (currentPage() - 1) * postsPerPage;
+    const end = start + postsPerPage;
+    return filteredAndSortedPosts().slice(start, end);
+  });
 
-  const hasActiveFilters = createMemo(() => 
-    languageFilter.size() > 0 || 
-    otherFilter.size() > 0 || 
-    difficultyFilter.size() > 0 ||
-    dateFilter.hasValue()
+  const totalPages = createMemo(() => {
+    return Math.ceil(filteredAndSortedPosts().length / postsPerPage);
+  });
+
+  // Toggle filter
+  const toggleFilter = (tag: string) => {
+    setActiveFilters(prev => {
+      const newFilters = new Set(prev)
+      if (newFilters.has(tag)) {
+        newFilters.delete(tag)
+      } else {
+        newFilters.add(tag)
+      }
+      return newFilters
+    })
+    setCurrentPage(1); // Reset halaman saat filter berubah
+  }
+
+  // Hapus semua filter
+  const clearFilters = () => {
+    setActiveFilters(new Set<string>())
+    setSearchQuery('')
+    setCurrentPage(1); // Reset halaman saat filter dihapus
+  }
+
+  // Tutup semua dropdown
+  const closeAllDropdowns = () => {
+    setIsLanguageOpen(false)
+    setIsFrameworkOpen(false)
+    setIsCategoryOpen(false)
+    setIsOtherOpen(false)
+  }
+
+  // Dapatkan jumlah filter aktif
+  const getActiveFilterCount = () => {
+    return activeFilters().size
+  }
+
+  // Komponen Dropdown Desktop
+  const FilterDropdown = (props: {
+    title: string
+    isOpen: boolean
+    onToggle: () => void
+    items: string[]
+    activeItems: Set<string>
+    onItemToggle: (item: string) => void
+  }) => (
+    <div class="relative">
+      <button
+        onClick={(e) => {
+          e.stopPropagation(); // Mencegah klik menyebar ke document
+          props.onToggle();
+        }}
+        class={cn(
+          "flex items-center gap-2 px-3 py-1.5 text-sm border rounded-md transition-colors",
+          "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800",
+          "hover:bg-gray-50 dark:hover:bg-gray-700",
+          props.isOpen && "border-blue-500 ring-1 ring-blue-500"
+        )}
+      >
+        <span>{props.title}</span>
+        <Show when={Array.from(props.activeItems).filter(item => props.items.includes(item)).length > 0}>
+          <span class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs px-1.5 py-0.5 rounded-full">
+            {Array.from(props.activeItems).filter(item => props.items.includes(item)).length}
+          </span>
+        </Show>
+        <svg
+          class={cn("w-4 h-4 transition-transform", props.isOpen && "rotate-180")}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      <Show when={props.isOpen}>
+        <div class="absolute top-full left-0 mt-1 w-48 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg z-50 max-h-60 overflow-y-auto">
+          <div class="p-2">
+            <For each={props.items}>
+              {(item) => (
+                <label class="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={props.activeItems.has(item)}
+                    onChange={() => props.onItemToggle(item)}
+                    class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span class="text-sm capitalize">
+                    {item}
+                  </span>
+                </label>
+              )}
+            </For>
+          </div>
+        </div>
+      </Show>
+    </div>
   )
 
-  const activeFiltersDescription = createMemo(() => {
-    const parts = []
-    
-    if (difficultyFilter.size() > 0) {
-      const difficultyNames = Array.from(difficultyFilter.filter()).map(d => DIFFICULTY_DISPLAY[d])
-      parts.push(`${difficultyNames.join(', ')} level${difficultyFilter.size() > 1 ? 's' : ''}`)
+  // Bottom Sheet Mobile
+  const BottomSheet = () => (
+    <Show when={isBottomSheetOpen()}>
+      {/* Backdrop */}
+      <div
+        class="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+        onClick={() => setIsBottomSheetOpen(false)}
+      />
+
+      {/* Bottom Sheet */}
+      <div class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 rounded-t-2xl shadow-xl z-50 md:hidden max-h-[80vh] flex flex-col">
+        {/* Header */}
+        <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Filter Posts</h3>
+          <button
+            onClick={() => setIsBottomSheetOpen(false)}
+            class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
+          >
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Tabs */}
+        <div class="border-b border-gray-200 dark:border-gray-700">
+          <div class="flex">
+            <Show when={categorizedTags().categories.length > 0}>
+              <button
+                onClick={() => setActiveBottomSheetTab('category')}
+                class={cn(
+                  "flex-1 px-4 py-3 text-sm font-medium border-b-2 transition-colors",
+                  activeBottomSheetTab() === 'category'
+                    ? "border-blue-500 text-blue-600 dark:text-blue-400"
+                    : "border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                )}
+              >
+                Category
+                <Show when={categorizedTags().categories.some(cat => activeFilters().has(cat))}>
+                  <span class="ml-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs px-1.5 py-0.5 rounded-full">
+                    {categorizedTags().categories.filter(cat => activeFilters().has(cat)).length}
+                  </span>
+                </Show>
+              </button>
+            </Show>
+
+            <Show when={categorizedTags().languages.length > 0}>
+              <button
+                onClick={() => setActiveBottomSheetTab('language')}
+                class={cn(
+                  "flex-1 px-4 py-3 text-sm font-medium border-b-2 transition-colors",
+                  activeBottomSheetTab() === 'language'
+                    ? "border-blue-500 text-blue-600 dark:text-blue-400"
+                    : "border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                )}
+              >
+                Language
+                <Show when={categorizedTags().languages.some(lang => activeFilters().has(lang))}>
+                  <span class="ml-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs px-1.5 py-0.5 rounded-full">
+                    {categorizedTags().languages.filter(lang => activeFilters().has(lang)).length}
+                  </span>
+                </Show>
+              </button>
+            </Show>
+
+            <Show when={categorizedTags().frameworks.length > 0}>
+              <button
+                onClick={() => setActiveBottomSheetTab('framework')}
+                class={cn(
+                  "flex-1 px-4 py-3 text-sm font-medium border-b-2 transition-colors",
+                  activeBottomSheetTab() === 'framework'
+                    ? "border-blue-500 text-blue-600 dark:text-blue-400"
+                    : "border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                )}
+              >
+                Framework
+                <Show when={categorizedTags().frameworks.some(fw => activeFilters().has(fw))}>
+                  <span class="ml-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs px-1.5 py-0.5 rounded-full">
+                    {categorizedTags().frameworks.filter(fw => activeFilters().has(fw)).length}
+                  </span>
+                </Show>
+              </button>
+            </Show>
+
+            <Show when={categorizedTags().others.length > 0}>
+              <button
+                onClick={() => setActiveBottomSheetTab('other')}
+                class={cn(
+                  "flex-1 px-4 py-3 text-sm font-medium border-b-2 transition-colors",
+                  activeBottomSheetTab() === 'other'
+                    ? "border-blue-500 text-blue-600 dark:text-blue-400"
+                    : "border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                )}
+              >
+                Other
+                <Show when={categorizedTags().others.some(other => activeFilters().has(other))}>
+                  <span class="ml-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs px-1.5 py-0.5 rounded-full">
+                    {categorizedTags().others.filter(other => activeFilters().has(other)).length}
+                  </span>
+                </Show>
+              </button>
+            </Show>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div class="flex-1 overflow-y-auto p-4">
+          <Show when={activeBottomSheetTab() === 'category'}>
+            <div class="space-y-2">
+              <For each={categorizedTags().categories}>
+                {(category) => (
+                  <label class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={activeFilters().has(category)}
+                      onChange={() => toggleFilter(category)}
+                      class="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span class="text-sm capitalize font-medium">{category}</span>
+                  </label>
+                )}
+              </For>
+            </div>
+          </Show>
+
+          <Show when={activeBottomSheetTab() === 'language'}>
+            <div class="space-y-2">
+              <For each={categorizedTags().languages}>
+                {(language) => (
+                  <label class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={activeFilters().has(language)}
+                      onChange={() => toggleFilter(language)}
+                      class="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span class="text-sm capitalize font-medium">{language}</span>
+                  </label>
+                )}
+              </For>
+            </div>
+          </Show>
+
+          <Show when={activeBottomSheetTab() === 'framework'}>
+            <div class="space-y-2">
+              <For each={categorizedTags().frameworks}>
+                {(framework) => (
+                  <label class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={activeFilters().has(framework)}
+                      onChange={() => toggleFilter(framework)}
+                      class="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span class="text-sm capitalize font-medium">{framework}</span>
+                  </label>
+                )}
+              </For>
+            </div>
+          </Show>
+
+          <Show when={activeBottomSheetTab() === 'other'}>
+            <div class="space-y-2">
+              <For each={categorizedTags().others}>
+                {(other) => (
+                  <label class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={activeFilters().has(other)}
+                      onChange={() => toggleFilter(other)}
+                      class="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span class="text-sm capitalize font-medium">{other}</span>
+                  </label>
+                )}
+              </For>
+            </div>
+          </Show>
+        </div>
+
+        {/* Footer */}
+        <div class="p-4 border-t border-gray-200 dark:border-gray-700">
+          <div class="flex gap-3">
+            <button
+              onClick={clearFilters}
+              class="flex-1 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600"
+            >
+              Clear All
+            </button>
+            <button
+              onClick={() => setIsBottomSheetOpen(false)}
+              class="flex-1 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+            >
+              Apply Filters
+            </button>
+          </div>
+        </div>
+      </div>
+    </Show>
+  )
+
+  // Chips filter aktif
+  const FilterChips = () => {
+    const allActiveFilters = () => [
+      ...Array.from(activeFilters()).map(tag => ({ type: 'tag', value: tag }))
+    ]
+
+    return (
+      <Show when={allActiveFilters().length > 0}>
+        <div class="flex flex-wrap gap-2 mb-4">
+          <For each={allActiveFilters()}>
+            {(filter) => (
+              <span class="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs rounded-full">
+                <span class="capitalize">{filter.value}</span>
+                <button
+                  onClick={() => {
+                    toggleFilter(filter.value)
+                  }}
+                  class="ml-1 hover:bg-blue-200 dark:hover:bg-blue-800 rounded-full p-0.5"
+                >
+                  <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                  </svg>
+                </button>
+              </span>
+            )}
+          </For>
+          <button
+            onClick={clearFilters}
+            class="text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 underline"
+          >
+            Clear all
+          </button>
+        </div>
+      </Show>
+    )
+  }
+
+  // Klik di luar untuk menutup dropdown
+  const handleDocumentClick = (e: Event) => {
+    const target = e.target as Element
+    if (!target?.closest?.('.relative')) {
+      closeAllDropdowns()
     }
-    if (languageFilter.size() > 0) {
-      parts.push(`${languageFilter.size()} language${languageFilter.size() > 1 ? 's' : ''}`)
+  }
+
+  // Tambahkan event listener untuk klik di luar (hanya saat mount)
+  onMount(() => {
+    if (typeof document !== 'undefined') {
+      document.addEventListener('click', handleDocumentClick)
     }
-    if (otherFilter.size() > 0) {
-      parts.push(`${otherFilter.size()} other tag${otherFilter.size() > 1 ? 's' : ''}`)
-    }
-    if (dateFilter.hasValue()) {
-      const currentFilter = dateFilter.get()
-      if (currentFilter) {
-        if (/^\d{4}$/.test(currentFilter)) {
-          parts.push(`${currentFilter}`)
-        } else {
-          const option = DATE_FILTER_OPTIONS.find(opt => opt.value === currentFilter)
-          if (option) {
-            parts.push(option.label.toLowerCase())
-          }
-        }
-      }
-    }
-    
-    return parts.join(' + ')
   })
 
-  // Effects
-  createEffect(() => {
-    filteredPosts()
-    selectedCategory()
-    languageFilter.size()
-    otherFilter.size()
-    difficultyFilter.size()
-    dateFilter.hasValue()
-    setCurrentPage(1)
-  })
-
-  // Event handlers
-  const clearAllFilters = () => {
-    batch(() => {
-      languageFilter.clear()
-      otherFilter.clear()  
-      difficultyFilter.clear()
-      dateFilter.clear()
-      setCurrentPage(1)
-    })
-  }
-
-  const goToPage = (page: number) => {
-    setCurrentPage(page)
-    onMount(() => {
-      document.querySelector('.posts-section')?.scrollIntoView({ behavior: 'smooth' })
-    })
-  }
-
-  const nextPage = () => {
-    if (currentPage() < paginationData().totalPages) {
-      goToPage(currentPage() + 1)
+  onCleanup(() => {
+    if (typeof document !== 'undefined') {
+      document.removeEventListener('click', handleDocumentClick)
     }
-  }
-
-  const previousPage = () => {
-    if (currentPage() > 1) {
-      goToPage(currentPage() - 1)
-    }
-  }
-
-  const getPageNumbers = createMemo(() => {
-    const totalPages = paginationData().totalPages
-    const current = currentPage()
-    const pages = []
-    
-    if (totalPages <= 7) {
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i)
-      }
-    } else {
-      if (current <= 4) {
-        for (let i = 1; i <= 5; i++) {
-          pages.push(i)
-        }
-        pages.push('...')
-        pages.push(totalPages)
-      } else if (current >= totalPages - 3) {
-        pages.push(1)
-        pages.push('...')
-        for (let i = totalPages - 4; i <= totalPages; i++) {
-          pages.push(i)
-        }
-      } else {
-        pages.push(1)
-        pages.push('...')
-        for (let i = current - 1; i <= current + 1; i++) {
-          pages.push(i)
-        }
-        pages.push('...')
-        pages.push(totalPages)
-      }
-    }
-    
-    return pages
   })
 
   return (
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
-      {/* Filters Sidebar */}
-      <div class="col-span-3 sm:col-span-1">
-        <div class="sticky top-24">
-          {/* Category Navigation */}
-          <div class="mb-6">
-            <h3 class="text-sm font-semibold uppercase text-black dark:text-white mb-2">
-              Categories
-            </h3>
-            <div class="flex flex-col gap-1.5">
-              <button
-                onClick={() => setSelectedCategory(null)}
-                class={cn(
-                  "w-full px-2 py-1 rounded text-left",
-                  "whitespace-nowrap overflow-hidden text-ellipsis",
-                  "flex gap-2 items-center",
-                  "bg-black/5 dark:bg-white/10",
-                  "hover:bg-black/10 hover:dark:bg-white/15",
-                  "transition-colors duration-300 ease-in-out",
-                  "focus:outline-none focus:ring-2 focus:ring-blue-500/50",
-                  !selectedCategory() && "bg-black/10 dark:bg-white/20 text-black dark:text-white"
-                )}
-              >
-                <svg class={cn(
-                  "size-5 fill-black/50 dark:fill-white/50", 
-                  "transition-colors duration-300 ease-in-out", 
-                  !selectedCategory() && "fill-black dark:fill-white"
-                )}>
-                  <use href={`/ui.svg#square${!selectedCategory() ? '-check' : ''}`} />
-                </svg>
-                All Posts
-              </button>
-              <For each={categories()}>
-                {(category) => (
-                  <button
-                    onClick={() => setSelectedCategory(category)}
-                    class={cn(
-                      "w-full px-2 py-1 rounded text-left",
-                      "whitespace-nowrap overflow-hidden text-ellipsis",
-                      "flex gap-2 items-center",
-                      "bg-black/5 dark:bg-white/10",
-                      "hover:bg-black/10 hover:dark:bg-white/15",
-                      "transition-colors duration-300 ease-in-out",
-                      "focus:outline-none focus:ring-2 focus:ring-blue-500/50",
-                      selectedCategory() === category && "bg-black/10 dark:bg-white/20 text-black dark:text-white"
-                    )}
-                  >
-                    <svg class={cn(
-                      "size-5 fill-black/50 dark:fill-white/50", 
-                      "transition-colors duration-300 ease-in-out", 
-                      selectedCategory() === category && "fill-black dark:fill-white"
-                    )}>
-                      <use href={`/ui.svg#square${selectedCategory() === category ? '-check' : ''}`} />
-                    </svg>
-                    {category.charAt(0).toUpperCase() + category.slice(1)}
-                  </button>
-                )}
-              </For>
-            </div>
-          </div>
-
-          {/* Filter Header */}
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="text-sm font-semibold uppercase text-black dark:text-white">
-              Filters
-            </h2>
-            <Show when={hasActiveFilters()}>
-              <button 
-                onClick={clearAllFilters}
-                class="text-xs text-black/50 dark:text-white/50 hover:text-black hover:dark:text-white transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500/50 rounded px-1"
-              >
-                Clear all
-              </button>
-            </Show>
-          </div>
-
-          {/* Date Filter */}
-          <DateFilter
-            availableYears={availableYears()}
-            currentFilter={dateFilter.get()}
-            onFilterChange={dateFilter.set}
+    <div class="max-w-7xl mx-auto px-4">
+      {/* Search Bar */}
+      <div class="mb-6">
+        <div class="relative">
+          <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input
+            type="text"
+            placeholder="Find a post..."
+            onInput={(e) => setSearchDebounced(e.currentTarget.value)}
+            class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
+        </div>
+      </div>
 
-          {/* Difficulty Filters */}
-          <div class="mb-6">
-            <h3 class="text-sm font-semibold uppercase text-black dark:text-white mb-2">
-              Difficulty
-            </h3>
-            <ul class="flex flex-wrap sm:flex-col gap-1.5">
-              <For each={DIFFICULTY_LEVELS}>
-                {(difficulty) => (
-                  <li>
-                    <button 
-                      onClick={() => difficultyFilter.toggle(difficulty)}
-                      class={cn(
-                        "w-full px-2 py-1 rounded text-left",
-                        "whitespace-nowrap overflow-hidden text-ellipsis",
-                        "flex gap-2 items-center",
-                        "bg-black/5 dark:bg-white/10",
-                        "hover:bg-black/10 hover:dark:bg-white/15",
-                        "transition-colors duration-300 ease-in-out",
-                        "focus:outline-none focus:ring-2 focus:ring-blue-500/50",
-                        difficultyFilter.has(difficulty) && "bg-black/10 dark:bg-white/20 text-black dark:text-white"
-                      )}
-                    >
-                      <svg class={cn(
-                        "size-5 fill-black/50 dark:fill-white/50", 
-                        "transition-colors duration-300 ease-in-out", 
-                        difficultyFilter.has(difficulty) && "fill-black dark:fill-white"
-                      )}>
-                        <use href={`/ui.svg#square${difficultyFilter.has(difficulty) ? '-check' : ''}`} />
-                      </svg>
-                      {DIFFICULTY_DISPLAY[difficulty]}
-                    </button>
-                  </li>
-                )}
-              </For>
-            </ul>
-          </div>
+      {/* Desktop Filters */}
+      <div class="mb-6 hidden md:block">
+        <div class="flex flex-wrap gap-3 items-center">
+          <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Filter by:</span>
 
-          {/* Language Filters */}
-          <Show when={categorizedTags().language.length > 0}>
-            <div class="mb-6">
-              <h3 class="text-sm font-semibold uppercase text-black dark:text-white mb-2">
-                Language
-              </h3>
-              <ul class="flex flex-wrap sm:flex-col gap-1.5">
-                <For each={categorizedTags().language}>
-                  {(tag) => (
-                    <li>
-                      <button 
-                        onClick={() => languageFilter.toggle(tag)}
-                        class={cn(
-                          "w-full px-2 py-1 rounded text-left",
-                          "whitespace-nowrap overflow-hidden text-ellipsis",
-                          "flex gap-2 items-center",
-                          "bg-black/5 dark:bg-white/10",
-                          "hover:bg-black/10 hover:dark:bg-white/15",
-                          "transition-colors duration-300 ease-in-out",
-                          "focus:outline-none focus:ring-2 focus:ring-blue-500/50",
-                          languageFilter.has(tag) && "bg-black/10 dark:bg-white/20 text-black dark:text-white"
-                        )}
-                      >
-                        <svg class={cn(
-                          "size-5 fill-black/50 dark:fill-white/50", 
-                          "transition-colors duration-300 ease-in-out", 
-                          languageFilter.has(tag) && "fill-black dark:fill-white"
-                        )}>
-                          <use href={`/ui.svg#square${languageFilter.has(tag) ? '-check' : ''}`} />
-                        </svg>
-                        {tag}
-                      </button>
-                    </li>
-                  )}
-                </For>
-              </ul>
-            </div>
-          </Show>
-
-          {/* Other Tags Filters */}
-          <Show when={categorizedTags().other.length > 0}>
-            <OtherTags
-              tags={categorizedTags().other}
-              selectedTags={otherFilter.filter()}
-              onTagToggle={otherFilter.toggle}
-              onClear={otherFilter.clear}
-              selectedCategory={selectedCategory()}
-              posts={data}
+          <Show when={categorizedTags().categories.length > 0}>
+            <FilterDropdown
+              title="Category"
+              isOpen={isCategoryOpen()}
+              onToggle={() => {
+                closeAllDropdowns()
+                setIsCategoryOpen(!isCategoryOpen())
+              }}
+              items={categorizedTags().categories}
+              activeItems={activeFilters()}
+              onItemToggle={toggleFilter}
             />
           </Show>
-        </div>
-      </div>
 
-      {/* Posts Display */}
-      <div class="col-span-3 sm:col-span-2 posts-section">
-        <div class="flex flex-col">
-          {/* Results Header */}
-          <div class="flex items-center justify-between mb-4">
-            <div class="text-sm uppercase font-semibold">
-              {paginationData().totalPosts} {paginationData().totalPosts === 1 ? 'POST' : 'POSTS'} FOUND
-              <Show when={paginationData().totalPages > 1}>
-                <span class="text-black/50 dark:text-white/50 ml-2">
-                  (Page {currentPage()} of {paginationData().totalPages})
-                </span>
-              </Show>
-            </div>
-            <Show when={hasActiveFilters()}>
-              <div class="text-sm text-black/50 dark:text-white/50">
-                {activeFiltersDescription()}
-              </div>
-            </Show>
-          </div>
-
-          {/* Posts List */}
-          <Show 
-            when={paginationData().currentPosts.length > 0}
-            fallback={
-              <div class="text-center py-12">
-                <p class="text-black/50 dark:text-white/50 mb-4">
-                  No posts found matching the selected filters
-                </p>
-                <Show when={hasActiveFilters()}>
-                  <button 
-                    onClick={clearAllFilters}
-                    class="text-sm text-blue-500 hover:text-blue-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/50 rounded px-2 py-1"
-                  >
-                    Clear all filters
-                  </button>
-                </Show>
-              </div>
-            }
-          >
-            <ul class="flex flex-col gap-3 mb-8" role="list">
-              <For each={paginationData().currentPosts}>
-                {(post) => (
-                  <li>
-                    <ArrowCard entry={post} />
-                  </li>
-                )}
-              </For>
-            </ul>
-
-            {/* Pagination Controls */}
-            <Show when={paginationData().totalPages > 1}>
-              <div class="flex flex-col items-center gap-4">
-                {/* Pagination Info */}
-                <div class="text-sm text-black/60 dark:text-white/60">
-                  Showing {paginationData().startIndex} to {paginationData().endIndex} of {paginationData().totalPosts} posts
-                </div>
-
-                {/* Pagination Buttons */}
-                <div class="flex items-center gap-2 flex-wrap justify-center">
-                  {/* Previous Button */}
-                  <PaginationButton
-                    onClick={previousPage}
-                    disabled={currentPage() === 1}
-                    class="flex items-center gap-1"
-                  >
-                    <svg class="size-4 fill-current">
-                      <use href="/ui.svg#chevron-left" />
-                    </svg>
-                    Previous
-                  </PaginationButton>
-
-                  {/* Page Numbers */}
-                  <div class="flex items-center gap-1">
-                    <For each={getPageNumbers()}>
-                      {(pageNum) => (
-                        <Show 
-                          when={typeof pageNum === 'number'}
-                          fallback={
-                            <span class="px-2 py-2 text-black/50 dark:text-white/50">
-                              ...
-                            </span>
-                          }
-                        >
-                          <PaginationButton
-                            onClick={() => goToPage(pageNum as number)}
-                            active={currentPage() === pageNum}
-                            class="min-w-[40px]"
-                          >
-                            {pageNum}
-                          </PaginationButton>
-                        </Show>
-                      )}
-                    </For>
-                  </div>
-
-                  {/* Next Button */}
-                  <PaginationButton
-                    onClick={nextPage}
-                    disabled={currentPage() === paginationData().totalPages}
-                    class="flex items-center gap-1"
-                  >
-                    Next
-                    <svg class="size-4 fill-current">
-                      <use href="/ui.svg#chevron-right" />
-                    </svg>
-                  </PaginationButton>
-                </div>
-
-                {/* Quick Jump (for many pages) */}
-                <Show when={paginationData().totalPages > 10}>
-                  <div class="flex items-center gap-2 text-sm">
-                    <span class="text-black/60 dark:text-white/60">Jump to page:</span>
-                    <input
-                      type="number"
-                      min="1"
-                      max={paginationData().totalPages}
-                      value={currentPage()}
-                      onInput={(e) => {
-                        const value = parseInt(e.currentTarget.value)
-                        if (value >= 1 && value <= paginationData().totalPages) {
-                          goToPage(value)
-                        }
-                      }}
-                      class="w-16 px-2 py-1 text-center border border-black/20 dark:border-white/20 rounded bg-white dark:bg-black focus:outline-none focus:ring-2 focus:ring-blue-500/50"
-                    />
-                    <span class="text-black/60 dark:text-white/60">of {paginationData().totalPages}</span>
-                  </div>
-                </Show>
-              </div>
-            </Show>
+          <Show when={categorizedTags().languages.length > 0}>
+            <FilterDropdown
+              title="Language"
+              isOpen={isLanguageOpen()}
+              onToggle={() => {
+                closeAllDropdowns()
+                setIsLanguageOpen(!isLanguageOpen())
+              }}
+              items={categorizedTags().languages}
+              activeItems={activeFilters()}
+              onItemToggle={toggleFilter}
+            />
           </Show>
+
+          <Show when={categorizedTags().frameworks.length > 0}>
+            <FilterDropdown
+              title="Framework"
+              isOpen={isFrameworkOpen()}
+              onToggle={() => {
+                closeAllDropdowns()
+                setIsFrameworkOpen(!isFrameworkOpen())
+              }}
+              items={categorizedTags().frameworks}
+              activeItems={activeFilters()}
+              onItemToggle={toggleFilter}
+            />
+          </Show>
+
+          <Show when={categorizedTags().others.length > 0}>
+            <FilterDropdown
+              title="Other"
+              isOpen={isOtherOpen()}
+              onToggle={() => {
+                closeAllDropdowns()
+                setIsOtherOpen(!isOtherOpen())
+              }}
+              items={categorizedTags().others}
+              activeItems={activeFilters()}
+              onItemToggle={toggleFilter}
+            />
+          </Show>
+            {/* Sort */}
+            <div class="relative ml-auto">
+            <select
+              value={sortBy()}
+              onChange={(e) => {
+                setSortBy(e.currentTarget.value as SortType);
+                setCurrentPage(1); // Reset halaman saat sort berubah
+              }}
+              class="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="date">Sort by Date</option>
+              <option value="name">Sort by Name</option>
+              <option value="popularity">Sort by Popularity</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Chips Filter Aktif */}
+        <FilterChips />
+
+        {/* Penghitung Hasil */}
+        <div class="flex justify-between items-center text-sm text-gray-600 dark:text-gray-400">
+          <span>
+            {filteredAndSortedPosts().length} {filteredAndSortedPosts().length === 1 ? 'post' : 'posts'}
+          </span>
         </div>
       </div>
+
+      {/* Tombol Filter Mobile & Hasil */}
+      <div class="mb-6 md:hidden">
+        <div class="flex items-center justify-between mb-4">
+          <button
+            onClick={() => setIsBottomSheetOpen(true)}
+            class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+            </svg>
+            <span class="text-sm font-medium">Filters</span>
+            <Show when={getActiveFilterCount() > 0}>
+              <span class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs px-1.5 py-0.5 rounded-full">
+                {getActiveFilterCount()}
+              </span>
+            </Show>
+          </button>
+
+          <span class="text-sm text-gray-600 dark:text-gray-400">
+            {filteredAndSortedPosts().length} {filteredAndSortedPosts().length === 1 ? 'post' : 'posts'}
+          </span>
+        </div>
+
+        {/* Chips Filter Aktif untuk Mobile */}
+        <FilterChips />
+      </div>
+
+      {/* Grid Posts */}
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <For each={paginatedPosts()}>
+          {(post) => (
+            <ArrowCard entry={post} pill={true} />
+          )}
+        </For>
+      </div>
+
+      {/* Tidak Ada Hasil */}
+      <Show when={filteredAndSortedPosts().length === 0}>
+        <div class="text-center py-12">
+          <div class="w-16 h-16 mx-auto mb-4 text-gray-300 dark:text-gray-600">
+            <svg fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+            </svg>
+          </div>
+          <h3 class="text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100">Tidak ada posts ditemukan</h3>
+          <p class="text-gray-600 dark:text-gray-400 mb-4">
+            Kami tidak dapat menemukan posts yang sesuai dengan filter Anda.
+          </p>
+          <button
+            onClick={clearFilters}
+            class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            Hapus filter
+          </button>
+        </div>
+      </Show>
+
+      {/* Kontrol Paginasi */}
+      <Show when={totalPages() > 1}>
+        <div class="flex justify-center items-center gap-2 mt-10">
+          <button
+            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+            class={cn(
+              "px-4 py-2 rounded border text-sm font-medium transition-colors",
+              currentPage() <= 1 ? 'pointer-events-none opacity-50 bg-gray-100 dark:bg-gray-700 text-gray-400' : 'hover:bg-gray-200 dark:hover:bg-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100'
+            )}
+            disabled={currentPage() <= 1}
+          >
+            Prev
+          </button>
+          <span class="mx-2 text-gray-500 dark:text-gray-400">Page {currentPage()} of {totalPages()}</span>
+          <button
+            onClick={() => setCurrentPage(prev => Math.min(totalPages(), prev + 1))}
+            class={cn(
+              "px-4 py-2 rounded border text-sm font-medium transition-colors",
+              currentPage() >= totalPages() ? 'pointer-events-none opacity-50 bg-gray-100 dark:bg-gray-700 text-gray-400' : 'hover:bg-gray-200 dark:hover:bg-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100'
+            )}
+            disabled={currentPage() >= totalPages()}
+          >
+            Next
+          </button>
+        </div>
+      </Show>
+
+      {/* Bottom Sheet */}
+      <BottomSheet />
     </div>
   )
 }

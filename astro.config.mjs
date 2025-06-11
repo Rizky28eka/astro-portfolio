@@ -6,6 +6,13 @@ import solidJs from "@astrojs/solid-js"
 
 // https://astro.build/config
 export default defineConfig({
-  site: "https://astro-sphere-demo.vercel.app",
+  site: "https://astro-portfolio.vercel.app",
   integrations: [mdx(), sitemap(), solidJs(), tailwind({ applyBaseStyles: false })],
+  vite: {
+    server: {
+      hmr: {
+        timeout: 10000 // 10 seconds
+      }
+    }
+  }
 })

@@ -11,14 +11,34 @@ import { SITE } from "@consts";
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" class="light">
   <head>
     <BaseHead title={`${title} | ${SITE.TITLE}`} description={description} />
+    <script is:inline>
+      // Check for saved theme preference or use system preference
+      const theme = (() => {
+        if (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) {
+          return localStorage.getItem('theme');
+        }
+        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          return 'dark';
+        }
+        return 'light';
+      })();
+      
+      if (theme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+      
+      window.localStorage.setItem('theme', theme);
+    </script>
   </head>
-  <body>
+  <body class="min-h-screen bg-white dark:bg-black text-black/75 dark:text-white/75 transition-colors duration-300">
     <Header />
     <Drawer />
-    <main>
+    <main class="flex-grow">
       <slot />
     </main>
     <Footer />

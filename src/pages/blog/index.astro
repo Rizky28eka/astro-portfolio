@@ -1,14 +1,14 @@
 ---
-import { getCollection } from "astro:content";
 import PageLayout from "@layouts/PageLayout.astro";
 import Blog from "@components/features/Blog";
 import { BLOG } from "@consts";
+import { getCollection } from "astro:content";
 
-// Get all non-draft blog posts and sort by date (newest first)
-const posts = (await getCollection("blog"))
+// Mengambil semua postingan blog non-draft dan mengurutkan berdasarkan tanggal (terbaru pertama)
+const allPosts = (await getCollection("blog"))
   .filter((post) => !post.data.draft)
   .sort((a, b) => {
-    // Handle both Date objects and date strings
+    // Menangani objek Date dan string tanggal
     const dateA =
       a.data.date instanceof Date ? a.data.date
       : a.data.date ? new Date(a.data.date)
@@ -17,18 +17,27 @@ const posts = (await getCollection("blog"))
       b.data.date instanceof Date ? b.data.date
       : b.data.date ? new Date(b.data.date)
       : new Date(0);
-    return dateB.getTime() - dateA.getTime(); // Sort newest first
+    return dateB.getTime() - dateA.getTime(); // Urutkan terbaru pertama
   });
 
-// Extract unique tags and sort alphabetically
-const tags = [...new Set(posts.flatMap((post) => post.data.tags || []))].sort(
-  (a, b) => a.localeCompare(b)
-);
+// Mengekstrak tag unik dan mengurutkan secara alfabetis
+const tags = [
+  ...new Set(allPosts.flatMap((post) => post.data.tags || [])),
+].sort((a, b) => a.localeCompare(b));
+
+// Catatan:
+// Logika filter berdasarkan kategori dari URL dan paginasi akan dipindahkan
+// sepenuhnya ke dalam komponen SolidJS (Blog.tsx) karena filter juga ada di sana.
+// Ini untuk memastikan filter bekerja pada *semua* data sebelum paginasi diterapkan
+// di sisi klien (setelah Hydration).
+
+// Meneruskan seluruh allPosts ke komponen Blog (SolidJS)
+// Komponen Blog SolidJS akan menangani filtering dan pagination di sisi klien.
 ---
 
 <PageLayout title={BLOG.TITLE} description={BLOG.DESCRIPTION}>
-  <div class="py-24 px-24 md:px-48 lg:px-72 xl:px-96 relative">
-    <!-- Background decoration -->
+  <div
+    class="py-12 sm:py-16 md:py-24 px-4 sm:px-8 md:px-16 lg:px-24 xl:px-32 relative">
     <div class="absolute inset-0 overflow-hidden pointer-events-none">
       <div
         class="absolute -top-40 -right-40 w-80 h-80 rounded-full bg-gradient-to-br from-purple-400/10 to-pink-400/10 blur-3xl">
@@ -38,23 +47,22 @@ const tags = [...new Set(posts.flatMap((post) => post.data.tags || []))].sort(
       </div>
     </div>
 
-    <!-- Header Section -->
-    <div class="text-center mb-16 relative z-10">
+    <div class="text-center mb-12 sm:mb-16 relative z-10">
       <h1
-        class="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-gray-900 via-purple-900 to-gray-900 dark:from-white dark:via-purple-300 dark:to-white bg-clip-text text-transparent">
+        class="text-4xl sm:text-5xl md:text-6xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-gray-900 via-purple-900 to-gray-900 dark:from-white dark:via-purple-300 dark:to-white bg-clip-text text-transparent">
         {BLOG.TITLE}
       </h1>
       <div
-        class="w-24 h-1 bg-gradient-to-r from-purple-500 to-pink-500 mx-auto rounded-full">
+        class="w-20 h-1 bg-gradient-to-r from-purple-500 to-pink-500 mx-auto rounded-full">
       </div>
       <p
-        class="mt-4 text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+        class="mt-4 text-base sm:text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto px-4">
         {BLOG.DESCRIPTION}
       </p>
     </div>
 
     <div class="relative z-10">
-      <Blog client:load tags={tags} data={posts} />
+      <Blog client:load tags={tags} data={allPosts} />
     </div>
   </div>
 </PageLayout>

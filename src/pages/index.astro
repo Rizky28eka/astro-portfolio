@@ -28,7 +28,6 @@ const structuredData = {
 ---
 
 <PageLayout title="Home" description={SITE.DESCRIPTION}>
-  <!-- Structured Data -->
   <script
     is:inline
     type="application/ld+json"
@@ -45,7 +44,6 @@ const structuredData = {
       <ExperienceSection />
       <AchievementsSection />
 
-      <!-- Featured Projects -->
       <section class="animate" aria-labelledby="projects-heading">
         <div class="text-center mb-10">
           <h2
@@ -107,7 +105,6 @@ const structuredData = {
         }
       </section>
 
-      <!-- Latest Articles -->
       {
         posts.length > 0 && (
           <section class="animate" aria-labelledby="blog-heading">
@@ -151,7 +148,6 @@ const structuredData = {
         )
       }
 
-      <!-- GitHub Contributions -->
       <section class="animate" aria-labelledby="github-heading">
         <div class="text-center mb-10">
           <h2
@@ -170,7 +166,7 @@ const structuredData = {
               <img
                 src="https://ghchart.rshah.org/rizky28eka"
                 alt="GitHub Contributions Chart"
-                class="w-full rounded-lg"
+                class="w-full h-auto rounded-lg"
                 loading="lazy"
                 decoding="async"
               />

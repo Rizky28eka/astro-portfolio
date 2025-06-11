@@ -30,6 +30,7 @@ const blog = defineCollection({
     tags: optionalStringArray,
     draft: z.boolean().optional(),
     difficulty: z.enum(['beginner', 'medium', 'advanced']).optional(),
+    views: z.number().optional(),
   }),
 });
 

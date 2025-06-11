@@ -1,8 +1,8 @@
 ---
-import PageLayout from '../layouts/PageLayout.astro';
-import Container from '@components/ui/Container.astro';
-import { SOCIALS } from 'src/consts';
-import { Github, Linkedin, Instagram } from 'lucide-astro';
+import PageLayout from "../layouts/PageLayout.astro";
+import Container from "@components/ui/Container.astro";
+import { SOCIALS } from "src/consts";
+import { Github, Linkedin, Instagram } from "lucide-astro";
 ---
 
 <PageLayout title="Contact">
@@ -28,7 +28,8 @@ import { Github, Linkedin, Instagram } from 'lucide-astro';
         <div
           class="w-16 sm:w-24 h-1 bg-gradient-to-r from-purple-500 to-pink-500 mx-auto rounded-full">
         </div>
-        <p class="mt-4 text-gray-600 dark:text-gray-300 text-lg max-w-2xl mx-auto">
+        <p
+          class="mt-4 text-gray-600 dark:text-gray-300 text-lg max-w-2xl mx-auto">
           Let's connect and create something amazing together
         </p>
       </div>
@@ -44,8 +45,8 @@ import { Github, Linkedin, Instagram } from 'lucide-astro';
             </h2>
             <p
               class="text-gray-600 dark:text-gray-300 text-base sm:text-lg leading-relaxed mb-6 sm:mb-8">
-              Feel free to reach out if you're looking for a developer, have a question,
-              or just want to connect. I'd love to hear from you!
+              Feel free to reach out if you're looking for a developer, have a
+              question, or just want to connect. I'd love to hear from you!
             </p>
 
             <!-- Contact Methods -->
@@ -83,13 +84,14 @@ import { Github, Linkedin, Instagram } from 'lucide-astro';
             <!-- Social Media Links -->
             <div
               class="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-gray-200/50 dark:border-gray-700/50">
-              <p class="text-sm text-gray-500 dark:text-gray-400 font-medium mb-4">
+              <p
+                class="text-sm text-gray-500 dark:text-gray-400 font-medium mb-4">
                 Follow me on
               </p>
               <div class="flex gap-3 sm:gap-4">
                 {
                   SOCIALS.filter((social) =>
-                    ['GitHub', 'LinkedIn', 'Instagram'].includes(social.NAME)
+                    ["GitHub", "LinkedIn", "Instagram"].includes(social.NAME)
                   ).map((social) => (
                     <a
                       href={social.HREF}
@@ -99,13 +101,13 @@ import { Github, Linkedin, Instagram } from 'lucide-astro';
                       rel="noopener noreferrer">
                       <div class="absolute inset-0 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                       <div class="relative z-10 text-gray-600 dark:text-gray-300 group-hover:text-white transition-colors duration-300">
-                        {social.NAME === 'GitHub' && (
+                        {social.NAME === "GitHub" && (
                           <Github class="w-5 h-5 sm:w-6 sm:h-6" />
                         )}
-                        {social.NAME === 'LinkedIn' && (
+                        {social.NAME === "LinkedIn" && (
                           <Linkedin class="w-5 h-5 sm:w-6 sm:h-6" />
                         )}
-                        {social.NAME === 'Instagram' && (
+                        {social.NAME === "Instagram" && (
                           <Instagram class="w-5 h-5 sm:w-6 sm:h-6" />
                         )}
                       </div>
@@ -223,7 +225,8 @@ import { Github, Linkedin, Instagram } from 'lucide-astro';
             <input type="text" name="_gotcha" style="display:none" />
 
             <!-- reCAPTCHA -->
-            <div class="g-recaptcha" data-sitekey="YOUR_RECAPTCHA_SITE_KEY"></div>
+            <div class="g-recaptcha" data-sitekey="YOUR_RECAPTCHA_SITE_KEY">
+            </div>
 
             <!-- Submit Button -->
             <button
@@ -235,7 +238,8 @@ import { Github, Linkedin, Instagram } from 'lucide-astro';
               <div
                 class="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl">
               </div>
-              <span class="relative z-10 flex items-center justify-center gap-3">
+              <span
+                class="relative z-10 flex items-center justify-center gap-3">
                 <span id="submit-text" class="font-semibold text-lg sm:text-xl"
                   >Send Message</span
                 >
@@ -425,16 +429,18 @@ import { Github, Linkedin, Instagram } from 'lucide-astro';
 
   <script>
     // Form handling
-    const form = document.getElementById('contact-form') as HTMLFormElement;
+    const form = document.getElementById("contact-form") as HTMLFormElement;
     const submitButton = form?.querySelector(
       'button[type="submit"]'
     ) as HTMLButtonElement;
-    const submitText = document.getElementById('submit-text');
-    const successMessage = document.getElementById('success-message');
-    const errorMessage = document.getElementById('error-message');
-    const messageCounter = document.getElementById('message-counter');
-    const messageError = document.getElementById('message-error');
-    const messageTextarea = document.getElementById('message') as HTMLTextAreaElement;
+    const submitText = document.getElementById("submit-text");
+    const successMessage = document.getElementById("success-message");
+    const errorMessage = document.getElementById("error-message");
+    const messageCounter = document.getElementById("message-counter");
+    const messageError = document.getElementById("message-error");
+    const messageTextarea = document.getElementById(
+      "message"
+    ) as HTMLTextAreaElement;
 
     // Rate limiting
     let lastSubmitTime = 0;
@@ -442,38 +448,42 @@ import { Github, Linkedin, Instagram } from 'lucide-astro';
 
     // Character counter for message
     if (messageTextarea && messageCounter) {
-      messageTextarea.addEventListener('input', () => {
+      messageTextarea.addEventListener("input", () => {
         const length = messageTextarea.value.length;
         messageCounter.textContent = `${length}/1000`;
 
         // Show error if message is too short
         if (length < 10 && length > 0) {
-          messageError?.classList.remove('hidden');
-          messageTextarea.setCustomValidity('Message must be at least 10 characters');
+          messageError?.classList.remove("hidden");
+          messageTextarea.setCustomValidity(
+            "Message must be at least 10 characters"
+          );
         } else {
-          messageError?.classList.add('hidden');
-          messageTextarea.setCustomValidity('');
+          messageError?.classList.add("hidden");
+          messageTextarea.setCustomValidity("");
         }
       });
     }
 
     // Email validation
-    const emailInput = form?.querySelector('input[type="email"]') as HTMLInputElement;
+    const emailInput = form?.querySelector(
+      'input[type="email"]'
+    ) as HTMLInputElement;
     if (emailInput) {
-      emailInput.addEventListener('input', () => {
+      emailInput.addEventListener("input", () => {
         const email = emailInput.value;
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
         if (!emailRegex.test(email) && email.length > 0) {
-          emailInput.setCustomValidity('Please enter a valid email address');
+          emailInput.setCustomValidity("Please enter a valid email address");
         } else {
-          emailInput.setCustomValidity('');
+          emailInput.setCustomValidity("");
         }
       });
     }
 
     if (form && submitButton && submitText) {
-      form.addEventListener('submit', async (e) => {
+      form.addEventListener("submit", async (e) => {
         e.preventDefault();
 
         // Check rate limiting
@@ -483,13 +493,13 @@ import { Github, Linkedin, Instagram } from 'lucide-astro';
             (SUBMIT_COOLDOWN - (now - lastSubmitTime)) / 1000
           );
           errorMessage!.textContent = `Please wait ${remainingTime} seconds before submitting again.`;
-          errorMessage?.classList.remove('hidden');
+          errorMessage?.classList.remove("hidden");
           return;
         }
 
         // Hide previous messages
-        successMessage?.classList.add('hidden');
-        errorMessage?.classList.add('hidden');
+        successMessage?.classList.add("hidden");
+        errorMessage?.classList.add("hidden");
 
         // Show loading state
         submitButton.disabled = true;
@@ -499,13 +509,13 @@ import { Github, Linkedin, Instagram } from 'lucide-astro';
           const formData = new FormData(form);
 
           // Add timestamp to prevent caching
-          formData.append('_timestamp', new Date().getTime().toString());
+          formData.append("_timestamp", new Date().getTime().toString());
 
           const response = await fetch(form.action, {
-            method: 'POST',
+            method: "POST",
             body: formData,
             headers: {
-              Accept: 'application/json',
+              Accept: "application/json",
             },
           });
 
@@ -514,64 +524,66 @@ import { Github, Linkedin, Instagram } from 'lucide-astro';
             lastSubmitTime = now;
 
             // Show success message with animation
-            successMessage?.classList.remove('hidden');
-            successMessage?.classList.add('animate-fade-in');
+            successMessage?.classList.remove("hidden");
+            successMessage?.classList.add("animate-fade-in");
             form.reset();
-            messageCounter!.textContent = '0/1000';
+            messageCounter!.textContent = "0/1000";
 
             // Reset button after delay
             setTimeout(() => {
               submitButton.disabled = false;
-              submitText.textContent = 'Send Message';
+              submitText.textContent = "Send Message";
             }, 1000);
           } else {
-            throw new Error('Network response was not ok');
+            throw new Error("Network response was not ok");
           }
         } catch (error) {
-          console.error('Error:', error);
+          console.error("Error:", error);
           // Show error message
-          errorMessage?.classList.remove('hidden');
-          errorMessage?.classList.add('animate-fade-in');
+          errorMessage?.classList.remove("hidden");
+          errorMessage?.classList.add("animate-fade-in");
           submitButton.disabled = false;
-          submitText.textContent = 'Send Message';
+          submitText.textContent = "Send Message";
         }
       });
     }
 
     // Real-time form validation
-    const inputs = form?.querySelectorAll('input, textarea');
+    const inputs = form?.querySelectorAll("input, textarea");
     inputs?.forEach((input) => {
-      input.addEventListener('blur', () => {
+      input.addEventListener("blur", () => {
         if ((input as HTMLInputElement).checkValidity()) {
-          input.classList.remove('border-red-500');
-          input.classList.add('border-green-500');
+          input.classList.remove("border-red-500");
+          input.classList.add("border-green-500");
         } else {
-          input.classList.remove('border-green-500');
-          input.classList.add('border-red-500');
+          input.classList.remove("border-green-500");
+          input.classList.add("border-red-500");
         }
       });
     });
 
     // Keyboard shortcuts
-    document.addEventListener('keydown', (e) => {
+    document.addEventListener("keydown", (e) => {
       // Ctrl/Cmd + Enter to submit form
-      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
         form?.requestSubmit();
       }
     });
 
     // Smooth scroll for contact info clicks
-    document.querySelectorAll('a[href^="mailto:"], a[href^="tel:"]').forEach((link) => {
-      link.addEventListener('click', () => {
-        // Add subtle animation feedback
-        const icon = link.querySelector('.w-10, .w-12');
-        if (icon) {
-          icon.classList.add('scale-125');
-          setTimeout(() => {
-            icon.classList.remove('scale-125');
-          }, 200);
-        }
+    document
+      .querySelectorAll('a[href^="mailto:"], a[href^="tel:"]')
+      .forEach((link) => {
+        link.addEventListener("click", () => {
+          // Add subtle animation feedback
+          const icon = link.querySelector(".w-10, .w-12");
+          if (icon) {
+            icon.classList.add("scale-125");
+            setTimeout(() => {
+              icon.classList.remove("scale-125");
+            }, 200);
+          }
+        });
       });
-    });
   </script>
 </PageLayout>

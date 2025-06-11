@@ -21,7 +21,7 @@ export default function ArrowCard({ entry, pill }: Props) {
             </div>
           )}
           <div class="text-xs uppercase tracking-wide text-gray-600 dark:text-gray-400">
-            {formatDate(entry.data.date)}
+            {entry.data.date ? formatDate(entry.data.date) : ''}
           </div>
         </div>
         <div class="font-bold text-lg md:text-xl mt-1 mb-2 text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">

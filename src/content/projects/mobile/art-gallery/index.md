@@ -3,6 +3,7 @@ title: "Art Gallery - Flutter UI Application"
 summary: "Modern Art Gallery Mobile Interface"
 date: "May 26 2025"
 draft: false
+category: "mobile"
 tags:
   - Flutter
   - Slicing UI

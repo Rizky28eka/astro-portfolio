@@ -23,9 +23,20 @@ export function sortByDateDesc(a: any, b: any): number {
 // Helper function to format work dates
 export function formatWorkDate(input: string | Date | undefined): string {
   if (!input) return "Present";
-  if (typeof input === "string") return input;
-  const month = new Date(input).toLocaleDateString("en-US", { month: "short" });
-  const year = new Date(input).getFullYear();
+  let dateObj: Date | null = null;
+  if (typeof input === "string") {
+    const parsed = new Date(input);
+    if (!isNaN(parsed.getTime())) {
+      dateObj = parsed;
+    } else {
+      return input; // fallback ke string asli jika bukan tanggal
+    }
+  } else if (input instanceof Date) {
+    dateObj = input;
+  }
+  if (!dateObj) return "Present";
+  const month = dateObj.toLocaleDateString("en-US", { month: "short" });
+  const year = dateObj.getFullYear();
   return `${month} ${year}`;
 }
 
@@ -50,8 +61,13 @@ export async function getLatestWork(limit: number = 2) {
   return (await getCollection("work"))
     .filter(exp => !exp.data.draft)
     .sort((a, b) => {
-      const dateStartA = typeof a.data.dateStart === 'string' ? new Date(a.data.dateStart) : a.data.dateStart || new Date(0);
-      const dateStartB = typeof b.data.dateStart === 'string' ? new Date(b.data.dateStart) : b.data.dateStart || new Date(0);
+      const dateStartA = a.data.dateStart ? new Date(a.data.dateStart) : new Date(0);
+      const dateStartB = b.data.dateStart ? new Date(b.data.dateStart) : new Date(0);
+      const validA = !isNaN(dateStartA.getTime());
+      const validB = !isNaN(dateStartB.getTime());
+      if (!validA && !validB) return 0;
+      if (!validA) return 1;
+      if (!validB) return -1;
       return dateStartB.getTime() - dateStartA.getTime();
     })
     .slice(0, limit);
@@ -62,8 +78,13 @@ export async function getLatestEducation(limit: number = 2) {
   return (await getCollection("education"))
     .filter(edu => !edu.data.draft)
     .sort((a, b) => {
-      const dateEndA = typeof a.data.dateEnd === 'string' ? new Date(a.data.dateEnd) : a.data.dateEnd || new Date(0);
-      const dateEndB = typeof b.data.dateEnd === 'string' ? new Date(b.data.dateEnd) : b.data.dateEnd || new Date(0);
+      const dateEndA = a.data.dateEnd ? new Date(a.data.dateEnd) : new Date(0);
+      const dateEndB = b.data.dateEnd ? new Date(b.data.dateEnd) : new Date(0);
+      const validA = !isNaN(dateEndA.getTime());
+      const validB = !isNaN(dateEndB.getTime());
+      if (!validA && !validB) return 0;
+      if (!validA) return 1;
+      if (!validB) return -1;
       return dateEndB.getTime() - dateEndA.getTime();
     })
     .slice(0, limit);
