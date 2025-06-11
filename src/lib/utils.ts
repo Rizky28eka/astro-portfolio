@@ -36,20 +36,11 @@ export function formatDate(
   date: Date | string,
   options: DateFormatOptions = {}
 ): string {
-  const { 
-    locale = 'en-US', 
-
-    format = 'long' as const,
-    includeTime = false 
+  const {
+    locale = 'en-US',
+    format = 'long',
+    includeTime = false
   } = options;
-
-
-
-
-
-  if (!date) {
-    return 'Invalid date provided';
-  }
 
   const d = new Date(date);
 
@@ -58,10 +49,10 @@ export function formatDate(
   }
 
   const formatOptions: Intl.DateTimeFormatOptions = {
-    short: { month: 'short' as const, day: 'numeric' as const, year: 'numeric' as const },
-    medium: { month: 'short' as const, day: 'numeric' as const, year: 'numeric' as const },
-    long: { month: 'long' as const, day: 'numeric' as const, year: 'numeric' as const },
-    full: { weekday: 'long' as const, month: 'long' as const, day: 'numeric' as const, year: 'numeric' as const }
+    short: { month: 'short', day: 'numeric', year: 'numeric' },
+    medium: { month: 'short', day: 'numeric', year: 'numeric' }, // duplicated in original, corrected to match 'short' if not intended to be different
+    long: { month: 'long', day: 'numeric', year: 'numeric' },
+    full: { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }
   }[format];
 
   if (includeTime) {
@@ -83,7 +74,7 @@ export function readingTime(
   options: ReadingTimeOptions = {}
 ): string {
   const { wordsPerMinute = 200, locale = 'en-US' } = options;
-  
+
   if (!content?.trim()) {
     return '0 min read';
   }
@@ -97,15 +88,21 @@ export function readingTime(
     .filter(word => word.length > 0).length;
 
   const minutes = Math.max(1, Math.ceil(words / wordsPerMinute));
-  
+
   // Internationalization support
   const rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
-  
-  if (minutes === 1) {
-    return '1 min read';
+
+  // Simplified logic: format using Intl.RelativeTimeFormat only if needed, otherwise use simple string
+  if (locale === 'en-US' || locale === 'id-ID') { // Contoh: tambahkan locale lain yang umum
+    return `${minutes} min read`; // Default English format
+  } else {
+    // Ini mungkin tidak mengembalikan "X min read" secara langsung.
+    // Intl.RelativeTimeFormat digunakan untuk "in X minutes" atau "X minutes ago".
+    // Untuk "X min read", lebih baik buat string secara manual.
+    // Jika maksudnya adalah "1 minute read", gunakan `rtf.format(minutes, 'minute')` (untuk kasus tunggal).
+    // Untuk konsistensi dengan "X min read", pendekatan manual lebih baik.
+    return `${minutes} min read`; // Untuk kasus selain en-US, tetap pakai format umum
   }
-  
-  return `${minutes} min read`;
 }
 
 /**
@@ -120,7 +117,7 @@ function parseSlugCategory(slug: string, collection: PostCollection): {
   subcategory?: string;
 } {
   const slugParts = slug.split('/').filter(Boolean);
-  
+
   return {
     collection,
     category: slugParts[0] || '', // flutter, git, java, kotlin, datamining, web, mobile
@@ -131,18 +128,21 @@ function parseSlugCategory(slug: string, collection: PostCollection): {
 /**
  * Checks if a post matches the specified category filter
  * @param post - Post to check
- * @param categoryFilter - Category to match against
+ * @param categoryFilter - Category to match against (optional)
  * @returns Boolean indicating if post matches category
  */
-function doesPostMatchCategory(post: Post, categoryFilter: string): boolean {
+function doesPostMatchCategory(post: Post, categoryFilter?: string): boolean {
+  if (!categoryFilter) return true; // If no filter, all posts match
+
   const { collection, category } = parseSlugCategory(post.slug, post.collection);
-  
-  // Exact category match (flutter, git, java, kotlin, datamining, web, mobile)
-  if (category === categoryFilter) return true;
-  
-  // Collection-level match (blog, projects)
-  if (collection === categoryFilter) return true;
-  
+  const normalizedFilter = categoryFilter.toLowerCase().trim();
+
+  // Exact category match (e.g., 'flutter', 'git')
+  if (category.toLowerCase() === normalizedFilter) return true;
+
+  // Collection-level match (e.g., 'blog', 'projects')
+  if (collection.toLowerCase() === normalizedFilter) return true;
+
   return false;
 }
 
@@ -152,7 +152,7 @@ function doesPostMatchCategory(post: Post, categoryFilter: string): boolean {
  * - Collection type: 'blog', 'projects'
  * - Blog categories: 'flutter', 'git', 'java', 'kotlin'
  * - Project categories: 'datamining', 'web', 'mobile'
- * 
+ *
  * @param posts - Array of posts to filter
  * @param categoryFilter - Category to filter by (optional)
  * @returns Filtered array of posts
@@ -161,12 +161,16 @@ export function filterPostsByCategory<T extends Post>(
   posts: T[],
   categoryFilter?: string
 ): T[] {
-  if (!categoryFilter || !posts?.length) {
-    return posts || [];
+  if (!posts?.length) {
+    return [];
+  }
+
+  if (!categoryFilter) {
+    return posts;
   }
 
   const normalizedCategory = categoryFilter.toLowerCase().trim();
-  
+
   return posts.filter(post => {
     if (!post?.slug) return false;
     return doesPostMatchCategory(post, normalizedCategory);
@@ -185,14 +189,14 @@ export function groupPostsByCategory<T extends Post>(
 
   return posts.reduce((groups, post) => {
     if (!post?.slug) return groups;
-    
+
     const { category } = parseSlugCategory(post.slug, post.collection);
     const groupKey = category || 'uncategorized';
-    
+
     if (!groups[groupKey]) {
       groups[groupKey] = [];
     }
-    
+
     groups[groupKey].push(post);
     return groups;
   }, {} as Record<string, T[]>);
@@ -207,17 +211,19 @@ export function getAvailableCategories<T extends Post>(posts: T[]): string[] {
   if (!posts?.length) return [];
 
   const categories = new Set<string>();
-  
+
   posts.forEach(post => {
     if (!post?.slug) return;
-    
+
     const { collection, category } = parseSlugCategory(post.slug, post.collection);
-    
-    // Add collection type
+
+    // Add collection type (e.g., 'blog', 'projects')
     categories.add(collection);
-    
-    // Add specific category (flutter, git, java, kotlin, datamining, web, mobile)
-    if (category) categories.add(category);
+
+    // Add specific category (e.g., 'flutter', 'datamining') if exists
+    if (category) {
+      categories.add(category);
+    }
   });
 
   return Array.from(categories).sort();
@@ -231,21 +237,21 @@ export function getAvailableCategories<T extends Post>(posts: T[]): string[] {
 export function getCategoriesByCollection<T extends Post>(
   posts: T[]
 ): Record<PostCollection, string[]> {
-  if (!posts?.length) return { blog: [], projects: [] };
-
   const result: Record<PostCollection, string[]> = {
     blog: [],
     projects: []
   };
+
+  if (!posts?.length) return result;
 
   const blogCategories = new Set<string>();
   const projectCategories = new Set<string>();
 
   posts.forEach(post => {
     if (!post?.slug) return;
-    
+
     const { collection, category } = parseSlugCategory(post.slug, post.collection);
-    
+
     if (collection === 'blog' && category) {
       blogCategories.add(category);
     } else if (collection === 'projects' && category) {
@@ -274,8 +280,8 @@ export function sortPostsByDate<T extends Post>(
   return [...posts].sort((a, b) => {
     const dateA = new Date(a.data.date || 0);
     const dateB = new Date(b.data.date || 0);
-    
-    return ascending 
+
+    return ascending
       ? dateA.getTime() - dateB.getTime()
       : dateB.getTime() - dateA.getTime();
   });
@@ -294,16 +300,16 @@ export function searchPosts<T extends Post>(
   if (!query?.trim() || !posts?.length) return posts || [];
 
   const normalizedQuery = query.toLowerCase().trim();
-  
+
   return posts.filter(post => {
     if (!post?.data) return false;
-    
+
     const title = post.data.title?.toLowerCase() || '';
     const description = post.data.summary?.toLowerCase() || '';
     const content = post.body?.toLowerCase() || '';
-    
-    return title.includes(normalizedQuery) || 
-           description.includes(normalizedQuery) || 
+
+    return title.includes(normalizedQuery) ||
+           description.includes(normalizedQuery) ||
            content.includes(normalizedQuery);
   });
 }
