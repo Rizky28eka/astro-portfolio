@@ -21,6 +21,7 @@ export default function Blog({ data, tags }: Props) {
   // Core state
   const [searchQuery, setSearchQuery] = createSignal('')
   const [activeFilters, setActiveFilters] = createSignal<Set<string>>(new Set())
+  const [activeCategories, setActiveCategories] = createSignal<Set<string>>(new Set())
   const [sortBy, setSortBy] = createSignal<SortType>("date")
 
   // Paginasi state
@@ -58,16 +59,22 @@ export default function Blog({ data, tags }: Props) {
     return categories
   })
 
-  // Filter dan urutkan posts (sebelum paginasi)
+  // Filter dan urutkan posts
   const filteredAndSortedPosts = createMemo(() => {
     const search = searchQuery()
     const filters = activeFilters()
+    const categories = activeCategories()
 
     let filtered = data.filter(entry => {
       const postTags = (entry.data.tags || []).map(tag => tag.toLowerCase())
       const title = entry.data.title.toLowerCase()
       const summary = (entry.data.summary || "").toLowerCase()
       const postCategory = entry.id.split('/')[0].toLowerCase()
+
+      // Filter kategori
+      if (categories.size > 0 && !categories.has(postCategory)) {
+        return false
+      }
 
       // Filter pencarian
       if (search) {
@@ -79,45 +86,28 @@ export default function Blog({ data, tags }: Props) {
         if (!searchMatch) return false
       }
 
-      // Filter tag dan kategori
+      // Filter tag
       if (filters.size > 0) {
-        let matchesCategory = true;
-        let matchesOtherTags = true;
-
-        const categoryFilters = Array.from(filters).filter(f => TAG_CATEGORIES.categories.includes(f as (typeof TAG_CATEGORIES.categories)[number]));
+        const categoryFilters = Array.from(filters).filter(f => 
+          TAG_CATEGORIES.categories.includes(f as (typeof TAG_CATEGORIES.categories)[number])
+        )
         const otherTagFilters = Array.from(filters).filter(f => 
           TAG_CATEGORIES.languages.includes(f as (typeof TAG_CATEGORIES.languages)[number]) || 
           TAG_CATEGORIES.frameworks.includes(f as (typeof TAG_CATEGORIES.frameworks)[number]) || 
           categorizedTags().others.includes(f)
-        );
+        )
 
-        if (categoryFilters.length > 0) {
-          matchesCategory = categoryFilters.includes(postCategory);
+        // Jika ada filter kategori, post harus cocok dengan kategori
+        if (categoryFilters.length > 0 && !categoryFilters.includes(postCategory)) {
+          return false
         }
 
-        if (otherTagFilters.length > 0) {
-          matchesOtherTags = otherTagFilters.some(filter => postTags.includes(filter));
+        // Jika ada filter tag lain, post harus memiliki setidaknya satu tag yang cocok
+        if (otherTagFilters.length > 0 && !otherTagFilters.some(filter => postTags.includes(filter))) {
+          return false
         }
-
-        // Jika ada filter kategori DAN filter tag lain:
-        // Post harus cocok dengan kategori DAN setidaknya satu tag lain
-        if (categoryFilters.length > 0 && otherTagFilters.length > 0) {
-            return matchesCategory && matchesOtherTags;
-        } 
-        // Jika hanya ada filter kategori:
-        // Post harus cocok dengan kategori
-        else if (categoryFilters.length > 0) {
-            return matchesCategory;
-        } 
-        // Jika hanya ada filter tag lain:
-        // Post harus cocok dengan setidaknya satu tag lain
-        else if (otherTagFilters.length > 0) {
-            return matchesOtherTags;
-        }
-        // Jika filter aktif, tapi tidak ada filter kategori atau tag lainnya
-        // yang cocok dengan post, maka post ini tidak harus ditampilkan.
-        // Namun, jika filter kosong, semua post ditampilkan (sudah di awal).
       }
+
       return true
     })
 
@@ -125,7 +115,9 @@ export default function Blog({ data, tags }: Props) {
     return filtered.sort((a, b) => {
       switch (sortBy()) {
         case "date":
-          return new Date(b.data.date ?? '').getTime() - new Date(a.data.date ?? '').getTime()
+          const dateA = a.data.date instanceof Date ? a.data.date : new Date(a.data.date || 0)
+          const dateB = b.data.date instanceof Date ? b.data.date : new Date(b.data.date || 0)
+          return dateB.getTime() - dateA.getTime()
         case "name":
           return a.data.title.localeCompare(b.data.title, undefined, { numeric: true })
         case "popularity":
@@ -160,14 +152,16 @@ export default function Blog({ data, tags }: Props) {
       }
       return newFilters
     })
-    setCurrentPage(1); // Reset halaman saat filter berubah
+    setCurrentPage(1) // Reset halaman saat filter berubah
+    closeAllDropdowns() // Close dropdown after selection
   }
 
   // Hapus semua filter
   const clearFilters = () => {
     setActiveFilters(new Set<string>())
+    setActiveCategories(new Set<string>())
     setSearchQuery('')
-    setCurrentPage(1); // Reset halaman saat filter dihapus
+    setCurrentPage(1) // Reset halaman saat filter dihapus
   }
 
   // Tutup semua dropdown

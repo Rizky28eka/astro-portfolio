@@ -10,6 +10,7 @@ type Project = CollectionEntry<"projects">
 const TAG_CATEGORIES = {
   frameworks: ['react', 'vue', 'angular', 'svelte', 'solid', 'next', 'nuxt', 'astro', 'flutter'] as string[],
   languages: ['javascript', 'typescript', 'python', 'java', 'c++', 'c#', 'php', 'ruby', 'go', 'rust'] as string[],
+  categories: ['react', 'vue', 'angular', 'svelte', 'solid', 'next', 'nuxt', 'astro', 'flutter'] as string[],
 }
 
 export default function Projects({ data, tags }: { data: Project[], tags: string[] }) {
@@ -70,8 +71,8 @@ export default function Projects({ data, tags }: { data: Project[], tags: string
       const projectCategory = project.id.split('/')[0]
 
       // Category filter
-      if (categories.size > 0) {
-        if (!categories.has(projectCategory)) return false
+      if (categories.size > 0 && !categories.has(projectCategory)) {
+        return false
       }
 
       // Search filter
@@ -79,13 +80,31 @@ export default function Projects({ data, tags }: { data: Project[], tags: string
         const searchMatch = 
           title.toLowerCase().includes(search) ||
           summary.toLowerCase().includes(search) ||
-          normalizedTags.some(tag => tag.includes(search))
+          normalizedTags.some(tag => tag.includes(search)) ||
+          projectCategory.toLowerCase().includes(search)
         if (!searchMatch) return false
       }
 
       // Tag filters
       if (filters.size > 0) {
-        return Array.from(filters).some(filter => normalizedTags.includes(filter))
+        const categoryFilters = Array.from(filters).filter(f => 
+          TAG_CATEGORIES.categories.includes(f)
+        )
+        const otherTagFilters = Array.from(filters).filter(f => 
+          TAG_CATEGORIES.languages.includes(f) || 
+          TAG_CATEGORIES.frameworks.includes(f) || 
+          categorizedTags().others.includes(f)
+        )
+
+        // Jika ada filter kategori, project harus cocok dengan kategori
+        if (categoryFilters.length > 0 && !categoryFilters.includes(projectCategory)) {
+          return false
+        }
+
+        // Jika ada filter tag lain, project harus memiliki setidaknya satu tag yang cocok
+        if (otherTagFilters.length > 0 && !otherTagFilters.some(filter => normalizedTags.includes(filter))) {
+          return false
+        }
       }
 
       return true
@@ -103,6 +122,7 @@ export default function Projects({ data, tags }: { data: Project[], tags: string
       }
       return newFilters
     })
+    closeAllDropdowns()
   }
 
   // Toggle category
@@ -116,6 +136,7 @@ export default function Projects({ data, tags }: { data: Project[], tags: string
       }
       return newCategories
     })
+    closeAllDropdowns()
   }
 
   // Clear all filters

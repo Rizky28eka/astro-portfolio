@@ -1,305 +1,400 @@
 ---
 import PageLayout from "../layouts/PageLayout.astro";
 import Container from "@components/ui/Container.astro";
-import { SOCIALS } from "src/consts";
-import { Github, Linkedin, Instagram } from "lucide-astro";
+import {
+  Github,
+  Linkedin,
+  Instagram,
+  Mail,
+  MapPin,
+  Send,
+  Phone,
+  Calendar,
+  Star,
+} from "lucide-astro";
 ---
 
 <PageLayout title="Contact">
   <Container size="xl">
-    <div class="py-16 sm:py-20 lg:py-24 relative min-h-screen">
-      <!-- Background decoration -->
+    <!-- Background Effects -->
+    <div class="fixed inset-0 -z-10 overflow-hidden">
+      <div
+        class="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-full blur-3xl animate-pulse">
+      </div>
+      <div
+        class="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-cyan-400/20 rounded-full blur-3xl animate-pulse delay-1000">
+      </div>
+      <div
+        class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-indigo-400/10 to-purple-400/10 rounded-full blur-3xl animate-pulse delay-500">
+      </div>
+    </div>
+
+    <div class="py-12 sm:py-16 lg:py-20 relative min-h-screen">
+      <!-- Floating Particles -->
       <div class="absolute inset-0 overflow-hidden pointer-events-none">
-        <div
-          class="absolute -top-32 -right-32 w-64 h-64 sm:w-80 sm:h-80 rounded-full bg-gradient-to-br from-purple-400/10 to-pink-400/10 blur-3xl animate-float">
-        </div>
-        <div
-          class="absolute -bottom-32 -left-32 w-64 h-64 sm:w-80 sm:h-80 rounded-full bg-gradient-to-tr from-blue-400/10 to-cyan-400/10 blur-3xl animate-float"
-          style="animation-delay: 2s;">
-        </div>
+        <div class="particle particle-1"></div>
+        <div class="particle particle-2"></div>
+        <div class="particle particle-3"></div>
+        <div class="particle particle-4"></div>
+        <div class="particle particle-5"></div>
       </div>
 
       <!-- Header Section -->
-      <div class="text-center mb-12 sm:mb-16 relative z-10">
-        <h1
-          class="text-4xl sm:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-gray-900 via-purple-900 to-gray-900 dark:from-white dark:via-purple-300 dark:to-white bg-clip-text text-transparent animate-gradient">
-          Contact Me
-        </h1>
+      <div class="text-center mb-12 sm:mb-16 lg:mb-20 relative z-10">
         <div
-          class="w-16 sm:w-24 h-1 bg-gradient-to-r from-purple-500 to-pink-500 mx-auto rounded-full">
+          class="inline-flex items-center gap-2 bg-gradient-to-r from-purple-500/10 to-pink-500/10 backdrop-blur-sm border border-purple-200/20 dark:border-purple-700/20 rounded-full px-6 py-2 mb-6">
+          <Star class="w-4 h-4 text-purple-500 animate-pulse" />
+          <span class="text-sm font-medium text-purple-600 dark:text-purple-400"
+            >Let's Connect</span
+          >
+          <Star class="w-4 h-4 text-purple-500 animate-pulse" />
         </div>
+
+        <h1
+          class="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-black mb-6 bg-gradient-to-r from-gray-900 via-purple-600 to-pink-600 dark:from-white dark:via-purple-400 dark:to-pink-400 bg-clip-text text-transparent leading-tight">
+          Let's Create Something
+          <span
+            class="block bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent"
+            >Amazing Together</span
+          >
+        </h1>
+
+        <div class="flex justify-center mb-6">
+          <div
+            class="w-20 sm:w-24 h-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full relative overflow-hidden">
+            <div
+              class="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent animate-shimmer">
+            </div>
+          </div>
+        </div>
+
         <p
-          class="mt-4 text-gray-600 dark:text-gray-300 text-lg max-w-2xl mx-auto">
-          Let's connect and create something amazing together
+          class="text-gray-600 dark:text-gray-300 text-lg sm:text-xl lg:text-2xl max-w-4xl mx-auto leading-relaxed font-light">
+          Have a project in mind? Let's connect and bring your ideas to life.
+          <span class="font-medium text-purple-600 dark:text-purple-400"
+            >I'm always excited to collaborate</span
+          >
+          on new and innovative projects.
         </p>
       </div>
 
-      <div class="grid lg:grid-cols-2 gap-10 lg:gap-16 xl:gap-20 relative z-10">
-        <!-- Left Section - Contact Info -->
-        <div class="space-y-6 lg:space-y-8 w-full max-w-2xl mx-auto">
+      <div class="grid grid-cols-1 xl:grid-cols-5 gap-6 lg:gap-8 relative z-10">
+        <!-- Contact Information Section -->
+        <div class="xl:col-span-2 space-y-6">
+          <!-- Main Contact Card -->
           <div
-            class="backdrop-blur-sm bg-white/70 dark:bg-gray-800/70 rounded-3xl p-8 sm:p-10 border border-gray-200/60 dark:border-gray-700/60 shadow-2xl hover:shadow-3xl transition-all duration-300">
-            <h2
-              class="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-              Get in Touch
-            </h2>
-            <p
-              class="text-gray-600 dark:text-gray-300 text-base sm:text-lg leading-relaxed mb-6 sm:mb-8">
-              Feel free to reach out if you're looking for a developer, have a
-              question, or just want to connect. I'd love to hear from you!
-            </p>
+            class="group relative overflow-hidden bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl p-6 sm:p-8 border border-gray-200/50 dark:border-gray-700/50 hover:border-purple-300/50 dark:hover:border-purple-600/50 transition-all duration-500 hover:shadow-2xl hover:shadow-purple-500/10">
+            <div
+              class="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+            </div>
 
-            <!-- Contact Methods -->
-            <div class="space-y-4 sm:space-y-6">
+            <h3
+              class="text-2xl sm:text-3xl font-bold mb-8 text-gray-900 dark:text-white relative z-10">
+              Get in Touch
+            </h3>
+
+            <div class="space-y-6 relative z-10">
               <!-- Email -->
-              <div
-                class="group flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl hover:bg-gray-100/50 dark:hover:bg-gray-700/50 transition-all duration-300 cursor-pointer">
+              <a
+                href="mailto:r28eka@gmail.com"
+                class="flex items-center gap-4 p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 hover:from-purple-100 dark:hover:from-purple-900/40 hover:to-pink-100 dark:hover:to-pink-900/40 transition-all duration-300 group/item transform hover:-translate-y-1 hover:shadow-lg border border-purple-100/50 dark:border-purple-800/50">
                 <div
-                  class="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                  <svg
-                    class="w-5 h-5 sm:w-6 sm:h-6 text-white"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2">
-                    <path
-                      d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
-                    </path>
-                  </svg>
+                  class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center group-hover/item:scale-110 transition-transform duration-300 shadow-lg">
+                  <Mail class="w-6 h-6 text-white" />
                 </div>
-                <div class="min-w-0 flex-1">
+                <div class="flex-1">
                   <p
-                    class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 font-medium mb-1">
+                    class="text-sm font-medium text-gray-500 dark:text-gray-400">
                     Email
                   </p>
-                  <a
-                    href="mailto:r28eka@gmail.com"
-                    class="text-base sm:text-lg font-semibold hover:bg-gradient-to-r hover:from-purple-600 hover:to-pink-600 hover:bg-clip-text hover:text-transparent transition-all duration-300 break-all">
+                  <p
+                    class="text-base sm:text-lg font-semibold text-gray-900 dark:text-white group-hover/item:text-purple-600 dark:group-hover/item:text-purple-400 transition-colors">
                     r28eka@gmail.com
-                  </a>
+                  </p>
+                </div>
+                <div
+                  class="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center opacity-0 group-hover/item:opacity-100 transition-opacity">
+                  <Send class="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                </div>
+              </a>
+
+              <!-- Location -->
+              <div
+                class="flex items-center gap-4 p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 transform hover:-translate-y-1 hover:shadow-lg transition-all duration-300 border border-blue-100/50 dark:border-blue-800/50">
+                <div
+                  class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg">
+                  <MapPin class="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <p
+                    class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                    Location
+                  </p>
+                  <p
+                    class="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
+                    Jakarta, Indonesia
+                  </p>
+                </div>
+              </div>
+
+              <!-- Response Time -->
+              <div
+                class="flex items-center gap-4 p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 transform hover:-translate-y-1 hover:shadow-lg transition-all duration-300 border border-emerald-100/50 dark:border-emerald-800/50">
+                <div
+                  class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shadow-lg">
+                  <Calendar class="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <p
+                    class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                    Response Time
+                  </p>
+                  <p
+                    class="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
+                    Within 24 hours
+                  </p>
                 </div>
               </div>
             </div>
+          </div>
 
-            <!-- Social Media Links -->
+          <!-- Social Media Card -->
+          <div
+            class="group relative overflow-hidden bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl p-6 sm:p-8 border border-gray-200/50 dark:border-gray-700/50 hover:border-purple-300/50 dark:hover:border-purple-600/50 transition-all duration-500 hover:shadow-2xl hover:shadow-purple-500/10">
             <div
-              class="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-gray-200/50 dark:border-gray-700/50">
-              <p
-                class="text-sm text-gray-500 dark:text-gray-400 font-medium mb-4">
-                Follow me on
-              </p>
-              <div class="flex gap-3 sm:gap-4">
-                {
-                  SOCIALS.filter((social) =>
-                    ["GitHub", "LinkedIn", "Instagram"].includes(social.NAME)
-                  ).map((social) => (
-                    <a
-                      href={social.HREF}
-                      class="group relative w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-full flex items-center justify-center hover:from-purple-500 hover:to-pink-500 transition-all duration-300 hover:scale-110 hover:shadow-lg"
-                      aria-label={`Follow me on ${social.NAME}`}
-                      target="_blank"
-                      rel="noopener noreferrer">
-                      <div class="absolute inset-0 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                      <div class="relative z-10 text-gray-600 dark:text-gray-300 group-hover:text-white transition-colors duration-300">
-                        {social.NAME === "GitHub" && (
-                          <Github class="w-5 h-5 sm:w-6 sm:h-6" />
-                        )}
-                        {social.NAME === "LinkedIn" && (
-                          <Linkedin class="w-5 h-5 sm:w-6 sm:h-6" />
-                        )}
-                        {social.NAME === "Instagram" && (
-                          <Instagram class="w-5 h-5 sm:w-6 sm:h-6" />
-                        )}
-                      </div>
-                    </a>
-                  ))
-                }
-              </div>
+              class="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
             </div>
 
-            <!-- Google Maps Section -->
-            <div class="w-full h-[300px] mt-8">
-              <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d63245.970855555235!2d110.33364527568787!3d-7.803248457473127!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e7a5787bd5b6bc5%3A0x21723fd4d3684f71!2sYogyakarta%2C%20Kota%20Yogyakarta%2C%20Daerah%20Istimewa%20Yogyakarta!5e0!3m2!1sid!2sid!4v1748485132951!5m2!1sid!2sid"
-                width="100%"
-                height="100%"
-                style="border:0; border-radius: 1.5rem;"
-                allowfullscreen=""
-                loading="lazy"
-                referrerpolicy="no-referrer-when-downgrade"
-                class="shadow-2xl">
-              </iframe>
+            <h4
+              class="text-xl sm:text-2xl font-bold mb-6 text-gray-900 dark:text-white relative z-10">
+              Connect with me
+            </h4>
+
+            <div class="grid grid-cols-3 gap-4 relative z-10">
+              <a
+                href="https://github.com/rizky28eka"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="group/social aspect-square rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center hover:from-purple-100 dark:hover:from-purple-900/40 hover:to-pink-100 dark:hover:to-pink-900/40 transition-all duration-300 transform hover:-translate-y-2 hover:shadow-xl border border-gray-200/50 dark:border-gray-600/50 hover:border-purple-300/50 dark:hover:border-purple-600/50">
+                <Github
+                  class="w-6 h-6 sm:w-7 sm:h-7 text-gray-600 dark:text-gray-300 group-hover/social:text-purple-600 dark:group-hover/social:text-purple-400 transition-colors"
+                />
+              </a>
+              <a
+                href="https://www.linkedin.com/in/rizky28eka/"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="group/social aspect-square rounded-2xl bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/40 dark:to-blue-800/40 flex items-center justify-center hover:from-blue-200 dark:hover:from-blue-900/60 hover:to-blue-300 dark:hover:to-blue-800/60 transition-all duration-300 transform hover:-translate-y-2 hover:shadow-xl border border-blue-200/50 dark:border-blue-600/50 hover:border-blue-400/50 dark:hover:border-blue-500/50">
+                <Linkedin
+                  class="w-6 h-6 sm:w-7 sm:h-7 text-blue-600 dark:text-blue-400 group-hover/social:text-blue-700 dark:group-hover/social:text-blue-300 transition-colors"
+                />
+              </a>
+              <a
+                href="https://www.instagram.com/rizky28eka/"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="group/social aspect-square rounded-2xl bg-gradient-to-br from-pink-100 to-rose-200 dark:from-pink-900/40 dark:to-rose-800/40 flex items-center justify-center hover:from-pink-200 dark:hover:from-pink-900/60 hover:to-rose-300 dark:hover:to-rose-800/60 transition-all duration-300 transform hover:-translate-y-2 hover:shadow-xl border border-pink-200/50 dark:border-pink-600/50 hover:border-pink-400/50 dark:hover:border-pink-500/50">
+                <Instagram
+                  class="w-6 h-6 sm:w-7 sm:h-7 text-pink-600 dark:text-pink-400 group-hover/social:text-pink-700 dark:group-hover/social:text-pink-300 transition-colors"
+                />
+              </a>
             </div>
           </div>
         </div>
 
-        <!-- Right Section - Contact Form -->
-        <div
-          class="backdrop-blur-sm bg-white/70 dark:bg-gray-800/70 rounded-3xl p-8 sm:p-10 border border-gray-200/60 dark:border-gray-700/60 shadow-2xl hover:shadow-3xl transition-all duration-300 w-full max-w-2xl mx-auto">
-          <h3
-            class="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            Send me a message
-          </h3>
-
-          <form
-            action="https://formspree.io/f/xnndewrd"
-            method="POST"
-            class="space-y-6 sm:space-y-8"
-            id="contact-form">
-            <!-- Name Field -->
-            <div class="group">
-              <label
-                for="name"
-                class="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300 group-focus-within:text-purple-600 dark:group-focus-within:text-purple-400 transition-colors">
-                Name *
-              </label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                class="w-full px-5 py-4 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-gray-800/80 focus:border-purple-500 dark:focus:border-purple-400 transition-all duration-300 placeholder-gray-400 dark:placeholder-gray-500 text-gray-900 dark:text-gray-100"
-                placeholder="Your full name"
-                required
-              />
-            </div>
-
-            <!-- Email Field -->
-            <div class="group">
-              <label
-                for="email"
-                class="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300 group-focus-within:text-purple-600 dark:group-focus-within:text-purple-400 transition-colors">
-                Email *
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                class="w-full px-5 py-4 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-gray-800/80 focus:border-purple-500 dark:focus:border-purple-400 transition-all duration-300 placeholder-gray-400 dark:placeholder-gray-500 text-gray-900 dark:text-gray-100"
-                placeholder="your.email@example.com"
-                required
-              />
-            </div>
-
-            <!-- Subject Field -->
-            <div class="group">
-              <label
-                for="subject"
-                class="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300 group-focus-within:text-purple-600 dark:group-focus-within:text-purple-400 transition-colors">
-                Subject
-              </label>
-              <input
-                type="text"
-                id="subject"
-                name="subject"
-                class="w-full px-5 py-4 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-gray-800/80 focus:border-purple-500 dark:focus:border-purple-400 transition-all duration-300 placeholder-gray-400 dark:placeholder-gray-500 text-gray-900 dark:text-gray-100"
-                placeholder="What's this about?"
-              />
-            </div>
-
-            <!-- Message Field -->
-            <div class="group">
-              <label
-                for="message"
-                class="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300 group-focus-within:text-purple-600 dark:group-focus-within:text-purple-400 transition-colors">
-                Message *
-              </label>
-              <textarea
-                id="message"
-                name="message"
-                rows="5"
-                minlength="10"
-                maxlength="1000"
-                class="w-full px-5 py-4 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-gray-800/80 focus:border-purple-500 dark:focus:border-purple-400 transition-all duration-300 placeholder-gray-400 dark:placeholder-gray-500 resize-none text-gray-900 dark:text-gray-100"
-                placeholder="Tell me about your project or just say hello!"
-                required></textarea>
-              <div
-                class="text-xs text-gray-500 dark:text-gray-400 mt-1 flex justify-between">
-                <span id="message-error" class="text-red-500 hidden"
-                  >Message must be at least 10 characters</span
-                >
-                <span id="message-counter" class="text-right">0/1000</span>
-              </div>
-            </div>
-
-            <!-- Honeypot Field -->
-            <input type="text" name="_gotcha" style="display:none" />
-
-            <!-- reCAPTCHA -->
-            <div class="g-recaptcha" data-sitekey="YOUR_RECAPTCHA_SITE_KEY">
-            </div>
-
-            <!-- Submit Button -->
-            <button
-              type="submit"
-              class="group relative w-full px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-semibold text-white overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-purple-500/50 disabled:opacity-50 disabled:cursor-not-allowed">
-              <div
-                class="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 transition-all duration-300 group-hover:from-purple-500 group-hover:to-pink-500">
-              </div>
-              <div
-                class="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl">
-              </div>
-              <span
-                class="relative z-10 flex items-center justify-center gap-3">
-                <span id="submit-text" class="font-semibold text-lg sm:text-xl"
-                  >Send Message</span
-                >
-                <svg
-                  class="w-7 h-7 sm:w-8 sm:h-8 ml-1 align-middle rotate-90"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24">
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
-                </svg>
-              </span>
-            </button>
-          </form>
-
-          <!-- Success Message -->
+        <!-- Contact Form Section -->
+        <div class="xl:col-span-3">
           <div
-            id="success-message"
-            class="hidden mt-4 p-4 bg-green-100 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl">
-            <div class="flex items-center gap-2">
-              <svg
-                class="w-5 h-5 text-green-600 dark:text-green-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M5 13l4 4L19 7"></path>
-              </svg>
-              <p class="text-green-800 dark:text-green-200 font-medium">
-                Message sent successfully! I'll get back to you soon.
-              </p>
+            class="group relative overflow-hidden bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl p-6 sm:p-8 lg:p-10 border border-gray-200/50 dark:border-gray-700/50 hover:border-purple-300/50 dark:hover:border-purple-600/50 transition-all duration-500 hover:shadow-2xl hover:shadow-purple-500/10">
+            <div
+              class="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
             </div>
-          </div>
 
-          <!-- Error Message -->
-          <div
-            id="error-message"
-            class="hidden mt-4 p-4 bg-red-100 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
-            <div class="flex items-center gap-2">
-              <svg
-                class="w-5 h-5 text-red-600 dark:text-red-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M6 18L18 6M6 6l12 12"></path>
-              </svg>
-              <p class="text-red-800 dark:text-red-200 font-medium">
-                Something went wrong. Please try again or contact me directly at
-                r28eka@gmail.com
-              </p>
+            <h3
+              class="text-2xl sm:text-3xl font-bold mb-8 text-gray-900 dark:text-white relative z-10">
+              Send me a message
+            </h3>
+
+            <form
+              action="https://formspree.io/f/xnndewrd"
+              method="POST"
+              class="space-y-6 relative z-10"
+              id="contact-form">
+              <!-- Name and Email Row -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Name Field -->
+                <div class="group/field">
+                  <label
+                    for="name"
+                    class="block text-sm font-semibold mb-3 text-gray-700 dark:text-gray-300 group-focus-within/field:text-purple-600 dark:group-focus-within/field:text-purple-400 transition-colors">
+                    Name *
+                  </label>
+                  <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    class="w-full px-5 py-4 rounded-2xl border-2 border-gray-200/70 dark:border-gray-700/70 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm focus:border-purple-500 dark:focus:border-purple-400 focus:bg-white dark:focus:bg-gray-800 transition-all duration-300 placeholder-gray-400 dark:placeholder-gray-500 text-gray-900 dark:text-gray-100 text-base hover:border-gray-300 dark:hover:border-gray-600"
+                    placeholder="Your full name"
+                    required
+                    minlength="2"
+                    maxlength="50"
+                  />
+                  <div
+                    class="text-sm text-red-500 dark:text-red-400 mt-2 opacity-0 transition-opacity"
+                    id="name-error">
+                  </div>
+                </div>
+
+                <!-- Email Field -->
+                <div class="group/field">
+                  <label
+                    for="email"
+                    class="block text-sm font-semibold mb-3 text-gray-700 dark:text-gray-300 group-focus-within/field:text-purple-600 dark:group-focus-within/field:text-purple-400 transition-colors">
+                    Email *
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    class="w-full px-5 py-4 rounded-2xl border-2 border-gray-200/70 dark:border-gray-700/70 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm focus:border-purple-500 dark:focus:border-purple-400 focus:bg-white dark:focus:bg-gray-800 transition-all duration-300 placeholder-gray-400 dark:placeholder-gray-500 text-gray-900 dark:text-gray-100 text-base hover:border-gray-300 dark:hover:border-gray-600"
+                    placeholder="your.email@example.com"
+                    required
+                    pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+                  />
+                  <div
+                    class="text-sm text-red-500 dark:text-red-400 mt-2 opacity-0 transition-opacity"
+                    id="email-error">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Subject Field -->
+              <div class="group/field">
+                <label
+                  for="subject"
+                  class="block text-sm font-semibold mb-3 text-gray-700 dark:text-gray-300 group-focus-within/field:text-purple-600 dark:group-focus-within/field:text-purple-400 transition-colors">
+                  Subject
+                </label>
+                <input
+                  type="text"
+                  id="subject"
+                  name="subject"
+                  class="w-full px-5 py-4 rounded-2xl border-2 border-gray-200/70 dark:border-gray-700/70 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm focus:border-purple-500 dark:focus:border-purple-400 focus:bg-white dark:focus:bg-gray-800 transition-all duration-300 placeholder-gray-400 dark:placeholder-gray-500 text-gray-900 dark:text-gray-100 text-base hover:border-gray-300 dark:hover:border-gray-600"
+                  placeholder="What's this about?"
+                  maxlength="100"
+                />
+              </div>
+
+              <!-- Message Field -->
+              <div class="group/field">
+                <label
+                  for="message"
+                  class="block text-sm font-semibold mb-3 text-gray-700 dark:text-gray-300 group-focus-within/field:text-purple-600 dark:group-focus-within/field:text-purple-400 transition-colors">
+                  Message *
+                </label>
+                <textarea
+                  id="message"
+                  name="message"
+                  rows="6"
+                  minlength="10"
+                  maxlength="1000"
+                  class="w-full px-5 py-4 rounded-2xl border-2 border-gray-200/70 dark:border-gray-700/70 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm focus:border-purple-500 dark:focus:border-purple-400 focus:bg-white dark:focus:bg-gray-800 transition-all duration-300 placeholder-gray-400 dark:placeholder-gray-500 resize-none text-gray-900 dark:text-gray-100 text-base hover:border-gray-300 dark:hover:border-gray-600"
+                  placeholder="Tell me about your project or just say hello! I'd love to hear from you..."
+                  required></textarea>
+                <div class="flex justify-between items-center mt-3">
+                  <span
+                    id="message-error"
+                    class="text-sm text-red-500 dark:text-red-400 opacity-0 transition-opacity"
+                    >Message must be at least 10 characters</span
+                  >
+                  <span
+                    id="message-counter"
+                    class="text-sm text-gray-500 dark:text-gray-400 font-medium"
+                    >0/1000</span
+                  >
+                </div>
+              </div>
+
+              <!-- Honeypot Field -->
+              <input type="text" name="_gotcha" style="display:none" />
+
+              <!-- Submit Button -->
+              <button
+                type="submit"
+                class="group/submit relative w-full px-8 py-5 rounded-2xl font-bold text-white overflow-hidden transition-all duration-300 shadow-lg hover:shadow-2xl focus:outline-none focus:ring-4 focus:ring-purple-500/50 disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-lg">
+                <div
+                  class="absolute inset-0 bg-gradient-to-r from-purple-700 to-pink-700 opacity-0 group-hover/submit:opacity-100 transition-opacity duration-300">
+                </div>
+                <span
+                  class="relative z-10 flex items-center justify-center gap-3">
+                  <span id="submit-text" class="font-bold">Send Message</span>
+                  <Send
+                    class="w-6 h-6 transform group-hover/submit:translate-x-1 transition-transform"
+                  />
+                </span>
+              </button>
+            </form>
+
+            <!-- Success Message -->
+            <div
+              id="success-message"
+              class="hidden mt-8 p-6 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 border-2 border-emerald-200 dark:border-emerald-800 rounded-2xl relative z-10">
+              <div class="flex items-center gap-4">
+                <div
+                  class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shadow-lg">
+                  <svg
+                    class="w-6 h-6 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M5 13l4 4L19 7"></path>
+                  </svg>
+                </div>
+                <div>
+                  <h4
+                    class="font-bold text-emerald-800 dark:text-emerald-200 text-lg">
+                    Message sent successfully!
+                  </h4>
+                  <p
+                    class="text-emerald-700 dark:text-emerald-300 text-sm mt-1">
+                    I'll get back to you within 24 hours.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Error Message -->
+            <div
+              id="error-message"
+              class="hidden mt-8 p-6 bg-gradient-to-r from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20 border-2 border-red-200 dark:border-red-800 rounded-2xl relative z-10">
+              <div class="flex items-center gap-4">
+                <div
+                  class="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500 to-rose-500 flex items-center justify-center shadow-lg">
+                  <svg
+                    class="w-6 h-6 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M6 18L18 6M6 6l12 12"></path>
+                  </svg>
+                </div>
+                <div>
+                  <h4 class="font-bold text-red-800 dark:text-red-200 text-lg">
+                    Something went wrong
+                  </h4>
+                  <p class="text-red-700 dark:text-red-300 text-sm mt-1">
+                    Please try again or contact me directly at r28eka@gmail.com
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -308,64 +403,111 @@ import { Github, Linkedin, Instagram } from "lucide-astro";
   </Container>
 
   <style>
-    /* Custom animations */
-    @keyframes float {
-      0%,
-      100% {
-        transform: translateY(0px);
-      }
-      50% {
-        transform: translateY(-10px);
-      }
-    }
-
-    .animate-float {
+    /* Floating Particles */
+    .particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: linear-gradient(45deg, #8b5cf6, #ec4899);
+      border-radius: 50%;
+      opacity: 0.6;
       animation: float 6s ease-in-out infinite;
     }
 
-    /* Smooth focus transitions */
+    .particle-1 {
+      top: 20%;
+      left: 10%;
+      animation-delay: 0s;
+      animation-duration: 8s;
+    }
+
+    .particle-2 {
+      top: 40%;
+      right: 15%;
+      animation-delay: 2s;
+      animation-duration: 10s;
+    }
+
+    .particle-3 {
+      bottom: 30%;
+      left: 20%;
+      animation-delay: 4s;
+      animation-duration: 7s;
+    }
+
+    .particle-4 {
+      top: 60%;
+      right: 25%;
+      animation-delay: 1s;
+      animation-duration: 9s;
+    }
+
+    .particle-5 {
+      bottom: 20%;
+      right: 10%;
+      animation-delay: 3s;
+      animation-duration: 6s;
+    }
+
+    @keyframes float {
+      0%,
+      100% {
+        transform: translateY(0px) translateX(0px);
+        opacity: 0.6;
+      }
+      25% {
+        transform: translateY(-20px) translateX(10px);
+        opacity: 1;
+      }
+      50% {
+        transform: translateY(-10px) translateX(-5px);
+        opacity: 0.8;
+      }
+      75% {
+        transform: translateY(-30px) translateX(15px);
+        opacity: 0.9;
+      }
+    }
+
+    /* Shimmer animation */
+    @keyframes shimmer {
+      0% {
+        transform: translateX(-100%);
+      }
+      100% {
+        transform: translateX(100%);
+      }
+    }
+
+    .animate-shimmer {
+      animation: shimmer 2s infinite;
+    }
+
+    /* Enhanced focus transitions */
     input:focus,
     textarea:focus {
       transform: translateY(-2px);
-      box-shadow: 0 10px 25px -5px rgba(139, 92, 246, 0.3);
+      box-shadow: 0 20px 40px -10px rgba(139, 92, 246, 0.25);
     }
 
-    /* Gradient text animation */
-    @keyframes gradient-shift {
-      0% {
-        background-position: 0% 50%;
-      }
-      50% {
-        background-position: 100% 50%;
-      }
-      100% {
-        background-position: 0% 50%;
-      }
-    }
-
-    .animate-gradient {
-      background-size: 200% 200%;
-      animation: gradient-shift 3s ease infinite;
-    }
-
-    /* Form validation styles */
+    /* Enhanced form validation styles */
     input:invalid:not(:placeholder-shown),
     textarea:invalid:not(:placeholder-shown) {
-      border-color: #ef4444;
-      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+      border-color: #ef4444 !important;
+      box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
     }
 
-    input:valid,
-    textarea:valid {
-      border-color: #10b981;
+    input:valid:not(:placeholder-shown),
+    textarea:valid:not(:placeholder-shown) {
+      border-color: #10b981 !important;
     }
 
     /* Loading spinner */
     .loading-spinner {
-      width: 20px;
-      height: 20px;
-      border: 2px solid transparent;
-      border-top: 2px solid currentColor;
+      width: 24px;
+      height: 24px;
+      border: 3px solid transparent;
+      border-top: 3px solid currentColor;
       border-radius: 50%;
       animation: spin 1s linear infinite;
     }
@@ -377,28 +519,31 @@ import { Github, Linkedin, Instagram } from "lucide-astro";
     }
 
     /* Responsive improvements */
-    @media (max-width: 640px) {
-      .backdrop-blur-sm {
-        backdrop-filter: blur(4px);
+    @media (max-width: 768px) {
+      .particle {
+        width: 3px;
+        height: 3px;
       }
     }
 
     /* Accessibility improvements */
     @media (prefers-reduced-motion: reduce) {
-      .animate-float,
-      .animate-gradient,
       * {
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
       }
+
+      .particle {
+        animation: none;
+      }
     }
 
-    /* New animations */
+    /* Fade in animation */
     @keyframes fade-in {
       from {
         opacity: 0;
-        transform: translateY(-10px);
+        transform: translateY(-20px);
       }
       to {
         opacity: 1;
@@ -407,28 +552,42 @@ import { Github, Linkedin, Instagram } from "lucide-astro";
     }
 
     .animate-fade-in {
-      animation: fade-in 0.3s ease-out forwards;
+      animation: fade-in 0.5s ease-out forwards;
     }
 
-    /* Focus styles for keyboard navigation */
+    /* Enhanced focus styles for keyboard navigation */
     *:focus-visible {
-      outline: 2px solid #8b5cf6;
-      outline-offset: 2px;
+      outline: 3px solid #8b5cf6;
+      outline-offset: 3px;
+      border-radius: 8px;
     }
 
-    /* Improved loading spinner */
-    .loading-spinner {
-      width: 20px;
-      height: 20px;
-      border: 2px solid rgba(255, 255, 255, 0.3);
-      border-top: 2px solid currentColor;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
+    /* Smooth scrolling */
+    html {
+      scroll-behavior: smooth;
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: linear-gradient(to bottom, #8b5cf6, #ec4899);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(to bottom, #7c3aed, #db2777);
     }
   </style>
 
   <script>
-    // Form handling
+    // Form handling with enhanced features
     const form = document.getElementById("contact-form") as HTMLFormElement;
     const submitButton = form?.querySelector(
       'button[type="submit"]'
@@ -441,47 +600,96 @@ import { Github, Linkedin, Instagram } from "lucide-astro";
     const messageTextarea = document.getElementById(
       "message"
     ) as HTMLTextAreaElement;
+    const nameError = document.getElementById("name-error");
+    const emailError = document.getElementById("email-error");
 
     // Rate limiting
     let lastSubmitTime = 0;
     const SUBMIT_COOLDOWN = 60000; // 1 minute cooldown
 
-    // Character counter for message
+    // Character counter for message with smooth animation
     if (messageTextarea && messageCounter) {
       messageTextarea.addEventListener("input", () => {
         const length = messageTextarea.value.length;
         messageCounter.textContent = `${length}/1000`;
 
-        // Show error if message is too short
+        // Update counter color based on length
+        if (length > 900) {
+          messageCounter.className =
+            "text-sm text-red-500 dark:text-red-400 font-medium";
+        } else if (length > 800) {
+          messageCounter.className =
+            "text-sm text-yellow-500 dark:text-yellow-400 font-medium";
+        } else {
+          messageCounter.className =
+            "text-sm text-gray-500 dark:text-gray-400 font-medium";
+        }
+
+        // Show/hide error with smooth transition
         if (length < 10 && length > 0) {
-          messageError?.classList.remove("hidden");
+          messageError?.classList.remove("opacity-0");
+          messageError?.classList.add("opacity-100");
           messageTextarea.setCustomValidity(
             "Message must be at least 10 characters"
           );
         } else {
-          messageError?.classList.add("hidden");
+          messageError?.classList.remove("opacity-100");
+          messageError?.classList.add("opacity-0");
           messageTextarea.setCustomValidity("");
         }
       });
     }
 
-    // Email validation
+    // Enhanced name validation
+    const nameInput = form?.querySelector(
+      'input[name="name"]'
+    ) as HTMLInputElement;
+    if (nameInput && nameError) {
+      nameInput.addEventListener("input", () => {
+        const name = nameInput.value.trim();
+        if (name.length < 2 && name.length > 0) {
+          nameError.textContent = "Name must be at least 2 characters";
+          nameError.classList.remove("opacity-0");
+          nameError.classList.add("opacity-100");
+          nameInput.setCustomValidity("Name must be at least 2 characters");
+        } else if (name.length > 50) {
+          nameError.textContent = "Name must be less than 50 characters";
+          nameError.classList.remove("opacity-0");
+          nameError.classList.add("opacity-100");
+          nameInput.setCustomValidity("Name must be less than 50 characters");
+        } else {
+          nameError.textContent = "";
+          nameError.classList.remove("opacity-100");
+          nameError.classList.add("opacity-0");
+          nameInput.setCustomValidity("");
+        }
+      });
+    }
+
+    // Enhanced email validation
     const emailInput = form?.querySelector(
       'input[type="email"]'
     ) as HTMLInputElement;
-    if (emailInput) {
+    if (emailInput && emailError) {
       emailInput.addEventListener("input", () => {
-        const email = emailInput.value;
+        const email = emailInput.value.trim();
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
         if (!emailRegex.test(email) && email.length > 0) {
+          emailError.textContent = "Please enter a valid email address";
+          emailError.classList.remove("opacity-0");
+          emailError.classList.add("opacity-100");
           emailInput.setCustomValidity("Please enter a valid email address");
         } else {
+          emailError.textContent = "";
+          emailError.classList.remove("opacity-100");
+          emailError.classList.add("opacity-0");
           emailInput.setCustomValidity("");
         }
       });
     }
 
+    // Enhanced form submission
     if (form && submitButton && submitText) {
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -492,8 +700,12 @@ import { Github, Linkedin, Instagram } from "lucide-astro";
           const remainingTime = Math.ceil(
             (SUBMIT_COOLDOWN - (now - lastSubmitTime)) / 1000
           );
-          errorMessage!.textContent = `Please wait ${remainingTime} seconds before submitting again.`;
+          const errorDiv = errorMessage?.querySelector("p");
+          if (errorDiv) {
+            errorDiv.textContent = `Please wait ${remainingTime} seconds before submitting again.`;
+          }
           errorMessage?.classList.remove("hidden");
+          errorMessage?.classList.add("animate-fade-in");
           return;
         }
 
@@ -501,14 +713,13 @@ import { Github, Linkedin, Instagram } from "lucide-astro";
         successMessage?.classList.add("hidden");
         errorMessage?.classList.add("hidden");
 
-        // Show loading state
+        // Show enhanced loading state
         submitButton.disabled = true;
         submitText.innerHTML = '<div class="loading-spinner"></div> Sending...';
+        submitButton.classList.add("scale-95");
 
         try {
           const formData = new FormData(form);
-
-          // Add timestamp to prevent caching
           formData.append("_timestamp", new Date().getTime().toString());
 
           const response = await fetch(form.action, {
@@ -520,70 +731,236 @@ import { Github, Linkedin, Instagram } from "lucide-astro";
           });
 
           if (response.ok) {
-            // Update last submit time
             lastSubmitTime = now;
 
-            // Show success message with animation
+            // Show success message with enhanced animation
             successMessage?.classList.remove("hidden");
             successMessage?.classList.add("animate-fade-in");
+
+            // Reset form with animation
             form.reset();
             messageCounter!.textContent = "0/1000";
+            messageCounter!.className =
+              "text-sm text-gray-500 dark:text-gray-400 font-medium";
 
-            // Reset button after delay
+            // Clear all error states
+            [nameError, emailError, messageError].forEach((error) => {
+              if (error) {
+                error.textContent = "";
+                error.classList.remove("opacity-100");
+                error.classList.add("opacity-0");
+              }
+            });
+
+            // Reset button with delay and animation
             setTimeout(() => {
               submitButton.disabled = false;
               submitText.textContent = "Send Message";
-            }, 1000);
+              submitButton.classList.remove("scale-95");
+            }, 1500);
+
+            // Auto-hide success message after 10 seconds
+            setTimeout(() => {
+              successMessage?.classList.add("hidden");
+            }, 10000);
           } else {
             throw new Error("Network response was not ok");
           }
         } catch (error) {
           console.error("Error:", error);
-          // Show error message
           errorMessage?.classList.remove("hidden");
           errorMessage?.classList.add("animate-fade-in");
           submitButton.disabled = false;
           submitText.textContent = "Send Message";
+          submitButton.classList.remove("scale-95");
         }
       });
     }
 
-    // Real-time form validation
+    // Enhanced real-time form validation with visual feedback
     const inputs = form?.querySelectorAll("input, textarea");
     inputs?.forEach((input) => {
+      // Focus effects
+      input.addEventListener("focus", () => {
+        input.parentElement?.classList.add("ring-2", "ring-purple-500/20");
+      });
+
       input.addEventListener("blur", () => {
-        if ((input as HTMLInputElement).checkValidity()) {
+        input.parentElement?.classList.remove("ring-2", "ring-purple-500/20");
+
+        if (
+          (input as HTMLInputElement).checkValidity() &&
+          (input as HTMLInputElement).value
+        ) {
           input.classList.remove("border-red-500");
-          input.classList.add("border-green-500");
-        } else {
-          input.classList.remove("border-green-500");
+          input.classList.add("border-emerald-500");
+        } else if (
+          !(input as HTMLInputElement).checkValidity() &&
+          (input as HTMLInputElement).value
+        ) {
+          input.classList.remove("border-emerald-500");
           input.classList.add("border-red-500");
+        }
+      });
+
+      // Real-time typing effects
+      input.addEventListener("input", () => {
+        if (
+          (input as HTMLInputElement).checkValidity() &&
+          (input as HTMLInputElement).value
+        ) {
+          input.classList.remove("border-red-500");
+          input.classList.add("border-emerald-500");
+        } else {
+          input.classList.remove("border-emerald-500");
         }
       });
     });
 
-    // Keyboard shortcuts
+    // Enhanced keyboard shortcuts
     document.addEventListener("keydown", (e) => {
       // Ctrl/Cmd + Enter to submit form
       if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+        e.preventDefault();
         form?.requestSubmit();
+      }
+
+      // Escape to clear form
+      if (e.key === "Escape") {
+        const focusedElement = document.activeElement;
+        if (
+          focusedElement &&
+          (focusedElement.tagName === "INPUT" ||
+            focusedElement.tagName === "TEXTAREA")
+        ) {
+          (focusedElement as HTMLElement).blur();
+        }
       }
     });
 
-    // Smooth scroll for contact info clicks
+    // Enhanced contact info interactions
     document
       .querySelectorAll('a[href^="mailto:"], a[href^="tel:"]')
       .forEach((link) => {
-        link.addEventListener("click", () => {
-          // Add subtle animation feedback
-          const icon = link.querySelector(".w-10, .w-12");
-          if (icon) {
-            icon.classList.add("scale-125");
-            setTimeout(() => {
-              icon.classList.remove("scale-125");
-            }, 200);
-          }
+        link.addEventListener("click", (e) => {
+          // Add ripple effect
+          const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+          const ripple = document.createElement("div");
+          const size = Math.max(rect.width, rect.height);
+          const mouseEvent = e as MouseEvent;
+          const x = mouseEvent.clientX - rect.left - size / 2;
+          const y = mouseEvent.clientY - rect.top - size / 2;
+
+          ripple.style.cssText = `
+          position: absolute;
+          width: ${size}px;
+          height: ${size}px;
+          left: ${x}px;
+          top: ${y}px;
+          background: rgba(139, 92, 246, 0.3);
+          border-radius: 50%;
+          transform: scale(0);
+          animation: ripple 0.6s linear;
+          pointer-events: none;
+          z-index: 1000;
+        `;
+
+          (e.currentTarget as HTMLElement).style.position = "relative";
+          (e.currentTarget as HTMLElement).style.overflow = "hidden";
+          (e.currentTarget as HTMLElement).appendChild(ripple);
+
+          setTimeout(() => {
+            ripple.remove();
+          }, 600);
         });
       });
+
+    // Add ripple animation styles
+    const style = document.createElement("style");
+    style.textContent = `
+      @keyframes ripple {
+        to {
+          transform: scale(2);
+          opacity: 0;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+
+    // Smooth scroll to form when clicking contact links
+    document.querySelectorAll('a[href="#contact-form"]').forEach((link) => {
+      link.addEventListener("click", (e) => {
+        e.preventDefault();
+        form?.scrollIntoView({ behavior: "smooth", block: "center" });
+        setTimeout(() => {
+          nameInput?.focus();
+        }, 500);
+      });
+    });
+
+    // Enhanced accessibility: Auto-focus management
+    let tabIndex = 0;
+    const focusableElements = form?.querySelectorAll("input, textarea, button");
+
+    focusableElements?.forEach((element, index) => {
+      element.addEventListener("keydown", (e) => {
+        const ke = e as KeyboardEvent;
+        if (ke.key === "Tab" && ke.shiftKey && index === 0) {
+          ke.preventDefault();
+          (
+            focusableElements[focusableElements.length - 1] as HTMLElement
+          ).focus();
+        } else if (
+          ke.key === "Tab" &&
+          !ke.shiftKey &&
+          index === focusableElements.length - 1
+        ) {
+          ke.preventDefault();
+          (focusableElements[0] as HTMLElement).focus();
+        }
+      });
+    });
+
+    // Progressive enhancement: Add visual feedback for successful interactions
+    const addSuccessFeedback = (element: Element) => {
+      element.classList.add("scale-105");
+      setTimeout(() => {
+        element.classList.remove("scale-105");
+      }, 200);
+    };
+
+    // Monitor form completion progress
+    let completionProgress = 0;
+    const updateProgress = () => {
+      const requiredFields = form?.querySelectorAll(
+        "input[required], textarea[required]"
+      );
+      let filledFields = 0;
+
+      requiredFields?.forEach((field) => {
+        if ((field as HTMLInputElement).value.trim()) {
+          filledFields++;
+        }
+      });
+
+      completionProgress =
+        requiredFields ? (filledFields / requiredFields.length) * 100 : 0;
+
+      // Update submit button appearance based on progress
+      if (completionProgress === 100) {
+        submitButton?.classList.add("ring-2", "ring-emerald-500/50");
+        submitButton?.classList.remove("ring-purple-500/50");
+      } else {
+        submitButton?.classList.remove("ring-2", "ring-emerald-500/50");
+      }
+    };
+
+    inputs?.forEach((input) => {
+      input.addEventListener("input", updateProgress);
+      input.addEventListener("blur", updateProgress);
+    });
+
+    // Initialize progress check
+    updateProgress();
   </script>
 </PageLayout>

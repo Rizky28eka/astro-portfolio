@@ -49,11 +49,11 @@ export function formatDate(
   }
 
   const formatOptions: Intl.DateTimeFormatOptions = {
-    short: { month: 'short', day: 'numeric', year: 'numeric' },
-    medium: { month: 'short', day: 'numeric', year: 'numeric' }, // duplicated in original, corrected to match 'short' if not intended to be different
-    long: { month: 'long', day: 'numeric', year: 'numeric' },
-    full: { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }
-  }[format];
+    month: format === 'short' || format === 'medium' ? 'short' : 'long',
+    day: 'numeric',
+    year: 'numeric',
+    ...(format === 'full' && { weekday: 'long' })
+  };
 
   if (includeTime) {
     formatOptions.hour = '2-digit';
@@ -89,18 +89,10 @@ export function readingTime(
 
   const minutes = Math.max(1, Math.ceil(words / wordsPerMinute));
 
-  // Internationalization support
-  const rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
-
   // Simplified logic: format using Intl.RelativeTimeFormat only if needed, otherwise use simple string
   if (locale === 'en-US' || locale === 'id-ID') { // Contoh: tambahkan locale lain yang umum
     return `${minutes} min read`; // Default English format
   } else {
-    // Ini mungkin tidak mengembalikan "X min read" secara langsung.
-    // Intl.RelativeTimeFormat digunakan untuk "in X minutes" atau "X minutes ago".
-    // Untuk "X min read", lebih baik buat string secara manual.
-    // Jika maksudnya adalah "1 minute read", gunakan `rtf.format(minutes, 'minute')` (untuk kasus tunggal).
-    // Untuk konsistensi dengan "X min read", pendekatan manual lebih baik.
     return `${minutes} min read`; // Untuk kasus selain en-US, tetap pakai format umum
   }
 }
