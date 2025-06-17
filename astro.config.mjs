@@ -6,7 +6,7 @@ import solidJs from "@astrojs/solid-js"
 
 // https://astro.build/config
 export default defineConfig({
-  site: "https://astro-portfolio.vercel.app",
+  site: "https://ekaportfolio.vercel.app/",
   integrations: [mdx(), sitemap(), solidJs(), tailwind({ applyBaseStyles: false })],
   vite: {
     server: {

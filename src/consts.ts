@@ -4,7 +4,7 @@ import type { Site, Page, Links, Socials } from "@types"
 export const SITE: Site = {
   TITLE: "R28eka",
   DESCRIPTION: "Personal portfolio and tech blog by Rizky Eka. Sharing knowledge about web development, design, and personal growth.",
-  AUTHOR: "Rizky Eka Putra",
+  AUTHOR: "Rizky Eka Haryadi",
 }
 
 // ===== Pages =====
@@ -84,7 +84,7 @@ export const SOCIALS: Socials = [
     NAME: "Twitter",
     ICON: "lucide:twitter",
     TEXT: "@rizky28eka",
-    HREF: "https://twitter.com/rizky28eka",
+    HREF: "https://twitter.com/duaribuempaat",
   },
   {
     NAME: "YouTube",
