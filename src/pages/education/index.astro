@@ -2,6 +2,18 @@
 import { getCollection } from "astro:content";
 import PageLayout from "@layouts/PageLayout.astro";
 import { EDUCATION } from "@consts";
+import { formatDate as utilFormatDate } from "@/lib/utils";
+import Accordion from "@components/ui/Accordion.astro";
+
+function formatEducationDate(input?: string | Date): string {
+  if (!input) return "Present";
+  if (input === "present") return "Present";
+  try {
+    return utilFormatDate(input, { format: "short" });
+  } catch (e) {
+    return "Invalid Date";
+  }
+}
 
 // Get education collection and sort by end date (descending)
 const collection = await getCollection("education");
@@ -24,19 +36,7 @@ const education = await Promise.all(
   })
 );
 
-function formatDate(input?: string | Date): string {
-  if (!input) return "Present";
-  if (input === "present") return "Present";
 
-  const date = typeof input === "string" ? new Date(input) : input;
-
-  if (isNaN(date.getTime())) return "Invalid Date";
-
-  const month = date.toLocaleString("en-US", { month: "short" });
-  const year = date.getFullYear();
-
-  return `${month} ${year}`;
-}
 
 ---
 
@@ -89,79 +89,51 @@ function formatDate(input?: string | Date): string {
               </div>
 
               <div class="flex-grow">
-                <div class="backdrop-blur-sm bg-white/50 dark:bg-gray-800/50 rounded-2xl border border-gray-200/50 dark:border-gray-700/50 shadow-xl transition-all duration-300 group-hover:shadow-2xl overflow-hidden">
-                  <button
-                    class="accordion-header w-full text-left p-6 sm:p-8 flex items-center justify-between cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500/50"
-                    aria-expanded="false"
-                    aria-controls={`accordion-content-${index}`}>
-                    <div>
-                      <div class="text-xl sm:text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                        {entry.data.school}
-                      </div>
-                      <div class="text-base sm:text-lg font-medium mt-1 text-gray-700 dark:text-gray-300">
-                        {entry.data.degree}
-                      </div>
-                    </div>
-                    <svg
-                      class="w-6 h-6 sm:w-7 sm:h-7 text-gray-600 dark:text-gray-300 transition-transform duration-300 transform accordion-arrow"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round">
-                      <polyline points="6 9 12 15 18 9" />
-                    </svg>
-                  </button>
-
+                <Accordion title={entry.data.school || ''} subtitle={entry.data.degree || undefined} index={index}>
                   <div class="px-6 pb-4 sm:px-8 sm:pb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                     <div class="text-xs sm:text-sm font-medium px-2 py-0.5 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-full">
-                      {formatDate(entry.data.dateStart)} -{" "}
-                      {formatDate(entry.data.dateEnd)}
+                      {formatEducationDate(entry.data.dateStart)} -{" "}
+                      {formatEducationDate(entry.data.dateEnd)}
                     </div>
                   </div>
 
-                  <div
-                    id={`accordion-content-${index}`}
-                    class="accordion-content max-h-0 overflow-hidden transition-[max-height] duration-500 ease-in-out">
-                    <article class="prose dark:prose-invert max-w-none text-sm sm:text-base px-6 pb-6 sm:px-8 sm:pb-8 pt-0">
-                      <entry.Content />
-                    </article>
+                  <article class="prose dark:prose-invert max-w-none text-sm sm:text-base px-6 pb-6 sm:px-8 sm:pb-8 pt-0">
+                    <entry.Content />
+                  </article>
 
-                    {entry.data.achievements &&
-                      entry.data.achievements.length > 0 && (
-                        <div class="mt-4 px-6 pt-4 sm:px-8 sm:pt-4 border-t border-gray-200/50 dark:border-gray-700/50">
-                          <div class="flex items-center gap-2 mb-3">
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              class="w-4 h-4 text-amber-500 sm:w-5 sm:h-5"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              stroke-width="2"
-                              stroke-linecap="round"
-                              stroke-linejoin="round">
-                              <circle cx="12" cy="8" r="6" />
-                              <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11" />
-                            </svg>
-                            <p class="font-medium text-sm sm:text-base bg-gradient-to-r from-amber-500 to-yellow-500 bg-clip-text text-transparent">
-                              Key Achievements
-                            </p>
-                          </div>
-                          <ul class="achievements-list space-y-2 text-sm sm:text-base mb-6">
-                            {entry.data.achievements.map((achievement) => (
-                              <li class="flex items-start gap-2 group">
-                                <span class="inline-block w-1.5 h-1.5 rounded-full bg-gradient-to-r from-amber-500 to-yellow-500 mt-2 flex-shrink-0" />
-                                <span class="group-hover:bg-gradient-to-r group-hover:from-amber-500 group-hover:to-yellow-500 group-hover:bg-clip-text group-hover:text-transparent transition-all duration-300">
-                                  {achievement}
-                                </span>
-                              </li>
-                            ))}
-                          </ul>
+                  {entry.data.achievements &&
+                    entry.data.achievements.length > 0 && (
+                      <div class="mt-4 px-6 pt-4 sm:px-8 sm:pt-4 border-t border-gray-200/50 dark:border-gray-700/50">
+                        <div class="flex items-center gap-2 mb-3">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="w-4 h-4 text-amber-500 sm:w-5 sm:h-5"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round">
+                            <circle cx="12" cy="8" r="6" />
+                            <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11" />
+                          </svg>
+                          <p class="font-medium text-sm sm:text-base bg-gradient-to-r from-amber-500 to-yellow-500 bg-clip-text text-transparent">
+                            Key Achievements
+                          </p>
                         </div>
-                      )}
-                  </div>
-                </div>
+                        <ul class="achievements-list space-y-2 text-sm sm:text-base mb-6">
+                          {entry.data.achievements.map((achievement) => (
+                            <li class="flex items-start gap-2 group">
+                              <span class="inline-block w-1.5 h-1.5 rounded-full bg-gradient-to-r from-amber-500 to-yellow-500 mt-2 flex-shrink-0" />
+                              <span class="group-hover:bg-gradient-to-r group-hover:from-amber-500 group-hover:to-yellow-500 group-hover:bg-clip-text group-hover:text-transparent transition-all duration-300">
+                                {achievement}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                </Accordion>
               </div>
             </div>
           </div>
@@ -216,47 +188,4 @@ function formatDate(input?: string | Date): string {
   }
 </style>
 
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const headers = document.querySelectorAll(".accordion-header");
 
-    headers.forEach((header) => {
-      header.addEventListener("click", () => {
-        const backdrop = header.closest(".backdrop-blur-sm");
-        const content = backdrop ? backdrop.querySelector(".accordion-content") : null;
-        const arrow = header.querySelector(".accordion-arrow");
-
-        if (content instanceof HTMLElement && arrow) {
-          const isExpanded = header.getAttribute("aria-expanded") === "true";
-
-          document
-            .querySelectorAll('.accordion-header[aria-expanded="true"]')
-            .forEach((openHeader) => {
-              if (openHeader !== header) {
-                openHeader.setAttribute("aria-expanded", "false");
-                const openBackdrop = openHeader.closest(".backdrop-blur-sm");
-                const openContent = openBackdrop ? openBackdrop.querySelector(".accordion-content") : null;
-                const openArrow = openHeader.querySelector(".accordion-arrow");
-                if (openContent instanceof HTMLElement) {
-                  openContent.style.maxHeight = "0";
-                }
-                if (openArrow) {
-                  openArrow.classList.remove("rotate-180");
-                }
-              }
-            });
-
-          if (isExpanded) {
-            header.setAttribute("aria-expanded", "false");
-            content.style.maxHeight = "0";
-            arrow.classList.remove("rotate-180");
-          } else {
-            header.setAttribute("aria-expanded", "true");
-            content.style.maxHeight = content.scrollHeight + "px";
-            arrow.classList.add("rotate-180");
-          }
-        }
-      });
-    });
-  });
-</script>

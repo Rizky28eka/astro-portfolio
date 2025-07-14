@@ -66,16 +66,8 @@ const structuredData = {
               ))}
             </div>
           : <div class="text-center py-12">
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <div class="animate-pulse">
-                  <div class="h-48 bg-gray-200 dark:bg-gray-700 rounded-lg" />
-                </div>
-                <div class="animate-pulse">
-                  <div class="h-48 bg-gray-200 dark:bg-gray-700 rounded-lg" />
-                </div>
-              </div>
               <p class="text-gray-600 dark:text-gray-400">
-                Loading amazing projects...
+                No projects found.
               </p>
             </div>
         }
@@ -105,47 +97,62 @@ const structuredData = {
         }
       </section>
 
-      {
-        posts.length > 0 && (
-          <section class="animate" aria-labelledby="blog-heading">
-            <div class="text-center mb-10">
-              <h2
-                id="blog-heading"
-                class="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-gray-900 via-purple-900 to-gray-900 dark:from-white dark:via-purple-300 dark:to-white bg-clip-text text-transparent">
-                {BLOG.TITLE}
-              </h2>
-              <div class="w-20 h-1 bg-gradient-to-r from-amber-600 to-yellow-600 mx-auto rounded-full" />
+      {posts.length > 0 ? (
+        <section class="animate" aria-labelledby="blog-heading">
+          <div class="text-center mb-10">
+            <h2
+              id="blog-heading"
+              class="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-gray-900 via-purple-900 to-gray-900 dark:from-white dark:via-purple-300 dark:to-white bg-clip-text text-transparent">
+              {BLOG.TITLE}
+            </h2>
+            <div class="w-20 h-1 bg-gradient-to-r from-amber-600 to-yellow-600 mx-auto rounded-full" />
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {posts.slice(0, 2).map((post) => (
+              <article class="transform hover:scale-105 transition-transform duration-300">
+                <ArrowCard entry={post} />
+              </article>
+            ))}
+          </div>
+          {posts.length > 2 && (
+            <div class="text-center mt-12">
+              <a
+                href="/blog"
+                class="inline-flex items-center px-8 py-4 text-base font-medium text-white bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
+                Read All Articles
+                <svg
+                  class="w-5 h-5 ml-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M17 8l4 4m0 0l-4 4m4-4H3"
+                  />
+                </svg>
+              </a>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {posts.slice(0, 2).map((post) => (
-                <article class="transform hover:scale-105 transition-transform duration-300">
-                  <ArrowCard entry={post} />
-                </article>
-              ))}
-            </div>
-            {posts.length > 2 && (
-              <div class="text-center mt-12">
-                <a
-                  href="/blog"
-                  class="inline-flex items-center px-8 py-4 text-base font-medium text-white bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
-                  Read All Articles
-                  <svg
-                    class="w-5 h-5 ml-2"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24">
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M17 8l4 4m0 0l-4 4m4-4H3"
-                    />
-                  </svg>
-                </a>
-              </div>
-            )}
-          </section>
-        )
+          )}
+        </section>
+      ) : (
+        <section class="animate" aria-labelledby="blog-heading">
+          <div class="text-center mb-10">
+            <h2
+              id="blog-heading"
+              class="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-gray-900 via-purple-900 to-gray-900 dark:from-white dark:via-purple-300 dark:to-white bg-clip-text text-transparent">
+              {BLOG.TITLE}
+            </h2>
+            <div class="w-20 h-1 bg-gradient-to-r from-amber-600 to-yellow-600 mx-auto rounded-full" />
+          </div>
+          <div class="text-center py-12">
+            <p class="text-gray-600 dark:text-gray-400">
+              No blog posts found.
+            </p>
+          </div>
+        </section>
+      )}
       }
 
       <section class="animate" aria-labelledby="github-heading">

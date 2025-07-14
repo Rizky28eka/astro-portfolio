@@ -1,0 +1,88 @@
+---
+interface Props {
+  title: string;
+  subtitle: string | null | undefined;
+  index: number;
+}
+
+const { title, subtitle, index } = Astro.props;
+---
+
+<div class="backdrop-blur-sm bg-white/50 dark:bg-gray-800/50 rounded-2xl border border-gray-200/50 dark:border-gray-700/50 shadow-xl transition-all duration-300 group-hover:shadow-2xl overflow-hidden">
+  <button
+    class="accordion-header w-full text-left p-6 sm:p-8 flex items-center justify-between cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500/50"
+    aria-expanded="false"
+    aria-controls={`accordion-content-${index}`}>
+    <div>
+      <div class="text-xl sm:text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+        {title}
+      </div>
+      {subtitle && (
+        <div class="text-base sm:text-lg font-medium mt-1 text-gray-700 dark:text-gray-300">
+          {subtitle}
+        </div>
+      )}
+    </div>
+    <svg
+      class="w-6 h-6 sm:w-7 sm:h-7 text-gray-600 dark:text-gray-300 transition-transform duration-300 transform accordion-arrow"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round">
+      <polyline points="6 9 12 15 18 9" />
+    </svg>
+  </button>
+
+  <div
+    id={`accordion-content-${index}`}
+    class="accordion-content max-h-0 overflow-hidden transition-[max-height] duration-500 ease-in-out">
+    <slot />
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const headers = document.querySelectorAll(".accordion-header");
+
+    headers.forEach((header) => {
+      header.addEventListener("click", () => {
+        const backdrop = header.closest(".backdrop-blur-sm");
+        const content = backdrop ? backdrop.querySelector(".accordion-content") : null;
+        const arrow = header.querySelector(".accordion-arrow");
+
+        if (content instanceof HTMLElement && arrow) {
+          const isExpanded = header.getAttribute("aria-expanded") === "true";
+
+          document
+            .querySelectorAll('.accordion-header[aria-expanded="true"]')
+            .forEach((openHeader) => {
+              if (openHeader !== header) {
+                openHeader.setAttribute("aria-expanded", "false");
+                const openBackdrop = openHeader.closest(".backdrop-blur-sm");
+                const openContent = openBackdrop ? openBackdrop.querySelector(".accordion-content") : null;
+                const openArrow = openHeader.querySelector(".accordion-arrow");
+                if (openContent instanceof HTMLElement) {
+                  openContent.style.maxHeight = "0";
+                }
+                if (openArrow) {
+                  openArrow.classList.remove("rotate-180");
+                }
+              }
+            });
+
+          if (isExpanded) {
+            header.setAttribute("aria-expanded", "false");
+            content.style.maxHeight = "0";
+            arrow.classList.remove("rotate-180");
+          } else {
+            header.setAttribute("aria-expanded", "true");
+            content.style.maxHeight = content.scrollHeight + "px";
+            arrow.classList.add("rotate-180");
+          }
+        }
+      });
+    });
+  });
+</script>
