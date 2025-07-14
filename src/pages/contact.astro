@@ -8,7 +8,6 @@ import {
   Mail,
   MapPin,
   Send,
-  Phone,
   Calendar,
   Star,
 } from "lucide-astro";
@@ -899,7 +898,6 @@ import {
     });
 
     // Enhanced accessibility: Auto-focus management
-    let tabIndex = 0;
     const focusableElements = form?.querySelectorAll("input, textarea, button");
 
     focusableElements?.forEach((element, index) => {
@@ -921,13 +919,7 @@ import {
       });
     });
 
-    // Progressive enhancement: Add visual feedback for successful interactions
-    const addSuccessFeedback = (element: Element) => {
-      element.classList.add("scale-105");
-      setTimeout(() => {
-        element.classList.remove("scale-105");
-      }, 200);
-    };
+    
 
     // Monitor form completion progress
     let completionProgress = 0;
