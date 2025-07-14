@@ -5,8 +5,9 @@ type Props = {
 }
 // Get the requested entry
 const { entry } = Astro.props
-const { collection } = entry
+const { collection, data, slug } = entry
 const { Content } = await entry.render()
+
 // Get the next and prev entries (modulo to wrap index)
 const items = (await getCollection(collection))
   .filter(post => !post.data.draft)
@@ -19,8 +20,17 @@ const items = (await getCollection(collection))
 const index = items.findIndex(x => x.slug === entry.slug)
 const prev = index > 0 ? items[index - 1] : items[items.length - 1]
 const next = index < items.length - 1 ? items[index + 1] : items[0]
+
+// Get related posts based on tags
+const currentTags = data.tags || [];
+const relatedPosts = items.filter(item => 
+  item.slug !== slug && 
+  item.data.tags && 
+  item.data.tags.some((tag: string) => currentTags.includes(tag))
+).slice(0, 3); // Limit to 3 related posts
 ---
 <div>
+  
   <article>
     <Content/>
   </article>
@@ -56,4 +66,21 @@ const next = index < items.length - 1 ? items[index + 1] : items[0]
       </svg>
     </a>
   </div>
+  {relatedPosts.length > 0 && (
+    <div class="mt-8 pt-8 border-t border-gray-200 dark:border-gray-700">
+      <h3 class="text-xl font-bold mb-4 text-gray-900 dark:text-white">Related {collection === 'blog' ? 'Posts' : 'Projects'}</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {relatedPosts.map((post: CollectionEntry<"blog"> | CollectionEntry<"projects">) => (
+          <a href={`/${post.collection}/${post.slug}`} class="group p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-purple-400 dark:hover:border-purple-500 transition-colors duration-300 ease-in-out block">
+            <h4 class="font-semibold text-lg text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+              {post.data.title}
+            </h4>
+            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+              {post.data.summary}
+            </p>
+          </a>
+        ))}
+      </div>
+    </div>
+  )}
 </div>
