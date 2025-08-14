@@ -8,7 +8,7 @@ summary: "This certification covers the fundamentals of networking, including ne
 
 This certificate signifies the successful completion of the CCNAv7: Introduction to Networks course, the first in the CCNA series. This course provides a comprehensive overview of networking concepts and technologies, essential for anyone pursuing a career in IT networking.
 
-![CCNAv7: Introduction to Networks](/certificates/CCNA Introduction to Networks Certificate-1.png)
+![CCNAv7: Introduction to Networks](/certificates/netacad-amikom.png)
 
 ### Key Learning Areas
 
