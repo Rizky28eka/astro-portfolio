@@ -81,6 +81,7 @@ const achievement = defineCollection({
     provider: z.string(),
     year: z.string().optional(),
     certificate: z.string().optional(), // Path to the certificate image/PDF
+    summary: optionalString,
     draft: z.boolean().optional(),
   }),
 });
