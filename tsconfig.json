@@ -9,6 +9,9 @@
     "paths": {
       "@*": [
         "src/*"
+      ],
+      "solid-slider": [
+        "./node_modules/solid-slider/dist/index.d.ts"
       ]
     },
     "jsx": "preserve",

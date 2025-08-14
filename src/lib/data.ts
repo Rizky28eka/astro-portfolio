@@ -123,31 +123,24 @@ export const skills = {
 };
 
 
-// Achievements/Certifications
-export const achievements = [
-  {
-    title: "Belajar Prinsip Pemrograman SOLID",
-    provider: "Dicoding Academy",
-    year: "2020"
-  },
-  {
-    title: "Belajar Membuat Aplikasi Android untuk Pemula",
-    provider: "Dicoding Academy", 
-    year: "2020"
-  },
-  {
-    title: "Android Developer Expert",
-    provider: "Dicoding Academy",
-    year: "2020"
-  },
-  {
-    title: "HTML, PHP, Java, SQL, JavaScript, C++, Python 3",
-    provider: "SoloLearn Certifications",
-    year: "2021"
-  },
-  {
-    title: "Mikrotik Certified Network Associate (MTCNA)",
-    provider: "Mikrotik",
-    year: ""
-  }
-];
+// Get latest achievements
+export async function getLatestAchievements(limit: number = 3) {
+  return (await getCollection("achievement"))
+    .filter(ach => !ach.data.draft)
+    .sort((a, b) => {
+      const yearA = parseInt(a.data.year || '0');
+      const yearB = parseInt(b.data.year || '0');
+      return yearB - yearA;
+    })
+    .slice(0, limit);
+}
+
+export async function getAllAchievements() {
+  return (await getCollection("achievement"))
+    .filter(ach => !ach.data.draft)
+    .sort((a, b) => {
+      const yearA = parseInt(a.data.year || '0');
+      const yearB = parseInt(b.data.year || '0');
+      return yearB - yearA;
+    });
+}

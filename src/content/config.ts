@@ -73,6 +73,18 @@ const education = defineCollection({
   }),
 });
 
+// Achievement collection schema
+const achievement = defineCollection({
+  type: "content",
+  schema: z.object({
+    title: z.string(),
+    provider: z.string(),
+    year: z.string().optional(),
+    certificate: z.string().optional(), // Path to the certificate image/PDF
+    draft: z.boolean().optional(),
+  }),
+});
+
 // Export all collections
 export const collections = {
   work,
@@ -80,4 +92,5 @@ export const collections = {
   projects,
   legal,
   education,
+  achievement,
 };
