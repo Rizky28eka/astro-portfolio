@@ -2,13 +2,13 @@
 title: "MikroTik Certified Network Associate (MTCNA)"
 provider: "MikroTik"
 year: "2022"
-certificate: "/certificates/placeholder.png"
+certificate: "/certificates/mtcna-certificated.jpeg"
 summary: "A foundational certification for managing MikroTik RouterOS devices, covering configuration, management, and troubleshooting of wired and wireless networks."
 ---
 
 MTCNA is a fundamental certification that validates the ability to operate MikroTik RouterOS hardware and software. This training provides a strong foundation in network management, from small to medium scale, using one of the most popular and versatile networking devices.
 
-![MikroTik Certified Network Associate (MTCNA)](/certificates/placeholder.png)
+![MikroTik Certified Network Associate (MTCNA)](/certificates/mtcna-certificated.jpeg)
 
 ### Competencies Gained
 
